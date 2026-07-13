@@ -1,0 +1,14 @@
+# dependências / caches / builds (regeneráveis — nunca subir)
+node_modules/
+swift/.build/
+swift/*.app/
+swift/DerivedData/
+
+# logs e temporários
+*.log
+run.log
+swift/run.log
+.DS_Store
+
+# estado local do app (por máquina)
+# (o state.json real fica em ~/Library/Application Support/tokentown/, fora do repo)

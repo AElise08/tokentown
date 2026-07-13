@@ -1,0 +1,21 @@
+# === deps / caches / builds (regeneráveis — NUNCA subir) ===
+**/node_modules/
+**/.next/
+**/.next-build/
+game/swift/.build/
+**/*.app/
+**/DerivedData/
+
+# === env / segredos (NUNCA) ===
+**/.env
+**/.env.local
+**/.env*.local
+
+# === logs e temporários ===
+**/*.log
+**/run.log
+.DS_Store
+**/.DS_Store
+
+# === next ===
+**/next-env.d.ts

@@ -1,0 +1,1615 @@
+:root {
+  --void: #141019;
+  --panel: #1e1826;
+  --panel2: #171220;
+  --edge: #302636;
+  --edge-hi: #4a3b52;
+  --amber: #f2b47a;
+  --amber-dk: #c9895a;
+  --gold: #ffd79a;
+  --silver: #cfd3da;
+  --bronze: #d19a6a;
+  --teal: #7fc7bf;
+  --ink: #efe6df;
+  --mute: #a99bb0;
+  --faint: #6b5f76;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  /* editorial serif accent — SYSTEM fonts only (no @font-face, no external
+     request, CSP-safe). Used sparingly on titles for a magazine feel over the
+     retro-mono body. */
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua",
+    Georgia, "Times New Roman", serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  background: var(--void);
+  color: var(--ink);
+  font-family: var(--mono);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  line-height: 1.55;
+  overflow-x: hidden;
+  /* fundo chapado + duas manchas de luz bem suaves (não é gradiente de hero) */
+  background:
+    radial-gradient(130% 90% at 82% -10%, #241a33 0%, rgba(20, 16, 25, 0) 55%),
+    radial-gradient(110% 80% at 6% 110%, #201623 0%, rgba(20, 16, 25, 0) 60%),
+    var(--void);
+}
+
+/* scanlines sutis por cima de tudo, sem atrapalhar o clique */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  background: linear-gradient(rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.05) 50%);
+  background-size: 100% 3px;
+  opacity: 0.5;
+}
+
+.wrap {
+  max-width: 940px;
+  margin: 0 auto;
+  padding: clamp(16px, 3.5vw, 46px) clamp(14px, 3vw, 30px) 60px;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(18px, 2.6vw, 30px);
+}
+
+/* ---- cabeçalho ---- */
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--amber);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.eyebrow::before {
+  content: "";
+  width: 22px;
+  height: 2px;
+  background: var(--amber);
+  opacity: 0.7;
+}
+h1 {
+  font-size: clamp(28px, 6.5vw, 50px);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  color: var(--gold);
+  text-shadow: 2px 2px 0 rgba(201, 137, 90, 0.5);
+  margin-top: 10px;
+}
+h1 .mark {
+  color: var(--amber);
+}
+h1 .sub {
+  color: var(--ink);
+  font-weight: 400;
+  opacity: 0.62;
+}
+.lede {
+  color: var(--mute);
+  max-width: 64ch;
+  font-size: 13.5px;
+  margin-top: 12px;
+}
+.lede a {
+  color: var(--teal);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(127, 199, 191, 0.35);
+}
+.lede a:hover {
+  border-bottom-color: var(--teal);
+}
+
+/* ---- nota 💸 (custo anualizado) — discreta, mora dentro do header ---- */
+.burn {
+  margin-top: 10px;
+  font-size: 12.5px;
+  color: var(--mute);
+  letter-spacing: 0.01em;
+  max-width: 68ch;
+}
+.burn-val {
+  color: var(--gold);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.burn-emoji {
+  display: inline-block;
+}
+.burn-sub {
+  color: var(--faint);
+}
+
+/* ---- toggle de janela do ranking (7 dias | temporada) ---- */
+.window-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: -4px;
+}
+.window-tabs {
+  display: inline-flex;
+  gap: 4px;
+  background: #191320;
+  border: 1px solid var(--edge);
+  border-radius: 10px;
+  padding: 4px;
+}
+.wtab {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--mute);
+  text-decoration: none;
+  padding: 6px 13px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  transition: color 0.12s, background 0.12s, border-color 0.12s;
+}
+.wtab:hover {
+  color: var(--ink);
+}
+.wtab.on {
+  color: var(--gold);
+  background: #241b30;
+  border-color: var(--edge-hi);
+}
+.window-hint {
+  font-size: 11px;
+  color: var(--faint);
+  letter-spacing: 0.02em;
+}
+/* live board indicator sits at the right edge of the window row */
+.window-row .live {
+  margin-left: auto;
+}
+.live-fresh {
+  opacity: 0.65;
+}
+
+/* ---- barra da temporada ---- */
+.season-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: linear-gradient(180deg, var(--panel), var(--panel2));
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+.season-now {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.season-now .label {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.season-now .value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gold);
+}
+.season-now .value b {
+  color: var(--teal);
+}
+.season-now .range {
+  font-size: 11px;
+  color: var(--mute);
+}
+.days {
+  text-align: right;
+}
+.days .n {
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--amber);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.days .u {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.days.closed .n {
+  font-size: 15px;
+  color: var(--faint);
+}
+
+/* ---- seletor de temporadas ---- */
+.seasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.seasons .cap {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-right: 4px;
+}
+.chip {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--mute);
+  background: #241b30;
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  padding: 6px 12px;
+  text-decoration: none;
+  transition: color 0.12s, border-color 0.12s;
+}
+.chip:hover {
+  color: var(--ink);
+  border-color: var(--edge-hi);
+}
+.chip.active {
+  color: #2c1a0a;
+  background: linear-gradient(180deg, var(--amber), var(--amber-dk));
+  border-color: transparent;
+}
+.chip.active.past {
+  background: #2b2338;
+  color: var(--gold);
+  border-color: var(--edge-hi);
+}
+
+/* ---- tabela do placar ---- */
+.board {
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--panel2);
+  box-shadow: 0 26px 64px -34px #000;
+}
+.table-scroll {
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+  min-width: 620px;
+}
+thead th {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  font-weight: 600;
+  text-align: right;
+  padding: 13px 16px;
+  background: #160f20;
+  border-bottom: 1px solid var(--edge);
+}
+thead th.l {
+  text-align: left;
+}
+tbody td {
+  padding: 13px 16px;
+  text-align: right;
+  border-bottom: 1px solid rgba(48, 38, 54, 0.55);
+  font-size: 13px;
+  color: var(--ink);
+}
+tbody tr:last-child td {
+  border-bottom: none;
+}
+tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.015);
+}
+td.pos {
+  text-align: left;
+  color: var(--faint);
+  font-weight: 700;
+  width: 56px;
+}
+td.user {
+  text-align: left;
+  font-weight: 700;
+  color: var(--ink);
+}
+td.tokens {
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 14px;
+}
+td.tokens .since {
+  display: block;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-top: 2px;
+}
+td.cost {
+  color: var(--amber-dk);
+}
+td.res,
+td.build {
+  color: var(--teal);
+}
+td.ago {
+  color: var(--faint);
+  font-size: 11px;
+}
+
+/* top 3 — realce sutil na cor do texto (ouro / prata / bronze) */
+tr.top1 td.pos,
+tr.top1 td.user {
+  color: var(--gold);
+}
+tr.top2 td.pos,
+tr.top2 td.user {
+  color: var(--silver);
+}
+tr.top3 td.pos,
+tr.top3 td.user {
+  color: var(--bronze);
+}
+tr.top1 td.pos::before,
+tr.top2 td.pos::before,
+tr.top3 td.pos::before {
+  content: "◆ ";
+  font-size: 10px;
+  opacity: 0.85;
+}
+
+.empty {
+  padding: 46px 20px;
+  text-align: center;
+  color: var(--mute);
+  font-size: 13px;
+}
+.empty b {
+  color: var(--ink);
+}
+
+/* ---- como participar ---- */
+.how {
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #1c1526, #160f1f);
+  padding: clamp(18px, 3vw, 26px);
+  scroll-margin-top: 20px;
+}
+.how h2 {
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 14px;
+}
+.how ol {
+  list-style: none;
+  counter-reset: step;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.how li {
+  counter-increment: step;
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--mute);
+}
+.how li::before {
+  content: counter(step, decimal-leading-zero);
+  color: var(--faint);
+  font-weight: 700;
+  font-size: 11px;
+  padding-top: 2px;
+}
+.how li b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.how code {
+  background: #241b30;
+  border: 1px solid var(--edge);
+  border-radius: 5px;
+  padding: 1px 6px;
+  color: var(--teal);
+  font-size: 12px;
+}
+.how .honor {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--edge);
+  font-size: 12px;
+  color: var(--faint);
+}
+.how .honor b {
+  color: var(--mute);
+}
+
+/* ---- WHY THE APP (pitch) ---- */
+.why {
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #1c1526, #160f1f);
+  padding: clamp(18px, 3vw, 28px);
+  scroll-margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.why-h {
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+.why-card {
+  position: relative;
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  background: #181121;
+  padding: 16px 17px 17px;
+}
+.why-n {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--faint);
+  margin-bottom: 8px;
+}
+.why-card h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1.25;
+  margin-bottom: 8px;
+  text-wrap: balance;
+}
+.why-card p {
+  font-size: 13px;
+  color: var(--mute);
+  line-height: 1.55;
+}
+.why-more {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 2px;
+}
+.why-more li {
+  font-size: 12.5px;
+  color: var(--faint);
+  padding-left: 16px;
+  position: relative;
+  line-height: 1.5;
+}
+.why-more li::before {
+  content: "◍";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--amber);
+  opacity: 0.7;
+  font-size: 10px;
+}
+.why-more b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ---- embedded demo ---- */
+.demo-card {
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  background: #141019;
+  padding: 12px 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.demo-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.demo-cap {
+  font-size: 11px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.demo-badge {
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: var(--faint);
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+.demo-frame {
+  align-self: center;
+  border: 1px solid #0e0a16;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #100c18;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 20px 44px -24px #000;
+  line-height: 0;
+}
+.demo-frame iframe {
+  display: block;
+  width: 340px;
+  max-width: 100%;
+  height: 380px;
+  border: 0;
+}
+
+/* ---- GET YOUR CITY (three ways in) ---- */
+.get {
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #1c1526, #160f1f);
+  padding: clamp(18px, 3vw, 26px);
+  scroll-margin-top: 20px;
+}
+.get h2 {
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 16px;
+}
+.tiers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+.tier {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  background: #181121;
+  padding: 15px 16px 16px;
+}
+.tier-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.tier-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gold);
+}
+.tier-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--teal);
+  border: 1px solid #36514c;
+  border-radius: 999px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+.tier-badge.soon {
+  color: var(--amber);
+  border-color: #5a4432;
+}
+.tier-badge.ghost {
+  color: var(--faint);
+  border-color: var(--edge);
+}
+.tier p {
+  font-size: 12.5px;
+  color: var(--mute);
+  line-height: 1.5;
+  flex: 1;
+}
+.tier-cmd {
+  font-size: 12.5px;
+  color: var(--teal);
+  background: #241b30;
+  border: 1px solid var(--edge);
+  border-radius: 6px;
+  padding: 7px 10px;
+}
+.tier-link {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--teal);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(127, 199, 191, 0.35);
+  align-self: flex-start;
+}
+.tier-link:hover {
+  border-bottom-color: var(--teal);
+}
+.get .honor {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--edge);
+  font-size: 12px;
+  color: var(--faint);
+}
+.get .honor b {
+  color: var(--mute);
+}
+
+.foot {
+  text-align: center;
+  font-size: 11px;
+  color: var(--faint);
+  letter-spacing: 0.02em;
+}
+.foot code {
+  color: var(--mute);
+}
+
+/* ---- mini-skyline na linha do ranking ---- */
+table {
+  min-width: 860px;
+}
+td.user {
+  white-space: nowrap;
+}
+.userlink {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.12s, color 0.12s;
+}
+.userlink:hover {
+  color: var(--gold);
+  border-bottom-color: rgba(255, 215, 154, 0.5);
+}
+/* nome da cidade (personalizado) — pequeno, sob o username no ranking */
+.rank-cityname {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--faint);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+td.city {
+  padding: 6px 12px;
+  width: 216px;
+}
+.city-link {
+  display: block;
+  width: 200px;
+  max-width: 200px;
+  border: 1px solid var(--edge);
+  border-radius: 7px;
+  overflow: hidden;
+  line-height: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 6px 18px -12px #000;
+  transition: border-color 0.14s, transform 0.14s, box-shadow 0.14s;
+}
+.city-link:hover {
+  border-color: var(--amber);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px -14px #000, 0 0 0 1px rgba(242, 180, 122, 0.25);
+}
+/* pixel-art nítida ao escalar: crispEdges no SVG + dica de raster no CSS. */
+.tt-city {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+.city-link .tt-city {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ---- página /u/[username] ---- */
+.uwrap {
+  gap: clamp(14px, 2.2vw, 22px);
+}
+.back {
+  color: var(--mute);
+  text-decoration: none;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  align-self: flex-start;
+  border-bottom: 1px solid transparent;
+  transition: color 0.12s, border-color 0.12s;
+}
+.back:hover {
+  color: var(--teal);
+  border-bottom-color: rgba(127, 199, 191, 0.4);
+}
+.uhead .uh1 {
+  font-size: clamp(26px, 6vw, 44px);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--gold);
+  text-shadow: 2px 2px 0 rgba(201, 137, 90, 0.5);
+  margin-top: 8px;
+}
+.uhead .uh1 .mark {
+  color: var(--amber);
+}
+.usub {
+  color: var(--mute);
+  font-size: 13.5px;
+  margin-top: 8px;
+}
+.usub b {
+  color: var(--gold);
+}
+.usub b.p1 {
+  color: var(--amber);
+}
+/* lema (motto) do perfil — logo abaixo do nome da cidade, em itálico calmo */
+.umotto {
+  font-style: italic;
+  color: var(--mute);
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  margin-top: 6px;
+  opacity: 0.92;
+}
+
+/* a cidade em grande */
+.citybig {
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  overflow: hidden;
+  line-height: 0;
+  background: var(--void);
+  box-shadow: 0 30px 70px -34px #000, inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+.citybig .tt-city {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.marcos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.marco {
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  font-weight: 500;
+  color: var(--amber);
+  background: #241b30;
+  border: 1px solid var(--edge-hi);
+  border-radius: 999px;
+  padding: 5px 13px;
+}
+
+/* ---- composição da cidade (construções especiais + contagem) ---- */
+.composition {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.comp-cap {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin-right: 2px;
+}
+.chip-comp {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  background: #1d1728;
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  padding: 5px 11px;
+}
+.chip-comp b {
+  color: var(--teal);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* grade de stats */
+.ustats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+.stat {
+  background: linear-gradient(180deg, var(--panel), var(--panel2));
+  border: 1px solid var(--edge);
+  border-radius: 11px;
+  padding: 13px 15px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+.stat .k {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.stat .v {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  margin-top: 4px;
+}
+.stat.big {
+  grid-column: 1 / -1;
+}
+.stat.big .v {
+  font-size: 34px;
+}
+.stat.tokens .v {
+  color: var(--gold);
+}
+.stat .v.cost {
+  color: var(--amber-dk);
+}
+.stat .v.teal {
+  color: var(--teal);
+}
+.stat .v.faint {
+  color: var(--mute);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* cidade não encontrada */
+.ucard {
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #1c1526, #160f1f);
+  padding: clamp(20px, 4vw, 34px);
+  text-align: center;
+}
+.uhandle {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+}
+.empty-city .lede {
+  margin: 12px auto 18px;
+}
+.cta {
+  display: inline-block;
+  color: #2c1a0a;
+  background: linear-gradient(180deg, var(--amber), var(--amber-dk));
+  border-radius: 9px;
+  padding: 9px 16px;
+  font-weight: 700;
+  font-size: 13px;
+  text-decoration: none;
+}
+.cta:hover {
+  filter: brightness(1.06);
+}
+
+@media (max-width: 560px) {
+  .season-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .days {
+    text-align: left;
+  }
+  .stat.big .v {
+    font-size: 28px;
+  }
+}
+
+/* ===========================================================================
+   A CIDADE RESPIRA — animações sutis SÓ na cidade GRANDE (.tt-city-full) do /u.
+   As minis do ranking (.tt-city-mini) ficam ESTÁTICAS por performance. É brisa,
+   não pisca-pisca: dips curtos e lentos, transforms mínimos. Tudo desligado sob
+   prefers-reduced-motion (regra global no fim do arquivo).
+   =========================================================================== */
+
+/* janelas piscando ocasionalmente — 3 grupos com fases/durações diferentes */
+.tt-city-full .tt-w1 {
+  animation: ttWin 6.5s ease-in-out infinite;
+}
+.tt-city-full .tt-w2 {
+  animation: ttWin 8s ease-in-out infinite 1.3s;
+}
+.tt-city-full .tt-w3 {
+  animation: ttWin 7.2s ease-in-out infinite 2.7s;
+}
+@keyframes ttWin {
+  0%, 44%, 56%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.32;
+  }
+}
+
+/* feixe do farol varrendo — brilho pulsa e o feixe gira devagar a partir da lanterna */
+.tt-city-full .tt-beam {
+  transform-box: fill-box;
+  transform-origin: 100% 50%;
+  animation: ttBeam 9s ease-in-out infinite;
+}
+@keyframes ttBeam {
+  0%, 100% {
+    opacity: 0.08;
+    transform: rotate(-3deg);
+  }
+  50% {
+    opacity: 0.2;
+    transform: rotate(4deg);
+  }
+}
+
+/* água tremulando — as linhas de brilho deslizam de leve na horizontal */
+.tt-city-full .tt-water {
+  animation: ttWater 7s ease-in-out infinite;
+}
+@keyframes ttWater {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+}
+
+/* lanternas do festival balançando — sway lento do fio de luzes */
+.tt-city-full .tt-festival {
+  transform-box: fill-box;
+  transform-origin: 50% 30%;
+  animation: ttSway 6s ease-in-out infinite;
+}
+@keyframes ttSway {
+  0%, 100% {
+    transform: rotate(-1.4deg);
+  }
+  50% {
+    transform: rotate(1.4deg);
+  }
+}
+
+/* ===========================================================================
+   FINALE — a última noite: FOGOS em TODAS as cidades (mini e grande). As rajadas
+   estouram/apagam em tempos diferentes (tt-f1/f2/f3). Anima em qualquer variante
+   quando a raiz tem .tt-finale.
+   =========================================================================== */
+.tt-finale .tt-burst {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: ttPop 3.6s ease-in-out infinite;
+}
+.tt-finale .tt-f1 {
+  animation-delay: 0s;
+}
+.tt-finale .tt-f2 {
+  animation-delay: 1.2s;
+}
+.tt-finale .tt-f3 {
+  animation-delay: 2.4s;
+}
+@keyframes ttPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  16% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  46% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+  70%, 100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+/* faixa do finale — discreta, dourada, no topo do ranking e no /u */
+.finale-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  background: linear-gradient(180deg, #241b30, #1c1526);
+  border: 1px solid var(--edge-hi);
+  border-radius: 10px;
+  padding: 9px 14px;
+}
+.finale-banner .fb-spark {
+  font-size: 14px;
+  line-height: 1;
+}
+.album-banner {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: var(--mute);
+  background: #191320;
+  border: 1px solid var(--edge);
+  border-radius: 10px;
+  padding: 9px 14px;
+}
+.album-banner .ab-cap {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #2c1a0a;
+  background: linear-gradient(180deg, var(--amber), var(--amber-dk));
+  border-radius: 5px;
+  padding: 2px 7px;
+}
+/* dentro do board (topo do ranking): encosta nas bordas e separa da tabela */
+.board-banner {
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+}
+
+/* coroa do campeão — glífico, dourado, discreto (não emoji, na estética do site) */
+.crown {
+  color: var(--gold);
+  opacity: 0.9;
+  margin-right: 6px;
+  font-size: 0.92em;
+  text-shadow: 0 0 6px rgba(255, 215, 154, 0.35);
+}
+.uh1.champ .crown {
+  font-size: 0.7em;
+  vertical-align: 0.14em;
+  margin-right: 8px;
+}
+tr.champ td {
+  background: rgba(255, 215, 154, 0.045);
+}
+tr.champ td.user .crown {
+  font-size: 12px;
+}
+
+/* ===========================================================================
+   AO VIVO — indicador discreto de auto-atualização (perto do último report)
+   =========================================================================== */
+.liverow {
+  margin-top: -6px;
+}
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--faint);
+}
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 6px rgba(127, 199, 191, 0.6);
+  animation: ttLive 2.4s ease-in-out infinite;
+}
+@keyframes ttLive {
+  0%, 100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* tag dos chips de temporada (· atual / · álbum) */
+.chip-tag {
+  font-weight: 600;
+  opacity: 0.7;
+}
+.chip.album .chip-tag {
+  color: var(--gold);
+  opacity: 0.65;
+}
+.chip.active .chip-tag {
+  opacity: 0.85;
+}
+
+/* ===========================================================================
+   COR DE DESTAQUE do perfil (--accent) — tinge DETALHES do /u: borda do card da
+   cidade, chips (marcos/composição) e o pulsinho do ao-vivo. O <main> só seta
+   --accent quando a pessoa escolheu um accent; sem accent, tudo cai nos defaults
+   (var(--edge)/--amber/--teal) e o visual segue idêntico ao de antes.
+   =========================================================================== */
+.uwrap {
+  --accent-edge: color-mix(in srgb, var(--accent, var(--edge)) 55%, var(--edge));
+}
+.uwrap .citybig {
+  border-color: var(--accent-edge);
+}
+.uwrap .marco {
+  border-color: var(--accent-edge);
+  color: var(--accent, var(--amber));
+}
+.uwrap .chip-comp {
+  border-color: var(--accent-edge);
+}
+.uwrap .live-dot {
+  background: var(--accent, var(--teal));
+  box-shadow: 0 0 6px color-mix(in srgb, var(--accent, var(--teal)) 60%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+  }
+}
+
+/* ===========================================================================
+   EDITORIAL SERIF ACCENT — only on section titles + the /u city name. The board
+   brand H1 keeps its pixel-mono identity; these get the magazine serif. Colours
+   and the retro shadow stay, so it reads dark-retro, never cream-serif.
+   =========================================================================== */
+.why-h,
+.get h2,
+.built-h,
+.uhead .uh1 {
+  font-family: var(--serif);
+  font-weight: 700;
+  letter-spacing: 0.005em;
+}
+.uhead .uh1 {
+  font-style: italic;
+}
+
+/* ===========================================================================
+   HERO — two columns: the copy, and a framed "overlay" mockup of the city. The
+   board stays the hero of the page; this just gives the header an editorial,
+   product-forward top. Collapses to one column on narrow screens.
+   =========================================================================== */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: clamp(18px, 3vw, 40px);
+  align-items: center;
+}
+.hero-copy {
+  min-width: 0;
+}
+.hero-mock {
+  min-width: 0;
+}
+.mock-win {
+  border: 1px solid var(--edge-hi);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #1d1728, #15101d);
+  box-shadow: 0 30px 60px -30px #000, inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+.mock-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 11px;
+  border-bottom: 1px solid var(--edge);
+  background: rgba(255, 255, 255, 0.015);
+}
+.mock-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3b3450;
+}
+.mock-dot:nth-child(1) {
+  background: #7a4a63;
+}
+.mock-dot:nth-child(2) {
+  background: #6a5e3a;
+}
+.mock-dot:nth-child(3) {
+  background: #3a5a52;
+}
+.mock-title {
+  margin-left: 6px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mock-city {
+  line-height: 0;
+}
+.mock-city .tt-city {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.mock-cap {
+  padding: 9px 12px;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--mute);
+  border-top: 1px solid var(--edge);
+  background: rgba(0, 0, 0, 0.12);
+}
+
+/* ===========================================================================
+   FIND A CITY — compact profile search, lives in the window row.
+   =========================================================================== */
+.find {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+}
+.find-cap {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.find-input {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink);
+  background: var(--panel2);
+  border: 1px solid var(--edge);
+  border-radius: 7px 0 0 7px;
+  padding: 5px 9px;
+  width: 118px;
+  outline: none;
+  transition: border-color 0.12s;
+}
+.find-input::placeholder {
+  color: var(--faint);
+}
+.find-input:focus {
+  border-color: var(--edge-hi);
+}
+.find-go {
+  font-family: var(--mono);
+  font-size: 15px;
+  line-height: 1;
+  color: var(--void);
+  background: linear-gradient(180deg, var(--amber), var(--amber-dk));
+  border: 1px solid var(--amber-dk);
+  border-left: none;
+  border-radius: 0 7px 7px 0;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: filter 0.12s;
+}
+.find-go:hover {
+  filter: brightness(1.08);
+}
+
+/* ===========================================================================
+   HOW THIS CITY WAS BUILT — the setup panel on /u. Skills/MCP/hook chips, the
+   tool "industries" bars, and the model "power sources" donut. Reads as part of
+   the city, not a bolt-on dashboard.
+   =========================================================================== */
+.built {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--panel), var(--panel2));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  padding: clamp(16px, 2.4vw, 24px);
+}
+.built-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+.built-h {
+  font-size: clamp(18px, 3.4vw, 24px);
+  color: var(--gold);
+  text-shadow: 1px 1px 0 rgba(201, 137, 90, 0.4);
+}
+.built-shared {
+  font-size: 12.5px;
+  letter-spacing: 0.01em;
+  color: var(--mute);
+  cursor: help;
+}
+.built-shared .info-i {
+  color: var(--teal);
+  margin-right: 3px;
+}
+.built-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.chip-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.chip-group-cap {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.setup-chip {
+  font-size: 12.5px;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  background: #211a2d;
+  border: 1px solid var(--edge);
+  border-radius: 7px;
+  padding: 4px 11px;
+}
+.setup-chip.skill {
+  border-color: color-mix(in srgb, var(--gold) 26%, var(--edge));
+  color: var(--gold);
+}
+.setup-chip.mcp {
+  border-color: color-mix(in srgb, var(--teal) 30%, var(--edge));
+  color: var(--teal);
+}
+.setup-chip.hook {
+  color: var(--mute);
+}
+
+.built-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: clamp(16px, 2.4vw, 28px);
+  align-items: start;
+}
+.mini-cap {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin-bottom: 10px;
+}
+.tool-bars {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.tool-bar {
+  display: grid;
+  grid-template-columns: minmax(104px, 140px) 1fr 40px;
+  align-items: center;
+  gap: 10px;
+}
+.tool-name {
+  font-size: 12.5px;
+  line-height: 1.25;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.tool-track {
+  height: 8px;
+  border-radius: 4px;
+  background: #191320;
+  border: 1px solid var(--edge);
+  overflow: hidden;
+}
+.tool-fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px 0 0 3px;
+  background: linear-gradient(90deg, var(--amber-dk), var(--amber));
+}
+.tool-pct {
+  font-size: 12px;
+  text-align: right;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.power-card {
+  min-width: 0;
+}
+.donut-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.donut {
+  flex: none;
+}
+.donut-mid {
+  fill: var(--ink);
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 700;
+}
+.power-legend {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+.power-legend li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  color: var(--ink);
+}
+.power-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  flex: none;
+}
+.power-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.power-legend b {
+  margin-left: auto;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===========================================================================
+   CITY LIGHTS — weekly heatmap. 7 little windows; brighter = more tokens burned
+   that day. --lit (0..1) comes from the render; the glow scales with it. Today
+   gets a soft breathing pulse (off under reduced-motion via the global rule).
+   =========================================================================== */
+.heatmap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.heat-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.heat-cap {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.heat-hint {
+  font-size: 12px;
+  color: var(--mute);
+}
+.heat-cells {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 7px;
+}
+.heat-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+.heat-win {
+  --glow: color-mix(in srgb, #ffcf7a calc(var(--lit, 0) * 100%), #1a1422);
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 5px;
+  border: 1px solid var(--edge);
+  background:
+    radial-gradient(120% 120% at 50% 35%, var(--glow), #14101c);
+  box-shadow: 0 0 calc(var(--lit, 0) * 12px) color-mix(in srgb, #ffcf7a calc(var(--lit, 0) * 55%), transparent);
+}
+.heat-cell.today .heat-win {
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--edge));
+  animation: ttHeat 3s ease-in-out infinite;
+}
+@keyframes ttHeat {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.18);
+  }
+}
+.heat-day {
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--mute);
+}
+.heat-cell.today .heat-day {
+  color: var(--gold);
+}
+
+/* ===========================================================================
+   RESPONSIVE — collapse the hero and setup grids on narrow screens.
+   =========================================================================== */
+@media (max-width: 720px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+  .hero-mock {
+    order: -1;
+    max-width: 420px;
+  }
+  .built-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 560px) {
+  .find {
+    width: 100%;
+    margin-left: 0;
+  }
+  .find-input {
+    flex: 1;
+    width: auto;
+  }
+  .tool-bar {
+    grid-template-columns: minmax(92px, 116px) 1fr 36px;
+  }
+}
