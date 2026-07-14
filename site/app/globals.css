@@ -653,6 +653,55 @@ tr.top3 td.pos::before {
   border-radius: 6px;
   padding: 7px 10px;
 }
+/* "live now" badge — soft gold with a quiet green pulse: available TODAY. */
+.tier-badge.live {
+  color: var(--gold);
+  border-color: #5a4a32;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #8fe38f;
+  box-shadow: 0 0 6px rgba(143, 227, 143, 0.85);
+  animation: live-pulse 1.8s ease-in-out infinite;
+}
+@keyframes live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-dot {
+    animation: none;
+  }
+}
+/* the quiet "what you actually get" line under the command. */
+.tier .tier-note {
+  flex: 0 0 auto;
+  font-size: 11.5px;
+  color: var(--faint);
+  line-height: 1.5;
+  margin-top: 2px;
+}
+.tier .tier-note code {
+  color: var(--mute);
+}
+.tier .tier-note a {
+  color: var(--teal);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(127, 199, 191, 0.35);
+}
+.tier .tier-note a:hover {
+  border-bottom-color: var(--teal);
+}
 .tier-link {
   font-size: 12.5px;
   font-weight: 600;
@@ -793,6 +842,22 @@ td.city {
   letter-spacing: 0.01em;
   margin-top: 6px;
   opacity: 0.92;
+}
+/* link discreto pro share card (a imagem que aparece quando cola o link). */
+.sharecard-link {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 11.5px;
+  letter-spacing: 0.03em;
+  color: var(--gold);
+  opacity: 0.72;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 215, 154, 0.28);
+  transition: opacity 0.12s, border-color 0.12s;
+}
+.sharecard-link:hover {
+  opacity: 1;
+  border-bottom-color: rgba(255, 215, 154, 0.6);
 }
 
 /* a cidade em grande */

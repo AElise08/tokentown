@@ -338,13 +338,20 @@ export default async function Page({
           <div className="tier">
             <div className="tier-top">
               <span className="tier-name">npx tokentown</span>
-              <span className="tier-badge">no install</span>
+              <span className="tier-badge live">
+                <span className="live-dot" aria-hidden="true" /> live now
+              </span>
             </div>
             <p>
-              One command in your terminal — no app. It reads your Claude Code usage and reports this
-              season&apos;s numbers, then prints your <code>/u/&lt;name&gt;</code> page. ~10 seconds.
+              One command in your terminal — no install, works today. It reads your Claude Code usage
+              and your city shows up on the board in seconds.
             </p>
             <code className="tier-cmd">npx tokentown</code>
+            <p className="tier-note">
+              This gets you your <code>/u/&lt;name&gt;</code> page + a spot on the board. The desktop
+              overlay — the live city &amp; the rooftop game — is a{" "}
+              <a href="https://github.com/AElise08/tokentown">separate download</a>.
+            </p>
           </div>
 
           <div className="tier">

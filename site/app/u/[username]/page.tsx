@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import { getUserWithRank } from "@/lib/store";
+import { getUserWithRank, getUserSnaps } from "@/lib/store";
 import { currentSeasonId, seasonRange, daysRemaining, isFinale } from "@/lib/season";
 import { formatCount, formatCost, formatAgo, formatDate } from "@/lib/format";
 import { citySvg, cityFeatures, cityComposition, cityMarcoLabels } from "@/lib/city";
 import { cityTitle, accentHex } from "@/lib/profile";
 import { setupView, weekHeatmap, pct } from "@/lib/setup-view";
-import { getUserSnaps } from "@/lib/snaps";
 import LiveRefresh from "./LiveRefresh";
 
 // donut geometry — ring circumference for the model-mix (stroke-dasharray).
@@ -172,6 +171,15 @@ export default async function UserPage({
           in season {season}
           {isCurrent ? " (current)" : " (closed)"} · {formatDate(range.start)}—{formatDate(range.end)}
         </p>
+        <a
+          className="sharecard-link"
+          href={`/u/${u}/opengraph-image`}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="the image that shows when you paste your link"
+        >
+          share card &rsaquo;
+        </a>
       </header>
 
       <div

@@ -12,6 +12,7 @@ import {
   MAX_SNAP_DAYS,
   type WindowKind,
   type UserWindowInput,
+  type SnapPoint,
 } from "./window";
 
 export type { WindowKind, SnapPoint, UserWindowInput } from "./window";
@@ -753,6 +754,28 @@ export async function getUserWithRank(
   );
   // /u é sempre por temporada: seasonTokens/seasonCost == tokens/cost.
   return { ...entry, position, seasonTokens: entry.tokens, seasonCost: entry.cost };
+}
+
+// ---------------------------------------------------------------------------
+// LEITURA dos snapshots diários de UM usuário — pro heatmap "CITY LIGHTS" da /u.
+// CRÍTICO: lê pelo MESMO kv() que o store ESCREVE (node-redis em prod, memória em
+// dev). Antes esta leitura vivia num módulo à parte (lib/snaps.ts) que só sabia
+// falar Upstash REST (UPSTASH_REDIS_REST_URL/_TOKEN) — variáveis que NÃO existem
+// em produção (lá a integração injeta só a URL nativa `tokentown_REDIS_URL`). Sem
+// achar credencial REST, ele caía pro mapa em memória (vazio no processo do
+// render) e devolvia [] -> o heatmap ficava todo apagado menos "hoje". Rotear
+// pelo kv() garante leitor == escritor, então os snapshots retro-datados aparecem.
+// Defensivo: qualquer erro -> [] (o heatmap degrada pra "quiet week"), e o kv()
+// node-redis tem timeouts/fallback próprios, então NUNCA pendura a página.
+export async function getUserSnaps(season: number, usernameRaw: string): Promise<SnapPoint[]> {
+  const username = sanitizeUsername(usernameRaw);
+  if (!username) return [];
+  const db = kv();
+  try {
+    return parseSnaps(await db.hgetall(kSnap(season, username)));
+  } catch {
+    return [];
+  }
 }
 
 export function backendName(): string {

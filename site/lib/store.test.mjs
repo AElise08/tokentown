@@ -6,11 +6,11 @@ import {
   __resetStoreForTests,
   submitReport,
   getUserWithRank,
+  getUserSnaps,
   sanitizeDailyTokens,
 } from "./store.ts";
 import { currentSeasonId } from "./season.ts";
 import { utcDayKey } from "./window.ts";
-import { getUserSnaps } from "./snaps.ts";
 import { weekHeatmap } from "./setup-view.ts";
 
 const DAY_MS = 86400000;
@@ -206,6 +206,32 @@ test("dailyTokens no report -> heatmap acende VÁRIOS dias (não só hoje) + flo
   // VÁRIOS dias acesos (o bug era só HOJE).
   const litDays = cells.filter((c) => c.gain > 0).length;
   assert.equal(litDays, 4);
+});
+
+// REGRESSÃO (bug de produção): o LEITOR do heatmap tem que usar o MESMO backend
+// que o store ESCREVE. Antes getUserSnaps vivia em lib/snaps.ts e só sabia ler
+// Upstash REST; em prod (Redis nativo `tokentown_REDIS_URL`, sem vars REST) ele
+// caía pro mapa em memória vazio e devolvia [] -> /u/mel mostrava só "hoje".
+// Agora getUserSnaps é exportado do PRÓPRIO store (mesmo kv()), então o que foi
+// escrito é exatamente o que é lido — este teste trava esse contrato.
+test("getUserSnaps lê pelo MESMO backend do store (regressão do heatmap em prod)", async () => {
+  __resetStoreForTests();
+  const now = Date.now();
+  const s = currentSeasonId(now);
+  const u = "snapread";
+  const daily = { [dayBack(now, 0)]: 5_000_000, [dayBack(now, 1)]: 3_000_000, [dayBack(now, 2)]: 2_000_000 };
+  const r = await submitReport({
+    username: u, key: "k".repeat(16), seasonId: s,
+    tokens: 10_000_000, cost: 20, residents: 4, buildings: 8,
+    dailyTokens: daily,
+  });
+  assert.equal(r.ok, true);
+  // o mesmo leitor que a /u usa devolve os snapshots que o store acabou de gravar.
+  const snaps = await getUserSnaps(s, u);
+  const gotDays = new Set(snaps.map((p) => p.dayKey));
+  // os 3 dias reportados (+ hoje) precisam estar presentes — não pode voltar [].
+  assert.ok(snaps.length >= 3, `esperava >=3 snapshots, veio ${snaps.length}`);
+  for (let i = 0; i <= 2; i++) assert.ok(gotDays.has(dayBack(now, i)), `dia ${dayBack(now, i)} sumiu na leitura`);
 });
 
 test("report SEM dailyTokens PRESERVA os snapshots diários já back-datados", async () => {
