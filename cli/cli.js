@@ -705,7 +705,16 @@ function printSummary(cfg, data, city, opts) {
 // ---------------------------------------------------------------------------
 // PAYLOAD + REPORT
 // ---------------------------------------------------------------------------
-function buildPayload(cfg, data, city) {
+// NOTE: we deliberately DO NOT send `city`. The CLI can't run the game
+// simulation, so it can't reproduce the app's special buildings — and the
+// leaderboard does last-writer-wins on the city field, so a CLI report would
+// clobber the rich city of anyone who also runs the desktop app. The server
+// already does the right thing without it: it PRESERVES an existing city when a
+// report arrives with no `city`, and for CLI-only users it renders a full
+// skyline seeded from the username (with the same token-threshold landmarks).
+// The `buildCity()` blob is still computed locally to drive the terminal
+// summary (buildings / population / landmarks); it just never leaves the machine.
+function buildPayload(cfg, data) {
   const username = String(cfg.username).trim().toLowerCase();
   const payload = {
     username: username,
@@ -716,8 +725,6 @@ function buildPayload(cfg, data, city) {
     residents: nonNeg(data.residents),
     buildings: nonNeg(data.buildings),
   };
-  const sc = shapeCity(city);
-  if (sc) payload.city = sc;
   const profile = shapeProfile(cfg);
   if (profile) payload.profile = profile;
   const daily = shapeDailyTokens(data.daily);
@@ -892,8 +899,8 @@ async function cmdReport(cfg, opts) {
   opts = opts || {};
   const data = readSeason();
   const username = String(cfg.username).trim().toLowerCase();
-  const city = buildCity(username, data.tokens);
-  const payload = buildPayload(cfg, data, city);
+  const city = buildCity(username, data.tokens); // local-only: drives the terminal summary; NOT sent
+  const payload = buildPayload(cfg, data);
 
   if (opts.dryRun) {
     line("  " + bold("DRY RUN") + dim(" — nothing will be sent. This is exactly what a real report would POST:"));
@@ -929,8 +936,8 @@ async function cmdWatch(cfg) {
   async function tick() {
     const data = readSeason();
     const username = String(cfg.username).trim().toLowerCase();
-    const city = buildCity(username, data.tokens);
-    const payload = buildPayload(cfg, data, city);
+    const city = buildCity(username, data.tokens); // local-only: drives the summary line; NOT sent
+    const payload = buildPayload(cfg, data);
     const r = await postReport(cfg, payload);
     const stamp = new Date().toLocaleTimeString("en-US", { hour12: false });
     if (r.ok && r.status === 200) {
