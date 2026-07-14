@@ -114,6 +114,19 @@ function redisCreds(): { url: string; token: string } {
   let url = uNames.map((n) => env[n]).find((v) => isHttps(v)) || "";
   let token = tNames.map((n) => env[n]).find(Boolean) || "";
   if (url && token) return { url, token };
+  // 1b) URL NATIVA do Redis (ex.: tokentown_REDIS_URL = rediss://default:TOKEN@host:6379):
+  //     na Upstash o host é o mesmo do endpoint REST e a SENHA é o token REST —
+  //     então dá pra derivar { https://host, token } direto da URL nativa.
+  for (const k of Object.keys(env)) {
+    const v = env[k] || "";
+    if (/URL$/i.test(k) && /^rediss?:\/\//.test(v)) {
+      try {
+        const u = new URL(v);
+        const pass = decodeURIComponent(u.password || "");
+        if (u.hostname && pass) return { url: `https://${u.hostname}`, token: pass };
+      } catch { /* URL malformada — segue pros outros métodos */ }
+    }
+  }
   // 2) Robusto: acha a URL REST do Upstash pelo VALOR (https://...upstash), seja
   //    qual for o prefixo/nome; o token vem do mesmo prefixo (…URL -> …TOKEN).
   let urlKey = "";
