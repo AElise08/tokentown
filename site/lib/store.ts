@@ -84,7 +84,7 @@ const RATE_LIMIT_SEC = 60; // 1 report/min por username
 // INTERFACE KV mínima — implementada por Redis (Upstash) e por memória.
 // ---------------------------------------------------------------------------
 interface KV {
-  backend: "upstash" | "memory";
+  backend: "upstash" | "memory" | "node-redis" | "memory-fallback";
   hget(key: string, field: string): Promise<string | null>;
   hset(key: string, obj: Record<string, string | number>): Promise<void>;
   hdel(key: string, field: string): Promise<void>;
@@ -248,24 +248,133 @@ function makeMemoryKV(): KV {
 // Escolha do backend (uma vez por processo — cacheada no globalThis pra
 // sobreviver aos recompiles do Next dev e ser a mesma pra página e API).
 // ---------------------------------------------------------------------------
+// BACKEND: Redis NATIVO (rediss://) via node-redis — pro caso em que a
+// integração do Vercel injeta só a URL nativa (ex.: tokentown_REDIS_URL), sem
+// endpoint REST. FAIL-FAST POR CONSTRUÇÃO: connect com timeout curto, sem
+// reconnect, e CADA operação corre contra um timeout; QUALQUER falha derruba
+// pro fallback em memória — a página NUNCA fica pendurada esperando o Redis.
+// ---------------------------------------------------------------------------
+function findNativeRedisUrl(): string {
+  const env = process.env as Record<string, string | undefined>;
+  // nomes óbvios primeiro (o prefixo aqui é o do projeto: "tokentown")
+  for (const n of ["tokentown_REDIS_URL", "TOKENTOWN_REDIS_URL", "REDIS_URL", "STORAGE_REDIS_URL"]) {
+    if (/^rediss?:\/\//.test(env[n] || "")) return env[n]!;
+  }
+  for (const k of Object.keys(env)) {
+    if (/^rediss?:\/\//.test(env[k] || "")) return env[k]!;
+  }
+  return "";
+}
+
+function makeNodeRedisKV(url: string): KV {
+  const mem = makeMemoryKV();
+  let dead = false;
+  let warned = false;
+  const warnOnce = (e: unknown) => {
+    if (!warned) {
+      console.warn("[tokentown-placar] redis nativo indisponível — caindo pra MEMÓRIA:", (e as Error)?.message);
+      warned = true;
+    }
+  };
+  // import() dinâmico: funciona no bundle do Next E em Node ESM puro (testes).
+  type RedisClient = import("redis").RedisClientType;
+  const clientP: Promise<RedisClient | null> = (async () => {
+    const { createClient } = await import("redis");
+    const c = createClient({ url, socket: { connectTimeout: 3000, reconnectStrategy: false } });
+    c.on("error", () => { /* sem listener, node-redis derruba o processo */ });
+    await c.connect();
+    return c as RedisClient;
+  })().catch((e: unknown) => { dead = true; warnOnce(e); return null; });
+  const T = <X,>(p: Promise<X>): Promise<X> =>
+    Promise.race([p, new Promise<never>((_, rej) => setTimeout(() => rej(new Error("redis timeout")), 2500))]);
+  const self: KV = {
+    backend: "node-redis",
+    async hget(key, field) {
+      return guard(async (c) => {
+        const v = await c.hGet(key, field);
+        return v == null ? null : String(v);
+      }, () => mem.hget(key, field));
+    },
+    async hset(key, obj) {
+      return guard((c) => c.hSet(key, obj as Record<string, string | number>).then(() => undefined), () => mem.hset(key, obj));
+    },
+    async hdel(key, field) {
+      return guard((c) => c.hDel(key, field).then(() => undefined), () => mem.hdel(key, field));
+    },
+    async hgetall(key) {
+      return guard(async (c) => {
+        const r = await c.hGetAll(key);
+        return r && Object.keys(r).length ? (r as unknown as Record<string, string | number>) : null;
+      }, () => mem.hgetall(key));
+    },
+    async zadd(key, score, member) {
+      return guard((c) => c.zAdd(key, { score, value: member }).then(() => undefined), () => mem.zadd(key, score, member));
+    },
+    async ztop(key, n) {
+      return guard(async (c) => {
+        const r = await c.zRangeWithScores(key, 0, n - 1, { REV: true });
+        return r.map((x) => ({ member: String(x.value), score: Number(x.score) }));
+      }, () => mem.ztop(key, n));
+    },
+    async setNxEx(key, val, ttlSec) {
+      return guard(async (c) => {
+        const r = await c.set(key, val, { NX: true, EX: ttlSec });
+        return r === "OK";
+      }, () => mem.setNxEx(key, val, ttlSec));
+    },
+  };
+  async function guard<X>(op: (c: RedisClient) => Promise<X>, fb: () => Promise<X>): Promise<X> {
+    if (dead) return fb();
+    try {
+      const c = await T(clientP);
+      if (!c || dead) return fb();
+      return await T(op(c));
+    } catch (e) {
+      dead = true;
+      self.backend = "memory-fallback"; // /api/health passa a mostrar a verdade
+      warnOnce(e);
+      return fb();
+    }
+  }
+  return self;
+}
+
+// ---------------------------------------------------------------------------
 const globKv = globalThis as unknown as { __ttpKv?: KV; __ttpWarned?: boolean };
 
 function kv(): KV {
   if (globKv.__ttpKv) return globKv.__ttpKv;
   const c = redisCreds();
-  const hasRedis = !!c.url && !!c.token;
-  if (hasRedis) {
+  if (c.url && c.token) {
     globKv.__ttpKv = makeUpstashKV();
-  } else {
-    if (!globKv.__ttpWarned) {
-      console.warn(
-        "[tokentown-placar] UPSTASH_REDIS_REST_URL/TOKEN ausentes — usando storage EM MEMÓRIA (dados somem ao reiniciar). Configure o Upstash pra persistir."
-      );
-      globKv.__ttpWarned = true;
-    }
-    globKv.__ttpKv = makeMemoryKV();
+    return globKv.__ttpKv;
   }
+  const native = findNativeRedisUrl();
+  if (native) {
+    globKv.__ttpKv = makeNodeRedisKV(native);
+    return globKv.__ttpKv;
+  }
+  if (!globKv.__ttpWarned) {
+    console.warn(
+      "[tokentown-placar] nenhuma credencial de Redis (REST ou nativa) — usando storage EM MEMÓRIA (dados somem ao reiniciar)."
+    );
+    globKv.__ttpWarned = true;
+  }
+  globKv.__ttpKv = makeMemoryKV();
   return globKv.__ttpKv;
+}
+
+// Saúde do storage — usada por /api/health: backend ativo + roundtrip REAL.
+export async function storeHealth(): Promise<{ backend: string; roundtrip: boolean }> {
+  const k = kv();
+  try {
+    const val = String(Date.now());
+    await k.hset("tt:health", { ping: val });
+    const got = await k.hget("tt:health", "ping");
+    return { backend: k.backend, roundtrip: got === val };
+  } catch {
+    return { backend: k.backend, roundtrip: false };
+  }
 }
 
 // ---------------------------------------------------------------------------

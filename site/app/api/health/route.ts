@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { storeHealth } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
@@ -19,5 +20,6 @@ export async function GET() {
       https: /^https:\/\//.test(env[k] || ""),
       len: (env[k] || "").length,
     }));
-  return NextResponse.json({ ok: true, redisEnvKeys });
+  const storage = await storeHealth(); // backend ativo + roundtrip real (com timeout — não pendura)
+  return NextResponse.json({ ok: true, storage, redisEnvKeys });
 }
