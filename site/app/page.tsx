@@ -338,11 +338,11 @@ export default async function Page({
           <div className="tier">
             <div className="tier-top">
               <span className="tier-name">npx tokentown</span>
-              <span className="tier-badge soon">coming soon</span>
+              <span className="tier-badge">no install</span>
             </div>
             <p>
-              10-second setup, no install. One command drops the overlay onto your desktop and points
-              it at this leaderboard.
+              One command in your terminal — no app. It reads your Claude Code usage and reports this
+              season&apos;s numbers, then prints your <code>/u/&lt;name&gt;</code> page. ~10 seconds.
             </p>
             <code className="tier-cmd">npx tokentown</code>
           </div>
@@ -353,11 +353,11 @@ export default async function Page({
               <span className="tier-badge">macOS</span>
             </div>
             <p>
-              The floating window that lives in the corner while you code. The game itself is tiny; a
-              lighter native shell is coming.
+              The floating window that lives in the corner while you code — the live city plus the
+              rooftop game. Native, ~384&nbsp;KB. Clone and build it from the repo.
             </p>
-            <a className="tier-link" href="#">
-              Download &rsaquo;
+            <a className="tier-link" href="https://github.com/AElise08/tokentown">
+              Get it on GitHub &rsaquo;
             </a>
           </div>
 

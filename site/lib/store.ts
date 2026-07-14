@@ -99,13 +99,20 @@ interface KV {
 // ---------------------------------------------------------------------------
 // BACKEND: Upstash Redis via @upstash/redis
 // ---------------------------------------------------------------------------
+// Aceita os nomes que o Vercel/Upstash podem injetar: o Marketplace do Upstash
+// usa UPSTASH_REDIS_REST_*, integrações antigas (Vercel KV) usam KV_REST_API_*.
+// Pega o primeiro disponível — assim funciona com qualquer um.
+function redisCreds(): { url: string; token: string } {
+  return {
+    url: process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL || "",
+    token: process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN || "",
+  };
+}
 function makeUpstashKV(): KV {
   // require dinâmico pra o fallback em memória não exigir o pacote instalado.
   const { Redis } = require("@upstash/redis") as typeof import("@upstash/redis");
-  const redis = new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL!,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-  });
+  const c = redisCreds();
+  const redis = new Redis({ url: c.url, token: c.token });
   return {
     backend: "upstash",
     async hget(key, field) {
@@ -220,8 +227,8 @@ const globKv = globalThis as unknown as { __ttpKv?: KV; __ttpWarned?: boolean };
 
 function kv(): KV {
   if (globKv.__ttpKv) return globKv.__ttpKv;
-  const hasRedis =
-    !!process.env.UPSTASH_REDIS_REST_URL && !!process.env.UPSTASH_REDIS_REST_TOKEN;
+  const c = redisCreds();
+  const hasRedis = !!c.url && !!c.token;
   if (hasRedis) {
     globKv.__ttpKv = makeUpstashKV();
   } else {
