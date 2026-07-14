@@ -74,6 +74,20 @@ A monorepo with three parts:
 cd site && npm install && npm run dev   # http://localhost:3000
 ```
 
+## How syncing works (FAQ)
+
+**Does it count tokens I burned before installing / while it wasn't running?**
+Yes. Claude Code itself writes a local transcript of every session (`~/.claude/projects`). TOKENTOWN doesn't listen in real time — it **reads that history**. On every launch (app) or run (CLI) it does a full **season backfill**: every token with a timestamp inside the current 28-day season is counted, deduplicated, whether or not TOKENTOWN was running at the time. Nothing is lost.
+
+**Is it automatic?**
+- **App:** yes — reads every ~1.5s (the city grows live) and reports to the board every ~3 min while open.
+- **`npx tokentown`:** one full read + one report per run — run it again whenever you want to update.
+- **`npx tokentown watch`:** keeps running and reports every ~10 min.
+
+**Why is the board a few minutes behind my overlay?** Reports are throttled (~3 min) to be gentle on the server. The numbers converge the moment burning pauses.
+
+**What doesn't it see?** Anything outside local Claude Code — e.g. claude.ai in the browser, or usage on another machine (run the CLI there too; same username, it merges).
+
 ## How it works
 
 - Reads your Claude Code session transcripts under `~/.claude/projects/**/*.jsonl` (token usage, tool calls, models) with per-message **de-duplication** and a **per-season backfill** from timestamps — accurate whether the app was open or not, and it counts sub-agent usage too.
