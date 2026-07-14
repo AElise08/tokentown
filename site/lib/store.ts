@@ -103,10 +103,25 @@ interface KV {
 // usa UPSTASH_REDIS_REST_*, integrações antigas (Vercel KV) usam KV_REST_API_*.
 // Pega o primeiro disponível — assim funciona com qualquer um.
 function redisCreds(): { url: string; token: string } {
-  return {
-    url: process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL || "",
-    token: process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN || "",
-  };
+  const env = process.env as Record<string, string | undefined>;
+  const https = (v?: string) => (v && /^https:\/\//.test(v) ? v : "");
+  // Nomes explícitos conhecidos (Upstash Marketplace, Vercel KV, ou prefixo
+  // custom "STORAGE" — que é o que o Vercel injeta se você não trocar o prefixo).
+  let url =
+    https(env.UPSTASH_REDIS_REST_URL) || https(env.KV_REST_API_URL) ||
+    https(env.STORAGE_REST_API_URL) || https(env.STORAGE_KV_REST_API_URL) || https(env.STORAGE_URL);
+  let token =
+    env.UPSTASH_REDIS_REST_TOKEN || env.KV_REST_API_TOKEN ||
+    env.STORAGE_REST_API_TOKEN || env.STORAGE_KV_REST_API_TOKEN || env.STORAGE_TOKEN || "";
+  if (url && token) return { url, token };
+  // Fallback robusto: varre o env por QUALQUER par (URL https de upstash/redis/kv/storage
+  // + token não-read-only), pra funcionar com qualquer prefixo custom do Vercel.
+  for (const k of Object.keys(env)) {
+    const v = env[k] || "";
+    if (!url && /URL$/i.test(k) && /^https:\/\//.test(v) && /upstash|redis|kv|storage/i.test(k)) url = v;
+    if (!token && /TOKEN$/i.test(k) && !/READ.?ONLY/i.test(k) && v.length > 16) token = v;
+  }
+  return { url, token };
 }
 function makeUpstashKV(): KV {
   // require dinâmico pra o fallback em memória não exigir o pacote instalado.
