@@ -51,15 +51,22 @@ While the agent is busy, hit **▶ recreio** for a little platformer across your
   ./build.sh && open TokenTown.app
   ```
 - **Just watch:** browse everyone's cities at [tokentown-gamma.vercel.app](https://tokentown-gamma.vercel.app) — nothing to install.
-- **`npx tokentown`** — *coming soon*: report your city from the terminal in 10 seconds, no app.
+- **No app? `npx tokentown`.** Report your city from the terminal in ~10 seconds — no install, [zero dependencies](cli/), Node 18+.
+  ```bash
+  npx tokentown            # first run picks a name + reports; prints your /u/<name> URL
+  npx tokentown watch      # keep it running, reports every ~10 min
+  npx tokentown --dry-run  # print exactly what would be sent — nothing leaves your machine
+  ```
+  Only your username and the numbers are sent — never prompts, code, or project names.
 
 ## This repo
 
-A monorepo with two parts:
+A monorepo with three parts:
 
 | Folder | What it is | Runs on |
 |---|---|---|
 | [`game/`](game/) | The desktop **overlay** — native macOS (Swift + WKWebView) that reads your usage and renders the city + the rooftop game. | your Mac |
+| [`cli/`](cli/) | **`npx tokentown`** — a zero-dependency Node CLI that reads your usage and reports it, no app to install. | your terminal |
 | [`site/`](site/) | The **leaderboard** — a Next.js app (Vercel + Upstash Redis) showing everyone's cities. | the web |
 
 ### Run the site locally

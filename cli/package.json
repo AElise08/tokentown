@@ -1,0 +1,35 @@
+{
+  "name": "tokentown",
+  "version": "0.1.0",
+  "description": "Report your real Claude Code token usage to the TOKENTOWN leaderboard — a pixel city that grows from your tokens. No app to install.",
+  "bin": {
+    "tokentown": "cli.js"
+  },
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AElise08/tokentown.git",
+    "directory": "cli"
+  },
+  "homepage": "https://tokentown-gamma.vercel.app",
+  "bugs": {
+    "url": "https://github.com/AElise08/tokentown/issues"
+  },
+  "keywords": [
+    "claude-code",
+    "claude",
+    "tokens",
+    "usage",
+    "leaderboard",
+    "cli",
+    "tokentown"
+  ],
+  "files": [
+    "cli.js",
+    "README.md"
+  ]
+}
