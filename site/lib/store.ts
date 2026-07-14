@@ -104,22 +104,32 @@ interface KV {
 // Pega o primeiro disponível — assim funciona com qualquer um.
 function redisCreds(): { url: string; token: string } {
   const env = process.env as Record<string, string | undefined>;
-  const https = (v?: string) => (v && /^https:\/\//.test(v) ? v : "");
-  // Nomes explícitos conhecidos (Upstash Marketplace, Vercel KV, ou prefixo
-  // custom "STORAGE" — que é o que o Vercel injeta se você não trocar o prefixo).
-  let url =
-    https(env.UPSTASH_REDIS_REST_URL) || https(env.KV_REST_API_URL) ||
-    https(env.STORAGE_REST_API_URL) || https(env.STORAGE_KV_REST_API_URL) || https(env.STORAGE_URL);
-  let token =
-    env.UPSTASH_REDIS_REST_TOKEN || env.KV_REST_API_TOKEN ||
-    env.STORAGE_REST_API_TOKEN || env.STORAGE_KV_REST_API_TOKEN || env.STORAGE_TOKEN || "";
+  const isHttps = (v?: string) => !!v && /^https:\/\//.test(v);
+  // 1) Nomes explícitos conhecidos (Upstash Marketplace, Vercel KV, ou prefixo
+  //    custom — o Vercel deixa você nomear; aqui a Mel usou "tokentown").
+  const uNames = ["UPSTASH_REDIS_REST_URL", "KV_REST_API_URL", "STORAGE_REST_API_URL",
+    "tokentown_REST_API_URL", "tokentown_KV_REST_API_URL", "TOKENTOWN_REST_API_URL"];
+  const tNames = ["UPSTASH_REDIS_REST_TOKEN", "KV_REST_API_TOKEN", "STORAGE_REST_API_TOKEN",
+    "tokentown_REST_API_TOKEN", "tokentown_KV_REST_API_TOKEN", "TOKENTOWN_REST_API_TOKEN"];
+  let url = uNames.map((n) => env[n]).find((v) => isHttps(v)) || "";
+  let token = tNames.map((n) => env[n]).find(Boolean) || "";
   if (url && token) return { url, token };
-  // Fallback robusto: varre o env por QUALQUER par (URL https de upstash/redis/kv/storage
-  // + token não-read-only), pra funcionar com qualquer prefixo custom do Vercel.
-  for (const k of Object.keys(env)) {
-    const v = env[k] || "";
-    if (!url && /URL$/i.test(k) && /^https:\/\//.test(v) && /upstash|redis|kv|storage/i.test(k)) url = v;
-    if (!token && /TOKEN$/i.test(k) && !/READ.?ONLY/i.test(k) && v.length > 16) token = v;
+  // 2) Robusto: acha a URL REST do Upstash pelo VALOR (https://...upstash), seja
+  //    qual for o prefixo/nome; o token vem do mesmo prefixo (…URL -> …TOKEN).
+  let urlKey = "";
+  if (!url) {
+    for (const k of Object.keys(env)) {
+      const v = env[k] || "";
+      if (/URL$/i.test(k) && /^https:\/\/[^ ]*upstash/i.test(v)) { url = v; urlKey = k; break; }
+    }
+  }
+  if (urlKey && !token) token = env[urlKey.replace(/URL$/i, "TOKEN")] || "";
+  // 3) Último recurso: qualquer *TOKEN longo e não read-only.
+  if (url && !token) {
+    for (const k of Object.keys(env)) {
+      const v = env[k] || "";
+      if (/TOKEN$/i.test(k) && !/READ.?ONLY/i.test(k) && v.length >= 24) { token = v; break; }
+    }
   }
   return { url, token };
 }

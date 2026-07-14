@@ -11,7 +11,7 @@ export async function GET() {
     .filter(
       (k) =>
         /(URL|TOKEN|REST)/i.test(k) &&
-        /(UPSTASH|REDIS|KV|STORAGE)/i.test(k)
+        /(UPSTASH|REDIS|KV|STORAGE|TOKENTOWN)/i.test(k)
     )
     .sort()
     .map((k) => ({
