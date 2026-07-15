@@ -1,4 +1,4 @@
-import { submitReport } from "@/lib/store";
+import { submitReport, deleteUser } from "@/lib/store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -81,4 +81,34 @@ export async function POST(req: Request) {
     { ok: true, updated: result.updated, entry: result.entry },
     { status: 200 }
   );
+}
+
+// DELETE /api/report — remove your own profile from the board (same key as report).
+// Body: { username, key }. Never requires admin; honor-system auth only.
+export async function DELETE(req: Request) {
+  const text = await readBodyLimited(req, MAX_BODY_BYTES);
+  if (text === null) {
+    return Response.json(
+      { ok: false, error: `corpo grande demais (máx ${MAX_BODY_BYTES} bytes)` },
+      { status: 413 }
+    );
+  }
+
+  let body: unknown;
+  try {
+    body = JSON.parse(text);
+  } catch {
+    return Response.json({ ok: false, error: "corpo não é JSON válido" }, { status: 400 });
+  }
+
+  const b = (body ?? {}) as Record<string, unknown>;
+  const result = await deleteUser({
+    username: b.username as string,
+    key: b.key as string,
+  });
+
+  if (!result.ok) {
+    return Response.json({ ok: false, error: result.error }, { status: result.status });
+  }
+  return Response.json({ ok: true, deleted: true, username: result.username }, { status: 200 });
 }

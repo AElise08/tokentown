@@ -91,6 +91,10 @@ interface KV {
   hdel(key: string, field: string): Promise<void>;
   hgetall(key: string): Promise<Record<string, string | number> | null>;
   zadd(key: string, score: number, member: string): Promise<void>;
+  // remove member from ZSET (no-op if absent)
+  zrem(key: string, member: string): Promise<void>;
+  // delete a whole key (hash / zset / string)
+  del(key: string): Promise<void>;
   // top N por score DESC -> [{ member, score }]
   ztop(key: string, n: number): Promise<Array<{ member: string; score: number }>>;
   // SET key val NX EX ttl -> true se conseguiu setar (não existia)
@@ -157,6 +161,12 @@ function makeUpstashKV(): KV {
     async zadd(key, score, member) {
       await redis.zadd(key, { score, member });
     },
+    async zrem(key, member) {
+      await redis.zrem(key, member);
+    },
+    async del(key) {
+      await redis.del(key);
+    },
     async ztop(key, n) {
       // rev + withScores -> [member, score, member, score, ...]
       const raw = (await redis.zrange(key, 0, n - 1, { rev: true, withScores: true })) as Array<
@@ -221,6 +231,14 @@ function makeMemoryKV(): KV {
     },
     async zadd(key, score, member) {
       z(key).set(member, score);
+    },
+    async zrem(key, member) {
+      zsets.get(key)?.delete(member);
+    },
+    async del(key) {
+      hashes.delete(key);
+      zsets.delete(key);
+      expires.delete(key);
     },
     async ztop(key, n) {
       const m = zsets.get(key);
@@ -310,6 +328,12 @@ function makeNodeRedisKV(url: string): KV {
     },
     async zadd(key, score, member) {
       return guard((c) => c.zAdd(key, { score, value: member }).then(() => undefined), () => mem.zadd(key, score, member));
+    },
+    async zrem(key, member) {
+      return guard((c) => c.zRem(key, member).then(() => undefined), () => mem.zrem(key, member));
+    },
+    async del(key) {
+      return guard((c) => c.del(key).then(() => undefined), () => mem.del(key));
     },
     async ztop(key, n) {
       return guard(async (c) => {
@@ -707,6 +731,45 @@ export async function submitReport(input: ReportInput): Promise<ReportResult> {
     updated: false,
     entry: { ...prev, profile: mergedProfile, setup: effectiveSetup },
   };
+}
+
+// ---------------------------------------------------------------------------
+// DELETE PROFILE — remove username from the board (honor system: same key that
+// was registered on first report). Wipes rank + user hash + daily snaps for the
+// current season (and previous, if still present) and frees the username so a
+// fresh key can re-claim it later.
+// ---------------------------------------------------------------------------
+export type DeleteResult =
+  | { ok: true; status: 200; deleted: true; username: string }
+  | { ok: false; status: 400 | 403 | 404; error: string };
+
+export async function deleteUser(input: { username: string; key: string }): Promise<DeleteResult> {
+  const db = kv();
+
+  const username = sanitizeUsername(input.username);
+  if (!username) return { ok: false, status: 400, error: "username inválido (use [a-z0-9-]{2,24})" };
+  if (typeof input.key !== "string" || input.key.length < 8)
+    return { ok: false, status: 400, error: "key ausente ou curta demais" };
+
+  const keyHash = sha256(input.key);
+  const known = await db.hget(K_USERS, username);
+  if (!known) return { ok: false, status: 404, error: "username não encontrado" };
+  if (known !== keyHash) return { ok: false, status: 403, error: "key incorreta pra este username" };
+
+  const now = Date.now();
+  const cur = currentSeasonId(now);
+  // Wipe current + previous season (grace window / leftover data).
+  for (const s of [cur, cur - 1]) {
+    if (s < 0) continue;
+    await db.zrem(kRank(s), username);
+    await db.del(kUser(s, username));
+    await db.del(kSnap(s, username));
+  }
+  await db.hdel(K_USERS, username);
+  // Drop rate-limit key so a re-register isn't blocked for 60s.
+  await db.del(kRate(username));
+
+  return { ok: true, status: 200, deleted: true, username };
 }
 
 // ---------------------------------------------------------------------------

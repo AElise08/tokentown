@@ -5,7 +5,9 @@ import { test } from "node:test";
 import {
   __resetStoreForTests,
   submitReport,
+  deleteUser,
   getUserWithRank,
+  getLeaderboard,
   getUserSnaps,
   sanitizeDailyTokens,
 } from "./store.ts";
@@ -260,4 +262,43 @@ test("report SEM dailyTokens PRESERVA os snapshots diários já back-datados", a
   const cellsAfter = weekHeatmap(await getUserSnaps(s, u), now);
   // ainda há vários dias com histórico (ontem preservado; hoje subiu pra 12M).
   assert.ok(cellsAfter.filter((c) => c.gain > 0).length >= 2, "snapshots diários foram perdidos");
+});
+
+test("deleteUser: key correta remove do placar e libera o username", async () => {
+  __resetStoreForTests();
+  const s = currentSeasonId();
+  const u = "deleteme";
+  const key = "k".repeat(16);
+  const base = { username: u, key, seasonId: s, cost: 1, residents: 1, buildings: 10 };
+
+  let r = await submitReport({ ...base, tokens: 50_000 });
+  assert.equal(r.ok, true);
+  assert.ok(await getUserWithRank(s, u));
+
+  // key errada -> 403, perfil permanece
+  let d = await deleteUser({ username: u, key: "wrong-key-xxxx" });
+  assert.equal(d.ok, false);
+  assert.equal(d.status, 403);
+  assert.ok(await getUserWithRank(s, u));
+
+  // key certa -> some do placar
+  d = await deleteUser({ username: u, key });
+  assert.equal(d.ok, true);
+  assert.equal(d.deleted, true);
+  assert.equal(await getUserWithRank(s, u), null);
+
+  const board = await getLeaderboard(s, { limit: 100 });
+  assert.ok(!board.some((e) => e.username === u));
+
+  // username liberado: outra key consegue registrar de novo
+  r = await submitReport({ ...base, key: "n".repeat(16), tokens: 1000 });
+  assert.equal(r.ok, true);
+  assert.equal(r.entry.tokens, 1000);
+});
+
+test("deleteUser: username inexistente -> 404", async () => {
+  __resetStoreForTests();
+  const d = await deleteUser({ username: "nobody-here", key: "k".repeat(16) });
+  assert.equal(d.ok, false);
+  assert.equal(d.status, 404);
 });
