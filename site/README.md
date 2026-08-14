@@ -32,7 +32,7 @@ For production, add the Upstash Redis vars to `.env.local` (see `.env.example`).
 
 ### Get your city
 
-- **`npx tokentown`** — live now: reads Claude Code, Codex and OpenCode, with no permanent install.
+- **`npx tokentown watch`** — live now: reads Claude Code, Codex and OpenCode continuously, with no permanent install.
 - **Desktop overlay app** (macOS) — the floating window that lives in the corner while you code.
 - **Just watch** — browse the cities other devs are growing; nothing to install.
 

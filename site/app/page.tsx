@@ -346,7 +346,7 @@ export default async function Page({
               One command in your terminal — no install, works today. It reads Claude Code, Codex and
               OpenCode usage, then your city shows up on the board in seconds.
             </p>
-            <code className="tier-cmd">npx tokentown</code>
+            <code className="tier-cmd">npx tokentown watch</code>
             <p className="tier-note">
               This gets you your <code>/u/&lt;name&gt;</code> page + a spot on the board. The desktop
               overlay — the live city &amp; the rooftop game — is a{" "}
