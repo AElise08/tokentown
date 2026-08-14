@@ -651,7 +651,16 @@ export async function submitReport(input: ReportInput): Promise<ReportResult> {
 
   // AUTENTICAÇÃO (honor system): registra na primeira vez, depois compara hash.
   const keyHash = sha256(input.key);
-  const known = await db.hget(K_USERS, username);
+  let known = await db.hget(K_USERS, username);
+  // Migração de recuperação, limitada a um único hash aleatório pré-autorizado.
+  // Remove-se assim que o primeiro report de `mel` concluir: preserva a cidade
+  // e o histórico sem jamais publicar/transportar a chave privada em si.
+  const recoveryHash =
+    username === "mel" ? "5732974d52783aa396ddb027eee8aab4f52266dc6acdb92a3d9e02ed25f92923" : "";
+  if (known && recoveryHash && keyHash === recoveryHash) {
+    await db.hset(K_USERS, { [username]: keyHash });
+    known = keyHash;
+  }
   if (known && known !== keyHash) return { ok: false, status: 403, error: "key incorreta pra este username" };
   if (!known) await db.hset(K_USERS, { [username]: keyHash });
 
