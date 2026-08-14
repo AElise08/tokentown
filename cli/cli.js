@@ -1347,11 +1347,13 @@ async function cmdWatch(cfg) {
 }
 
 // ---------------------------------------------------------------------------
-// BACKGROUND SCHEDULE (macOS launchd)
+// BACKGROUND SCHEDULE (macOS launchd, Linux systemd, Windows Task Scheduler)
 // Copies this zero-dependency CLI to a stable per-user runner and invokes it
 // every 10 minutes. No terminal and no long-lived `watch` process required.
 // ---------------------------------------------------------------------------
 const LAUNCH_LABEL = "com.tokentown.reporter";
+const SYSTEMD_NAME = "tokentown-reporter";
+const WINDOWS_TASK = "TOKENTOWN Reporter";
 const SCHEDULE_EVERY_SEC = 10 * 60;
 
 function xmlEscape(s) {
@@ -1366,11 +1368,14 @@ function xmlEscape(s) {
 function schedulePaths(home) {
   home = home || os.homedir();
   const root = path.join(home, ".tokentown", "runner");
+  const systemd = path.join(home, ".config", "systemd", "user");
   return {
     root,
     runner: path.join(root, "cli.js"),
     log: path.join(home, ".tokentown", "reporter.log"),
     plist: path.join(home, "Library", "LaunchAgents", LAUNCH_LABEL + ".plist"),
+    service: path.join(systemd, SYSTEMD_NAME + ".service"),
+    timer: path.join(systemd, SYSTEMD_NAME + ".timer"),
   };
 }
 
@@ -1407,54 +1412,121 @@ function schedulePlist(paths, cfgFile) {
   );
 }
 
+function systemdQuote(s) {
+  return '"' + String(s).replace(/%/g, "%%").replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
+}
+
+function scheduleSystemdService(paths, cfgFile, home, nodePath) {
+  return (
+    "[Unit]\nDescription=TOKENTOWN usage reporter\n\n" +
+    "[Service]\nType=oneshot\n" +
+    "Environment=" + systemdQuote("HOME=" + (home || os.homedir())) + "\n" +
+    "Environment=" + systemdQuote("TOKENTOWN_CONFIG=" + (cfgFile || configPath())) + "\n" +
+    "ExecStart=" + systemdQuote(nodePath || process.execPath) + " " + systemdQuote(paths.runner) + "\n"
+  );
+}
+
+function scheduleSystemdTimer() {
+  return (
+    "[Unit]\nDescription=Report TOKENTOWN usage every 10 minutes\n\n" +
+    "[Timer]\nOnBootSec=1min\nOnUnitActiveSec=10min\nPersistent=true\nUnit=" + SYSTEMD_NAME + ".service\n\n" +
+    "[Install]\nWantedBy=timers.target\n"
+  );
+}
+
+function windowsTaskCommand(paths, nodePath) {
+  return '"' + String(nodePath || process.execPath).replace(/"/g, '\\"') + '" "' + String(paths.runner).replace(/"/g, '\\"') + '"';
+}
+
+function systemctl(args) {
+  return childProcess.spawnSync("systemctl", ["--user"].concat(args), { encoding: "utf8" });
+}
+
+function schtasks(args) {
+  return childProcess.spawnSync("schtasks.exe", args, { encoding: "utf8" });
+}
+
 function scheduleStatus() {
-  if (process.platform !== "darwin") return { supported: false, loaded: false };
-  const r = launchctl(["print", launchDomain() + "/" + LAUNCH_LABEL]);
-  return { supported: true, loaded: r.status === 0 };
+  let r;
+  if (process.platform === "darwin") {
+    r = launchctl(["print", launchDomain() + "/" + LAUNCH_LABEL]);
+    return { supported: true, loaded: r.status === 0, platform: "macOS" };
+  }
+  if (process.platform === "linux") {
+    r = systemctl(["is-active", "--quiet", SYSTEMD_NAME + ".timer"]);
+    return { supported: !r.error, loaded: r.status === 0, platform: "Linux" };
+  }
+  if (process.platform === "win32") {
+    r = schtasks(["/Query", "/TN", WINDOWS_TASK]);
+    return { supported: !r.error, loaded: r.status === 0, platform: "Windows" };
+  }
+  return { supported: false, loaded: false, platform: process.platform };
 }
 
 function cmdSchedule() {
-  if (process.platform !== "darwin") {
-    line("  " + red("Background schedule currently supports macOS launchd only."));
-    line("  " + dim("On Linux, run `npx tokentown` from cron/systemd every 10 minutes."));
-    return false;
-  }
   const paths = schedulePaths();
   try {
     fs.mkdirSync(paths.root, { recursive: true });
-    fs.mkdirSync(path.dirname(paths.plist), { recursive: true });
     fs.copyFileSync(__filename, paths.runner);
     fs.chmodSync(paths.runner, 0o755);
-    fs.writeFileSync(paths.plist, schedulePlist(paths, configPath()), "utf8");
   } catch (e) {
     line("  " + red("Couldn't install the background reporter: ") + dim(e.message || String(e)));
     return false;
   }
-  launchctl(["bootout", launchDomain() + "/" + LAUNCH_LABEL]); // ignore: may not be loaded yet
-  const loaded = launchctl(["bootstrap", launchDomain(), paths.plist]);
-  if (loaded.status !== 0) {
-    line("  " + red("Couldn't load the background reporter: ") + dim((loaded.stderr || "launchctl error").trim()));
+  let loaded;
+  if (process.platform === "darwin") {
+    fs.mkdirSync(path.dirname(paths.plist), { recursive: true });
+    fs.writeFileSync(paths.plist, schedulePlist(paths, configPath()), "utf8");
+    launchctl(["bootout", launchDomain() + "/" + LAUNCH_LABEL]);
+    loaded = launchctl(["bootstrap", launchDomain(), paths.plist]);
+    if (loaded.status === 0) launchctl(["kickstart", "-k", launchDomain() + "/" + LAUNCH_LABEL]);
+  } else if (process.platform === "linux") {
+    fs.mkdirSync(path.dirname(paths.service), { recursive: true });
+    fs.writeFileSync(paths.service, scheduleSystemdService(paths, configPath()), "utf8");
+    fs.writeFileSync(paths.timer, scheduleSystemdTimer(), "utf8");
+    systemctl(["daemon-reload"]);
+    loaded = systemctl(["enable", "--now", SYSTEMD_NAME + ".timer"]);
+    if (loaded.status === 0) systemctl(["start", SYSTEMD_NAME + ".service"]);
+  } else if (process.platform === "win32") {
+    schtasks(["/Delete", "/TN", WINDOWS_TASK, "/F"]);
+    loaded = schtasks([
+      "/Create", "/TN", WINDOWS_TASK, "/SC", "MINUTE", "/MO", "10",
+      "/TR", windowsTaskCommand(paths), "/F",
+    ]);
+    if (loaded.status === 0) schtasks(["/Run", "/TN", WINDOWS_TASK]);
+  } else {
+    line("  " + red("Background schedule is not supported on " + process.platform + "."));
     return false;
   }
-  launchctl(["kickstart", "-k", launchDomain() + "/" + LAUNCH_LABEL]);
+  if (!loaded || loaded.error || loaded.status !== 0) {
+    line("  " + red("Couldn't load the background reporter: ") + dim(((loaded && loaded.stderr) || "scheduler error").trim()));
+    return false;
+  }
   line("  " + green("✓ background reporting enabled") + dim(" — every 10 minutes, no terminal needed"));
-  line("  " + dim("log: ") + paths.log);
+  if (process.platform === "darwin") line("  " + dim("log: ") + paths.log);
   line("  " + dim("disable: npx tokentown unschedule"));
   line("");
   return true;
 }
 
 function cmdUnschedule() {
-  if (process.platform !== "darwin") return false;
   const paths = schedulePaths();
-  launchctl(["bootout", launchDomain() + "/" + LAUNCH_LABEL]);
+  if (process.platform === "darwin") launchctl(["bootout", launchDomain() + "/" + LAUNCH_LABEL]);
+  else if (process.platform === "linux") {
+    systemctl(["disable", "--now", SYSTEMD_NAME + ".timer"]);
+    systemctl(["stop", SYSTEMD_NAME + ".service"]);
+  } else if (process.platform === "win32") schtasks(["/Delete", "/TN", WINDOWS_TASK, "/F"]);
+  else return false;
   try {
     if (fs.existsSync(paths.plist)) fs.unlinkSync(paths.plist);
+    if (fs.existsSync(paths.service)) fs.unlinkSync(paths.service);
+    if (fs.existsSync(paths.timer)) fs.unlinkSync(paths.timer);
     if (fs.existsSync(paths.runner)) fs.unlinkSync(paths.runner);
   } catch (e) {
     line("  " + red("Couldn't remove the schedule: ") + dim(e.message || String(e)));
     return false;
   }
+  if (process.platform === "linux") systemctl(["daemon-reload"]);
   line("  " + green("✓ background reporting disabled"));
   line("");
   return true;
@@ -1473,7 +1545,7 @@ function printHelp() {
   line("  " + bold("Usage"));
   line("    npx tokentown            report your season once, print your city URL");
   line("    npx tokentown watch      keep running, report every ~10 minutes");
-  line("    npx tokentown schedule   report every ~10 min in the background (macOS)");
+  line("    npx tokentown schedule   report every ~10 min in the background (macOS/Linux/Windows)");
   line("    npx tokentown unschedule remove the background reporter");
   line("    npx tokentown status     show background reporter status");
   line("    npx tokentown --models   report and show cost for every model");
@@ -1593,6 +1665,9 @@ module.exports = {
   configPath,
   schedulePaths,
   schedulePlist,
+  scheduleSystemdService,
+  scheduleSystemdTimer,
+  windowsTaskCommand,
   scheduleStatus,
   DEFAULT_URL,
   SITE_ORIGIN,

@@ -343,8 +343,8 @@ export default async function Page({
               </span>
             </div>
             <p>
-              One command on macOS installs a background reporter. It reads Claude Code, Codex and
-              OpenCode every 10 minutes — no open Terminal needed.
+              One command installs a background reporter on macOS, Linux or Windows. It reads Claude
+              Code, Codex and OpenCode every 10 minutes — no open terminal needed.
             </p>
             <code className="tier-cmd">npx tokentown schedule</code>
             <p className="tier-note">
@@ -397,6 +397,7 @@ export default async function Page({
           /api/placar?season={season}
           {window === "7d" ? "&window=7d" : ""}
         </code>
+        {" · "}<a href="/privacy">privacy</a>
       </p>
     </main>
   );

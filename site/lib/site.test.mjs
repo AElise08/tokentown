@@ -69,3 +69,12 @@ test("isometric profiles vary structure by deterministic city family", () => {
   assert.match(iso, /towerKind\s*=\s*\(family \|\| 0\) % 4/);
   assert.match(iso, /city-layout-7|Macro-family/);
 });
+
+test("site exposes a dedicated privacy page and links it from the board", () => {
+  const page = read("app/page.tsx");
+  const privacy = read("app/privacy/page.tsx");
+  assert.match(page, /href="\/privacy"/);
+  assert.match(privacy, /What is never sent/);
+  assert.match(privacy, /Prompts, responses, source code/);
+  assert.match(privacy, /github\.com\/AElise08\/tokentown/);
+});

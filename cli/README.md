@@ -9,7 +9,7 @@ TOKENTOWN turns local **Claude Code, Codex and OpenCode** usage into a pixel cit
 ```bash
 npx tokentown             # read once, report and print your city URL
 npx tokentown --models    # report and show the complete cost/model breakdown
-npx tokentown schedule    # macOS: report every 10 minutes in the background
+npx tokentown schedule    # macOS/Linux/Windows: report every 10 minutes in the background
 npx tokentown status      # show background reporter status
 npx tokentown unschedule  # remove the background reporter
 npx tokentown --dry-run   # print exactly what would be sent; send nothing
@@ -35,9 +35,7 @@ Only timestamps, usage counters, model/provider identifiers and tool names are a
 
 ## Background mode
 
-On macOS, `schedule` installs a small user LaunchAgent. It runs a copied, version-pinned CLI every ten minutes, including after login, without keeping Terminal or `npx tokentown watch` open. Run `schedule` again after upgrading the npm package so the background copy is refreshed.
-
-On Linux, use cron or a systemd user timer to run `npx tokentown` periodically. Windows background scheduling is not yet built in.
+`schedule` installs a per-user background job: LaunchAgent on macOS, systemd user timer on Linux, and Task Scheduler task on Windows. It runs a copied, version-pinned CLI every ten minutes without keeping Terminal open. Run `schedule` again after upgrading the npm package so the background copy is refreshed.
 
 ## Privacy and config
 

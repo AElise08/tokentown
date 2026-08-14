@@ -92,3 +92,23 @@ test("launchd schedule is self-contained and runs every ten minutes", () => {
   assert.match(plist, /config&amp;file\.json/);
   assert.doesNotMatch(plist, /npx|watch/);
 });
+
+test("Linux systemd schedule is persistent and runs every ten minutes", () => {
+  const paths = { runner: "/home/mel/.tokentown/runner/cli.js" };
+  const service = cli.scheduleSystemdService(paths, "/home/mel/config.json", "/home/mel", "/usr/bin/node");
+  const timer = cli.scheduleSystemdTimer();
+  assert.match(service, /Type=oneshot/);
+  assert.match(service, /ExecStart="\/usr\/bin\/node" "\/home\/mel\/\.tokentown\/runner\/cli\.js"/);
+  assert.match(service, /TOKENTOWN_CONFIG=\/home\/mel\/config\.json/);
+  assert.match(timer, /OnUnitActiveSec=10min/);
+  assert.match(timer, /Persistent=true/);
+});
+
+test("Windows Task Scheduler command uses absolute quoted paths", () => {
+  const command = cli.windowsTaskCommand(
+    { runner: "C:\\Users\\Mel User\\.tokentown\\runner\\cli.js" },
+    "C:\\Program Files\\nodejs\\node.exe"
+  );
+  assert.equal(command, '"C:\\Program Files\\nodejs\\node.exe" "C:\\Users\\Mel User\\.tokentown\\runner\\cli.js"');
+  assert.doesNotMatch(command, /npx|watch/);
+});

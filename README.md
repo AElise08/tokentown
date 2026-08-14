@@ -54,7 +54,7 @@ While the agent is busy, hit **▶ recreio** for a little platformer across your
 - **No app? `npx tokentown`.** Report your city from the terminal in ~10 seconds — no install, [zero dependencies](cli/), Node 18+.
   ```bash
   npx tokentown            # first run picks a name + reports; prints your /u/<name> URL
-  npx tokentown schedule   # macOS: report every ~10 min without leaving Terminal open
+  npx tokentown schedule   # macOS/Linux/Windows: report every ~10 min in the background
   npx tokentown --models   # show local cost breakdown by provider and model
   npx tokentown --dry-run  # print exactly what would be sent — nothing leaves your machine
   ```
@@ -83,7 +83,7 @@ Yes. Claude Code, Codex and OpenCode keep local usage history. TOKENTOWN doesn't
 **Is it automatic?**
 - **App:** yes — reads every ~1.5s (the city grows live) and reports to the board every ~3 min while open.
 - **`npx tokentown`:** one full read + one report per run — run it again whenever you want to update.
-- **`npx tokentown schedule`:** on macOS, reports every ~10 min in the background without an open terminal.
+- **`npx tokentown schedule`:** on macOS, Linux and Windows, reports every ~10 min in the background without an open terminal.
 - **`npx tokentown watch`:** remains available as a foreground compatibility mode.
 
 **Why is the board a few minutes behind my overlay?** Reports are throttled (~3 min) to be gentle on the server. The numbers converge the moment burning pauses.

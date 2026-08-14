@@ -1031,6 +1031,22 @@ td.city {
   float: right;
   color: var(--gold);
 }
+
+/* Standalone privacy page — deliberately quiet and text-first. */
+.privacy-page {
+  width: min(760px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 64px 0 96px;
+  color: #c9becf;
+}
+.privacy-back, .privacy-page a { color: #c89a62; }
+.privacy-kicker { margin: 52px 0 12px; color: #8fc9c2; letter-spacing: .22em; text-transform: uppercase; }
+.privacy-page h1 { margin: 0 0 20px; color: #f0d29c; font-size: clamp(2.2rem, 7vw, 4.6rem); line-height: .98; }
+.privacy-lede { max-width: 680px; color: #a99dac; font-size: 1.12rem; line-height: 1.7; }
+.privacy-page section { margin-top: 42px; padding-top: 24px; border-top: 1px solid #30263a; }
+.privacy-page h2 { margin: 0 0 12px; color: #ddbd86; font-size: 1rem; letter-spacing: .12em; text-transform: uppercase; }
+.privacy-page section p { margin: 0; line-height: 1.75; }
+.privacy-page code { color: #9bd2ca; }
 .rail-local {
   color: var(--faint);
   font-size: 8px;
