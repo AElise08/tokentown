@@ -59,6 +59,15 @@
   .vt:hover{color:var(--ink)}
   .vt.on{color:var(--gold);background:#241b30;border-color:var(--edge-hi)}
   @media (prefers-reduced-motion:reduce){.float{animation-duration:.7s}}
+  /* Profile pages reuse the same renderer without the demo card chrome. */
+  body.profile-mode{padding:0;display:block;background:transparent;overflow:hidden}
+  body.profile-mode .card{width:100%;height:100%;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+  body.profile-mode .bar,
+  body.profile-mode .autobadge,
+  body.profile-mode .viewtoggle,
+  body.profile-mode .readout,
+  body.profile-mode .cap{display:none}
+  body.profile-mode .view{width:100%;height:100%;aspect-ratio:auto;border:0;border-radius:0;background:transparent}
 </style>
 </head>
 <body>
@@ -84,6 +93,7 @@
     </div>
   </div>
   <div class="cap">simulated preview · the real app reads your live usage</div>
-  <script src="game.js"></script>
+  <script src="isometric-city.js?v=city-layout-6"></script>
+  <script src="game.js?v=profile-city-v7"></script>
 </body>
 </html>

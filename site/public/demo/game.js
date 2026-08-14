@@ -17,6 +17,53 @@
    - RECREIO: joguinho de plataforma (só enquanto o agente está AO VIVO). */
 (function () {
   "use strict";
+  // PROFILE MODE — the leaderboard can mount this exact renderer with a frozen
+  // snapshot from one person's city. The normal demo remains unchanged.
+  var query = new URLSearchParams(window.location.search);
+  var profileMode = query.get('mode') === 'profile';
+  if(profileMode) document.body.classList.add('profile-mode');
+  function hashSeed(s){ var h=2166136261; s=String(s||'anon');
+    for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
+    return h>>>0; }
+  // A reported city seed describes the snapshot, while the username makes
+  // the visual blueprint belong to one person. Mixing both prevents two
+  // profiles that happen to report the same numeric seed from collapsing into
+  // the same skyline.
+  function profileCitySeed(raw, username){
+    var name = String(username || 'city');
+    var base = Number(raw) || hashSeed(name);
+    return (base ^ hashSeed(name + ':tokentown-city')) >>> 0;
+  }
+  function qNum(k, fallback){ var n=Number(query.get(k)); return Number.isFinite(n)?n:fallback; }
+  function qList(k){ return (query.get(k)||'').split(',').map(function(v){ return v.trim(); }).filter(Boolean); }
+  function qCounts(k){
+    var out = {};
+    (query.get(k)||'').split(',').forEach(function(pair){
+      var parts = pair.split(':');
+      var key = (parts[0] || '').trim();
+      var value = Number(parts[1]);
+      if(key && Number.isFinite(value) && value > 0) out[key] = Math.floor(value);
+    });
+    return out;
+  }
+  var profileSnapshot = profileMode ? {
+    username: query.get('username') || 'city',
+    seed: profileCitySeed(qNum('seed', 0), query.get('username') || 'city'),
+    tokens: Math.max(0, qNum('tokens', 0)),
+    buildings: Math.max(0, Math.floor(qNum('buildings', 0))),
+    pop: Math.max(0, Math.floor(qNum('pop', 0))),
+    season: Math.max(0, Math.floor(qNum('season', 0))),
+    era: Math.max(0, Math.floor(qNum('era', 0))),
+    types: qCounts('types'),
+    specials: qList('specials'),
+    marcos: qList('marcos')
+  } : null;
+  var profileTargetBuildings = profileSnapshot ? profileSnapshot.buildings : 0;
+  var profileRenderer = query.get('renderer') || 'iso';
+  if(profileMode && profileRenderer !== 'classic' && window.TokentownIsoCity){
+    window.TokentownIsoCity.mount(document.getElementById('scene'), profileSnapshot);
+    return;
+  }
   var reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
   function clamp01(x){ return x < 0 ? 0 : x > 1 ? 1 : x; }
   function ss(x){ x = clamp01(x); return x*x*(3 - 2*x); }
@@ -42,7 +89,9 @@
   // agState: 'live' (agente trabalhando) | 'decision' (esperando a MEL autorizar/responder)
   // | 'idle' (turno fechado de verdade). Vem do main via IPC (payload.state); payload.live
   // segue existindo como booleano de compat (main antigo). liveNow = (agState === 'live').
-  var real = false, realTotal = 0, liveNow = true, agState = 'live', simTokens = 0, residents = 0, realCost = 0;
+  var real = profileMode, realTotal = profileSnapshot ? profileSnapshot.tokens : 0,
+      liveNow = !profileMode, agState = profileMode ? 'idle' : 'live', simTokens = 0,
+      residents = 0, realCost = 0;
   function tokens(){ return real ? realTotal : simTokens; }
   function tokPerBuild(){ return real ? TOK_PER_BUILD_REAL : TOK_PER_BUILD_SIM; }
   function era(){ return Math.floor(tokens() / ERA_STEP); }
@@ -226,14 +275,14 @@
   // reconstrói só a CAUDA visível (não gera milhares de prédios ao retomar temporada).
   function rebuildCity(){
     city = []; frontier = 2; builtNormals = 0;
-    var target = 2 + Math.floor(tokens()/tokPerBuild());
-    builtNormals = Math.max(0, target - 26); // materializa ~26 prédios recentes
+    var target = profileMode ? profileTargetBuildings : 2 + Math.floor(tokens()/tokPerBuild());
+    var materialized = profileMode ? Math.min(target, 36) : Math.max(0, target - 26);
     var guard = 0;
-    while((builtNormals < target || frontier < W*0.55) && guard < 44){
+    while((builtNormals < materialized || frontier < W*0.55) && guard < 44){
       var b = genNormal(builtNormals); b.wx = frontier; b.rise = 1; city.push(b);
       frontier += b.gap; builtNormals++; guard++;
     }
-    builtNormals = Math.max(builtNormals, target);
+    builtNormals = profileMode ? target : Math.max(builtNormals, target);
     // recoloca as ÚLTIMAS especiais na orla (as antigas já rolaram pra história da cidade).
     var recent = store.specials.slice(-4);
     for(var i=0;i<recent.length;i++){ var s = genSpecial(recent[i]); s.wx = frontier; s.rise = 1;
@@ -261,6 +310,7 @@
   }
   function accruePop(){ while(popNormalIdx < builtNormals){ popNormals += popForNormal(popNormalIdx); popNormalIdx++; } }
   function recomputePop(){
+    if(profileMode){ population = profileSnapshot.pop; return; }
     accruePop();
     var ps = 0;
     for(var i=0;i<store.specials.length;i++){ var t=store.specials[i];
@@ -361,6 +411,21 @@
     lastDrain=-99999; lastNote=0; lastCitySig=''; lastCitySent=0;
     mode='city'; rc=null;   // nunca inicia numa temporada dentro do recreio
     saveStore();            // trava a semente da temporada já no início (layout persiste)
+    rebuildCity();
+    recomputePop();
+  }
+  function initProfile(){
+    seasonId = profileSnapshot.season;
+    store = defaultStore();
+    store.seed = profileSnapshot.seed;
+    store.specials = profileSnapshot.specials.slice();
+    store.marcos = {};
+    for(var i=0;i<profileSnapshot.marcos.length;i++) store.marcos[profileSnapshot.marcos[i]] = true;
+    store.wish = null;
+    store.wishDone = {};
+    dust=[]; motes=[]; hearts=[]; fireworks=[]; ferryX=-24; noteQueue=[]; noteUntil=0;
+    lastDrain=-99999; lastNote=0; lastCitySig=''; lastCitySent=0;
+    mode='city'; rc=null;
     rebuildCity();
     recomputePop();
   }
@@ -853,25 +918,30 @@
   }
 
   // ---- DIRIGÍVEL raro: a cada 30-60min cruza o céu devagar; letreiro "TOKENTOWN" piscando ----
-  var blimp = null, blimpNextAt = 60000;
+  var blimp = null, blimpNextAt = 1800000;
   function updateBlimp(dt){
     if(reduce) return;
     if(!blimp && t >= blimpNextAt){ var dir = Math.random()<0.5?1:-1;
       blimp = { x: dir>0? -70 : W+70, y: 16+Math.random()*16, dir:dir, sp:0.28+Math.random()*0.12 }; }
     if(blimp){ blimp.x += blimp.dir*blimp.sp*(dt*0.06);
-      if(blimp.x < -74 || blimp.x > W+74){ blimp=null; blimpNextAt = t + 1800000 + Math.random()*1800000; } } // 30-60min
+      if(blimp.x < -74 || blimp.x > W+74){ blimp=null; blimpNextAt = t + 1800000; } } // a cada 30min
   }
   function drawBlimp(night){
-    if(!blimp) return; var x=blimp.x|0, y=blimp.y|0, blink = (Math.floor(t*0.004)%2===0);
+    if(!blimp) return; var x=blimp.x|0, y=blimp.y|0;
     var body = night? '#6a5f7a' : '#8a7f96';
-    R(x, y, 22, 8, body); R(x+2, y-1, 18, 1, mix(body,'#fff',0.15));
-    R(x-1, y+3, 1, 2, body); R(x+22, y+3, 1, 2, body);     // envelope (bico e cauda)
-    R(x+8, y+8, 6, 2, mix(body,'#000',0.3));               // gôndola
-    var lit = night ? '#ffe6a8' : '#f2b47a';               // letreiro piscando; à noite brilha
-    if(blink){ ctx.globalAlpha = night?1:0.9; ctx.font='bold 6px monospace'; ctx.textAlign='left'; ctx.textBaseline='top';
-      ctx.fillStyle = lit; ctx.fillText('TOKENTOWN', x+1, y+2);
-      if(night){ ctx.globalAlpha=0.22; R(x, y, 22, 8, '#ffe6a8'); }
-      ctx.globalAlpha=1; ctx.textBaseline='alphabetic'; }
+    // The old envelope was only 22px wide while the word is much longer;
+    // give the airship enough room so the brand stays inside the silhouette.
+    var bw = 62;
+    R(x, y, bw, 11, body); R(x+6, y-1, bw-12, 1, mix(body,'#fff',0.15));
+    R(x-1, y+4, 1, 3, body); R(x+bw, y+4, 1, 3, body);     // envelope (bico e cauda)
+    R(x+23, y+11, 16, 2, mix(body,'#000',0.3));            // gôndola
+    var lit = night ? '#ffe6a8' : '#f2b47a';               // letreiro fixo e legível
+    ctx.globalAlpha = night?1:0.95;
+    R(x+7, y+2, bw-14, 7, '#40354f');
+    ctx.font='bold 7px monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillStyle = lit; ctx.fillText('TOKENTOWN', x+bw/2, y+2);
+    if(night){ ctx.globalAlpha=0.18; R(x, y, bw, 11, '#ffe6a8'); }
+    ctx.globalAlpha=1; ctx.textBaseline='alphabetic';
   }
 
   function draw(dt){
@@ -883,7 +953,7 @@
 
     if(seasonId!=null){
       // gera prédios a partir dos tokens — sem teto; salto grande (retomada) -> snap.
-      var target = 2 + Math.floor(tokens() / tokPerBuild());
+      var target = profileMode ? profileTargetBuildings : 2 + Math.floor(tokens() / tokPerBuild());
       if(target - builtNormals > 60){ rebuildCity(); }
       else { var made=0; while(builtNormals < target && made < 8){
         var nb = genNormal(builtNormals); nb.wx = frontier; city.push(nb);
@@ -1613,7 +1683,10 @@
       if(!real) daysLeft = localDaysLeft();
       setState(real ? agState : 'live');
       // camadas de jogo (baratas): população, marcos, vontades, auto-build, placar
-      if(seasonId!=null){ recomputePop(); evalMarcos(); evalWishes(); drainSpecials(now); maybeSendCity(now); }
+      if(seasonId!=null){
+        recomputePop();
+        if(!profileMode){ evalMarcos(); evalWishes(); drainSpecials(now); maybeSendCity(now); }
+      }
       updateHud(now);
       if(elTok) elTok.innerHTML = fmt(tokens()) + ' <small>tokens</small>';
       if(elCost) elCost.textContent = fmtCost(real ? realCost : simTokens/1e6*SIM_PRICE_PER_MTOK);
@@ -1625,7 +1698,8 @@
   }
 
   // no navegador (preview) não há IPC — inicia a temporada localmente já de cara.
-  if(!real){ daysLeft = localDaysLeft(); initSeason(localSeasonId()); }
+  if(profileMode){ initProfile(); }
+  else if(!real){ daysLeft = localDaysLeft(); initSeason(localSeasonId()); }
   setState(real ? 'idle' : 'live');
   // VITRINE: no navegador, abre JÁ nos TELHADOS em auto-play (attract mode) — mostra o
   // platformer logo abaixo de "play on your rooftops"; clique/tecla assume o controle.

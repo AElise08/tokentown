@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getUserWithRank, getUserSnaps } from "@/lib/store";
 import { currentSeasonId, seasonRange, daysRemaining, isFinale } from "@/lib/season";
 import { formatCount, formatCost, formatAgo, formatDate } from "@/lib/format";
-import { citySvg, cityFeatures, cityComposition, cityMarcoLabels } from "@/lib/city";
+import { cityFeatures, cityComposition, cityMarcoLabels } from "@/lib/city";
 import { cityTitle, accentHex } from "@/lib/profile";
 import { setupView, weekHeatmap, pct } from "@/lib/setup-view";
 import LiveRefresh from "./LiveRefresh";
@@ -91,8 +91,16 @@ export default async function UserPage({
 
   // SETUP → CITY: how this city was built (skills/MCP/tools/models), plus the
   // weekly "city lights" heatmap from the daily snapshots. Both degrade to
-  // nothing/quiet when there's no data.
+  // an honest empty state when there's no shared setup yet.
   const sv = setupView(entry.setup);
+  const builtView = sv ?? {
+    skills: [],
+    mcp: [],
+    hooks: [],
+    tools: [],
+    donut: [],
+    summary: { text: "nothing shared yet" },
+  };
   const heat = weekHeatmap(await getUserSnaps(season, u), now);
   const heatActive = heat.some((c) => c.gain > 0);
 
@@ -104,15 +112,39 @@ export default async function UserPage({
   const accentSlug = profile?.accent;
   const accent = accentSlug ? accentHex(accentSlug) : undefined;
 
-  const svg = citySvg(
-    { username: u, tokens: entry.tokens, residents: entry.residents, buildings: entry.buildings, city: entry.city, accent },
-    "full",
-    finale
-  );
-
   // residents/composition: from the REAL city when present, else from the fallback.
   const pop = entry.city ? entry.city.pop : entry.residents;
   const composition = entry.city ? cityComposition(entry.city) : [];
+
+  // The profile uses the same canvas renderer as the live demo. Only the
+  // person's snapshot is passed in; game.js remains the single visual source.
+  const demoParams = new URLSearchParams({
+    mode: "profile",
+    username: u,
+    tokens: String(entry.tokens),
+    buildings: String(entry.buildings),
+    pop: String(pop),
+    seed: String(entry.city?.seed ?? 0),
+    era: String(entry.city?.era ?? 0),
+    types: entry.city
+      ? Object.entries(entry.city.types).map(([slug, count]) => `${slug}:${count}`).join(",")
+      : "",
+    season: String(season),
+    renderer: "iso-original",
+  });
+  if (entry.city) {
+    demoParams.set("marcos", entry.city.marcos.join(","));
+    demoParams.set(
+      "specials",
+      Object.entries(entry.city.types)
+        .flatMap(([slug, count]) => Array.from({ length: Math.min(count, 4) }, () => slug))
+        .join(",")
+    );
+  }
+  const profileDemoSrc = `/demo/index.html?${demoParams.toString()}`;
+  const railDemoParams = new URLSearchParams(demoParams);
+  railDemoParams.set("renderer", "classic");
+  const railDemoSrc = `/demo/index.html?${railDemoParams.toString()}`;
 
   // landmarks: from the real city (app vocabulary) or derived from the numbers (fallback).
   let marcos: string[];
@@ -132,9 +164,34 @@ export default async function UserPage({
       className="wrap uwrap"
       style={accent ? ({ "--accent": accent } as React.CSSProperties) : undefined}
     >
-      <a href={backHref} className="back">
-        &lsaquo; back to the leaderboard
-      </a>
+      <div className="profile-layout">
+        <aside className="profile-rail" aria-label="Profile navigation">
+          <div className="rail-topline">◆ {u.toUpperCase()} <span>+</span> PROFILE</div>
+          <a href={backHref} className="rail-brand">TokenTown</a>
+          <div className="rail-tagline">where prompts become skyline™</div>
+
+          <div className="rail-city-card">
+            <iframe src={railDemoSrc} title={`thumbnail city of ${u}`} loading="lazy" />
+            <div className="rail-user"><span className="rail-led" /> {u}</div>
+            <div className="rail-meta">T{season} · {isCurrent ? "ACTIVE BUILD" : "SEASON CLOSED"}</div>
+          </div>
+
+          <nav className="rail-nav">
+            <a className="active" href="#profile-top"><span>▦</span> dashboard <b>›</b></a>
+            <a href="#profile-city"><span>▥</span> my skyline <b>›</b></a>
+            <a href="#built"><span>◈</span> shared setup <b>›</b></a>
+          </nav>
+
+          <div className="rail-footer">
+            <div><span className="rail-led" /> season {season} <b>{isCurrent ? `${days}d` : "done"}</b></div>
+            <div className="rail-local">local-first telemetry</div>
+          </div>
+        </aside>
+
+        <section className="profile-main" id="profile-top">
+          <a href={backHref} className="back">
+            &lsaquo; back to the leaderboard
+          </a>
 
       {finale && (
         <div className="finale-banner" role="status">
@@ -182,12 +239,9 @@ export default async function UserPage({
         </a>
       </header>
 
-      <div
-        className="citybig"
-        role="img"
-        aria-label={`city of ${u}`}
-        dangerouslySetInnerHTML={{ __html: svg }}
-      />
+      <div id="profile-city" className="citybig profile-game" role="img" aria-label={`city of ${u}`}>
+        <iframe src={profileDemoSrc} title={`live city of ${u}`} loading="eager" />
+      </div>
 
       {marcos.length > 0 && (
         <div className="marcos">
@@ -265,25 +319,24 @@ export default async function UserPage({
         </div>
       </section>
 
-      {sv && (
-        <section className="built" aria-label="How this city was built">
+      <section className={`built${sv ? "" : " built-empty"}`} aria-label="How this city was built">
           <div className="built-head">
             <h2 className="built-h">How this city was built</h2>
             <span
               className="built-shared"
               title="Only names & counts are ever shared — never prompts, code or project names."
             >
-              <span className="info-i" aria-hidden="true">ⓘ</span> what&apos;s shared: {sv.summary.text}
+              <span className="info-i" aria-hidden="true">ⓘ</span> what&apos;s shared: {builtView.summary.text}
             </span>
           </div>
 
-          {(sv.skills.length > 0 || sv.mcp.length > 0 || sv.hooks.length > 0) && (
+          {(builtView.skills.length > 0 || builtView.mcp.length > 0 || builtView.hooks.length > 0) && (
             <div className="built-chips">
-              {sv.skills.length > 0 && (
+              {builtView.skills.length > 0 && (
                 <div className="chip-group">
                   <span className="chip-group-cap">Skills · landmark buildings</span>
                   <div className="chip-row">
-                    {sv.skills.map((s) => (
+                    {builtView.skills.map((s) => (
                       <span key={s} className="setup-chip skill">
                         {s}
                       </span>
@@ -291,11 +344,11 @@ export default async function UserPage({
                   </div>
                 </div>
               )}
-              {sv.mcp.length > 0 && (
+              {builtView.mcp.length > 0 && (
                 <div className="chip-group">
                   <span className="chip-group-cap">MCP · dockside stations</span>
                   <div className="chip-row">
-                    {sv.mcp.map((s) => (
+                    {builtView.mcp.map((s) => (
                       <span key={s} className="setup-chip mcp">
                         {s}
                       </span>
@@ -303,11 +356,11 @@ export default async function UserPage({
                   </div>
                 </div>
               )}
-              {sv.hooks.length > 0 && (
+              {builtView.hooks.length > 0 && (
                 <div className="chip-group">
                   <span className="chip-group-cap">Hooks</span>
                   <div className="chip-row">
-                    {sv.hooks.map((s) => (
+                    {builtView.hooks.map((s) => (
                       <span key={s} className="setup-chip hook">
                         {s}
                       </span>
@@ -319,11 +372,11 @@ export default async function UserPage({
           )}
 
           <div className="built-grid">
-            {sv.tools.length > 0 && (
+            {builtView.tools.length > 0 && (
               <div className="tools-card">
                 <span className="mini-cap">Industries · tool mix</span>
                 <ul className="tool-bars">
-                  {sv.tools.map((t) => (
+                  {builtView.tools.map((t) => (
                     <li key={t.slug} className="tool-bar">
                       <span className="tool-name">{t.label}</span>
                       <span className="tool-track">
@@ -339,7 +392,7 @@ export default async function UserPage({
               </div>
             )}
 
-            {sv.donut.length > 0 && (
+            {builtView.donut.length > 0 ? (
               <div className="power-card">
                 <span className="mini-cap">Power sources · models</span>
                 <div className="donut-wrap">
@@ -353,7 +406,7 @@ export default async function UserPage({
                   >
                     <circle cx={44} cy={44} r={DONUT_R} fill="none" stroke="#241b30" strokeWidth={12} />
                     <g transform="rotate(-90 44 44)">
-                      {sv.donut.map((d) => (
+                      {builtView.donut.map((d) => (
                         <circle
                           key={d.slug}
                           cx={44}
@@ -369,11 +422,11 @@ export default async function UserPage({
                       ))}
                     </g>
                     <text x={44} y={49} textAnchor="middle" className="donut-mid">
-                      {pct(sv.donut[0].frac)}
+                      {pct(builtView.donut[0].frac)}
                     </text>
                   </svg>
                   <ul className="power-legend">
-                    {sv.donut.map((d) => (
+                    {builtView.donut.map((d) => (
                       <li key={d.slug}>
                         <span className="power-dot" style={{ background: d.color }} aria-hidden="true" />
                         <span className="power-name">{d.label}</span>
@@ -383,10 +436,20 @@ export default async function UserPage({
                   </ul>
                 </div>
               </div>
+            ) : (
+              <div className="power-card power-empty">
+                <span className="mini-cap">Power sources · models</span>
+                <div className="donut-wrap">
+                  <div className="donut-placeholder" aria-hidden="true"><span>—</span></div>
+                  <p className="empty-copy">
+                    setup not shared yet
+                    <small>the skyline still grows from tokens</small>
+                  </p>
+                </div>
+              </div>
             )}
           </div>
-        </section>
-      )}
+      </section>
 
       {isCurrent && (
         <p className="liverow">
@@ -404,6 +467,8 @@ export default async function UserPage({
         )}{" "}
         · <a href={backHref}>back to the leaderboard</a>
       </p>
+        </section>
+      </div>
     </main>
   );
 }
