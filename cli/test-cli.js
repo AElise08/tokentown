@@ -7,7 +7,8 @@ const path = require("node:path");
 const cli = require("./cli.js");
 
 test("OpenAI pricing separates uncached, cached, cache-write and output tokens", () => {
-  assert.equal(cli.openAIPriceFor("gpt-5.6-luna-2026-08-01").in, 0.2);
+  assert.equal(cli.openAIPriceFor("gpt-5.6-luna-2026-08-01").in, 1);
+  assert.deepEqual(cli.openAIPriceFor("gpt-5.6-terra"), { in: 2.5, cached: 0.25, write: 3.125, out: 15 });
   assert.equal(cli.openAIPriceFor("gpt-5.6-sol").out, 30);
   const cost = cli.openAICostFromUsage(
     {
@@ -18,7 +19,7 @@ test("OpenAI pricing separates uncached, cached, cache-write and output tokens",
     },
     "gpt-5.6-luna"
   );
-  assert.equal(cost, (300 * 0.2 + 600 * 0.02 + 100 * 0.25 + 100 * 1.2) / 1e6);
+  assert.equal(cost, (300 * 1 + 600 * 0.1 + 100 * 1.25 + 100 * 6) / 1e6);
 });
 
 test("Claude Sonnet 5 introductory pricing ends in September 2026", () => {

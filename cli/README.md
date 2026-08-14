@@ -30,7 +30,7 @@ Only timestamps, usage counters, model/provider identifiers and tool names are a
 
 - City growth excludes cache reads so repeated context does not inflate buildings.
 - Cost includes input, cached input, cache writes and output when the client exposes those fields.
-- OpenCode's own recorded cost is preferred. When Codex or an OpenAI-backed OpenCode session exposes tokens but no bill, TOKENTOWN shows an **official API-equivalent estimate**, not a subscription invoice.
+- OpenCode's own recorded usage value is preferred. OpenCode Go itself is a fixed subscription ($5 introductory month, then $10/month); its per-model values represent consumption against the plan, not an additional card charge. When Codex or an OpenAI-backed OpenCode session exposes tokens but no bill, TOKENTOWN shows an **official API-equivalent estimate**, not a subscription invoice.
 - `--models` prints the local breakdown by provider and model. The server still receives only aggregate numbers and the optional setup summary.
 
 ## Background mode

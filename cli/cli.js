@@ -90,8 +90,8 @@ const SONNET_5_STANDARD_AT = Date.UTC(2026, 8, 1); // introductory $2/$10 ends 2
 // checked 2026-08-14. `write` is the prompt-cache write rate when available.
 const OPENAI_PRICING = {
   "gpt-5.6-sol": { in: 5, cached: 0.5, write: 6.25, out: 30 },
-  "gpt-5.6-terra": { in: 2, cached: 0.2, write: 2.5, out: 12 },
-  "gpt-5.6-luna": { in: 0.2, cached: 0.02, write: 0.25, out: 1.2 },
+  "gpt-5.6-terra": { in: 2.5, cached: 0.25, write: 3.125, out: 15 },
+  "gpt-5.6-luna": { in: 1, cached: 0.1, write: 1.25, out: 6 },
   "gpt-5.3-codex": { in: 1.75, cached: 0.175, write: 1.75, out: 14 },
   "gpt-5.2-codex": { in: 1.75, cached: 0.175, write: 1.75, out: 14 },
   "gpt-5.1-codex": { in: 1.25, cached: 0.125, write: 1.25, out: 10 },

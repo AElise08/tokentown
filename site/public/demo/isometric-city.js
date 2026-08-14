@@ -108,15 +108,15 @@
     var stillCtx = still.getContext("2d");
     stillCtx.imageSmoothingEnabled = false;
     drawSky(stillCtx, random);
-    drawPlatform(stillCtx);
+    drawPlatform(stillCtx, plan);
     drawStreetSurface(stillCtx, plan);
     for (var i = 0; i < plan.background.length; i++) drawBuilding(stillCtx, plan.background[i], activity);
     for (var j = 0; j < plan.middle.length; j++) drawBuilding(stillCtx, plan.middle[j], activity);
-    drawLandmark(stillCtx, activity, plan.style, plan.towerX, plan.towerTop);
+    drawLandmark(stillCtx, activity, plan.family, plan.towerX, plan.towerTop);
     for (var k = 0; k < plan.foreground.length; k++) drawBuilding(stillCtx, plan.foreground[k], activity);
     drawTrees(stillCtx, plan);
     drawStreetDetails(stillCtx, plan);
-    drawPlatformFront(stillCtx);
+    drawPlatformFront(stillCtx, plan);
 
     var airshipCycle = 30 * 60 * 1000;
     var airshipFlight = 26000;
@@ -265,6 +265,44 @@
       b.h += b.depth === 1 ? family % 5 : b.depth === 2 ? (family + 2) % 4 : 0;
       b.h = Math.round(b.h * (0.86 + era * 0.035));
       b.w = Math.max(14, b.w + Math.floor(local() * 7) - 3);
+      // Macro-family changes the actual district silhouette, not just color.
+      // These transformations are deliberately large enough to remain visible
+      // after the 320x180 backing canvas is scaled inside the profile card.
+      if (family === 0) { // financial core: narrow offices, strong verticals
+        if (b.depth < 2) b.type = index % 3 === 0 ? "residential-tower" : "office";
+        b.w = Math.max(12, b.w - 3);
+        b.h += b.depth < 2 ? 14 : 2;
+      } else if (family === 1) { // residential terraces: broad apartment blocks
+        b.type = b.depth === 2 && index % 3 === 0 ? "shop" : "apartment";
+        b.w += 5;
+        b.h -= b.depth === 2 ? 5 : 1;
+      } else if (family === 2) { // old brick quarter: stepped, low foreground
+        b.type = b.depth === 2 ? (index % 2 ? "shop" : "brick") : (index % 3 ? "brick" : "office");
+        b.h -= b.depth === 2 ? 9 : 3;
+      } else if (family === 3) { // needle city: compressed, tall central canyon
+        b.w = Math.max(12, b.w - 4);
+        b.h += b.depth === 1 ? 18 : b.depth === 0 ? 8 : 0;
+        if (b.depth === 1) b.type = index % 2 ? "office" : "residential-tower";
+      } else if (family === 4) { // industrial waterfront
+        if (b.depth === 2) b.type = index % 3 ? "warehouse" : "shop";
+        b.w += b.depth === 2 ? 7 : 1;
+        b.h -= b.depth === 2 ? 10 : 2;
+      } else if (family === 5) { // civic campus, open and asymmetric
+        if (index % 5 === 0) b.type = "civic";
+        b.x += b.x < 160 ? -7 : 7;
+        b.h += b.depth === 0 ? 5 : -3;
+      } else if (family === 6) { // twin clusters with a lower center valley
+        var centerDistance = Math.abs((b.x + b.w / 2) - 160);
+        b.h += centerDistance > 45 ? 12 : -10;
+        if (centerDistance > 45 && b.depth < 2) b.type = "office";
+      } else { // mixed metropolitan ridge, intentionally irregular
+        b.h += (index % 4) * 6 - 7;
+        b.w += index % 2 ? 4 : -2;
+        b.type = ["office", "brick", "apartment", "residential-tower", "shop"][index % 5];
+      }
+      b.x = clamp(Math.round(b.x), 24, 270);
+      b.w = clamp(Math.round(b.w), 12, 34);
+      b.h = clamp(Math.round(b.h), 14, b.depth === 2 ? 58 : 82);
       b.roof = b.type === "shop" ? "awning" : ["flat", "parapet", "antenna", "tank", "chimney"][Math.floor(local() * 5)];
       b.variant = Math.floor(local() * 4);
       b.seed = hashSeed(seed + ":windows:" + b.id);
@@ -424,18 +462,29 @@
     }
   }
 
-  function drawLandmark(ctx, activity, cityStyle, towerX, towerTop) {
+  function drawLandmark(ctx, activity, family, towerX, towerTop) {
     var cx = towerX == null ? 160 : towerX;
-    var top = towerTop == null ? (cityStyle === 1 ? 24 : cityStyle === 2 ? 38 : 31) : towerTop;
-    var shaft = cityStyle === 1 ? "#1d384d" : cityStyle === 2 ? "#292944" : "#1d2d48";
-    var shaftHi = cityStyle === 1 ? "#31566a" : cityStyle === 2 ? "#4b3d58" : "#29415a";
+    var towerKind = (family || 0) % 4;
+    var top = towerTop == null ? 28 : towerTop;
+    if (towerKind === 0) top -= 8;
+    else if (towerKind === 2) top += 5;
+    var shaft = towerKind === 1 ? "#1d384d" : towerKind === 2 ? "#292944" : "#1d2d48";
+    var shaftHi = towerKind === 1 ? "#31566a" : towerKind === 2 ? "#4b3d58" : "#29415a";
     // narrow shaft
-    fill(ctx, shaft, cx - 3, top + 18, 6, BASE - top - 18);
-    fill(ctx, shaftHi, cx + 1, top + 18, 2, BASE - top - 18);
+    var shaftW = towerKind === 3 ? 8 : towerKind === 0 ? 4 : 6;
+    fill(ctx, shaft, cx - Math.floor(shaftW / 2), top + 18, shaftW, BASE - top - 18);
+    fill(ctx, shaftHi, cx + Math.max(0, Math.floor(shaftW / 4)), top + 18, 2, BASE - top - 18);
     for (var mark = top + 40; mark < BASE - 5; mark += 24) fill(ctx, "#40566c", cx - 2, mark, 4, 1);
-    // small observation decks, never a broad building mass
-    fill(ctx, "#465a70", cx - 9, top + 14, 18, 2);
-    fill(ctx, "#1a2b45", cx - 3, top + 8, 6, 6);
+    // Four deterministic landmark silhouettes: needle, broadcast deck,
+    // stacked observatory and heavy metropolitan mast.
+    var deckW = towerKind === 0 ? 12 : towerKind === 1 ? 22 : towerKind === 2 ? 16 : 26;
+    fill(ctx, "#465a70", cx - Math.floor(deckW / 2), top + 14, deckW, 2);
+    fill(ctx, "#1a2b45", cx - (towerKind === 2 ? 5 : 3), top + 8, towerKind === 2 ? 10 : 6, 6);
+    if (towerKind === 2) fill(ctx, "#5b4960", cx - 7, top + 22, 14, 2);
+    if (towerKind === 3) {
+      fill(ctx, "#263b54", cx - 6, top + 31, 12, 4);
+      fill(ctx, "#40566c", cx - 9, top + 34, 18, 2);
+    }
     fill(ctx, COLORS.cyan, cx - 1, top + 22, 2, 2);
     fill(ctx, activity > 0.5 ? COLORS.orange : "#734b54", cx - 1, top + 47, 2, 2);
     fill(ctx, COLORS.gold, cx - 1, top + 73, 2, 2);
@@ -443,11 +492,12 @@
     fill(ctx, COLORS.orange, cx, top - 15, 1, 2);
   }
 
-  function drawPlatform(ctx) {
+  function drawPlatform(ctx, plan) {
+    var family = plan && plan.family || 0;
     var far = [160, 128];
-    var right = [294, 146];
+    var right = [family === 5 ? 286 : 294, 146];
     var front = [160, 164];
-    var left = [26, 146];
+    var left = [family === 4 ? 18 : family === 5 ? 34 : 26, 146];
     poly(ctx, COLORS.edge1, [left, front, [front[0], front[1] + 6], [left[0], left[1] + 6]]);
     poly(ctx, COLORS.edge2, [front, right, [right[0], right[1] + 6], [front[0], front[1] + 6]]);
     poly(ctx, COLORS.platform, [far, right, front, left]);
@@ -512,8 +562,11 @@
     }
   }
 
-  function drawPlatformFront(ctx) {
-    line(ctx, "#443b5b", [[26, 146], [160, 164], [294, 146]], 1);
+  function drawPlatformFront(ctx, plan) {
+    var family = plan && plan.family || 0;
+    var left = family === 4 ? 18 : family === 5 ? 34 : 26;
+    var right = family === 5 ? 286 : 294;
+    line(ctx, "#443b5b", [[left, 146], [160, 164], [right, 146]], 1);
     line(ctx, COLORS.edge0, [[40, 155], [160, 170], [280, 155]], 2);
     line(ctx, COLORS.edge1, [[54, 160], [160, 174], [266, 160]], 2);
     line(ctx, COLORS.edge2, [[70, 164], [160, 177], [250, 164]], 2);

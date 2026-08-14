@@ -619,8 +619,8 @@ async function recordBackdatedDailySnapshots(
 
 // ---------------------------------------------------------------------------
 // REPORT — honor system. Primeiro report registra o hash do key; depois key
-// errado -> 403. Valores são SNAPSHOT absoluto: só grava se os tokens forem
-// MAIORES que o guardado (nunca regride; ignora report atrasado).
+// errado -> 403. Valores são SNAPSHOTS absolutos e monotônicos por métrica:
+// tokens, custo, residentes e prédios podem avançar de forma independente.
 // ---------------------------------------------------------------------------
 export async function submitReport(input: ReportInput): Promise<ReportResult> {
   const db = kv();
@@ -665,7 +665,9 @@ export async function submitReport(input: ReportInput): Promise<ReportResult> {
   // veio -> preserva tudo. "" explícito num campo APAGA o guardado.
   const patch = sanitizeProfile(input.profile);
 
-  // SNAPSHOT monotônico: grava os números só se aumentaram.
+  // SNAPSHOT monotônico por campo. Isso é importante quando um leitor novo
+  // aprende a calcular custo/modelos históricos: o custo pode sair de zero
+  // mesmo sem que o total de tokens tenha mudado desde o último report.
   const prev = parseEntry(username, await db.hgetall(kUser(season, username)));
   // merge do patch sobre o profile guardado (aplica-se mesmo em report sem
   // crescimento — trocar/limpar o lema não exige queimar mais tokens).
@@ -690,24 +692,42 @@ export async function submitReport(input: ReportInput): Promise<ReportResult> {
   // mesmo sem crescimento de tokens (a semana muda de dia sem novo total).
   const daily = sanitizeDailyTokens(input.dailyTokens, now);
 
-  if (!prev || tokens > prev.tokens) {
-    const fields: Record<string, string | number> = { tokens, cost, residents, buildings, lastReport: now };
+  const nextTokens = prev ? Math.max(prev.tokens, tokens) : tokens;
+  const nextCost = prev ? Math.max(prev.cost, cost) : cost;
+  const nextResidents = prev ? Math.max(prev.residents, residents) : residents;
+  const nextBuildings = prev ? Math.max(prev.buildings, buildings) : buildings;
+  const numbersChanged =
+    !prev ||
+    nextTokens > prev.tokens ||
+    nextCost > prev.cost ||
+    nextResidents > prev.residents ||
+    nextBuildings > prev.buildings;
+  const cityChanged = !!city && JSON.stringify(city) !== JSON.stringify(prev?.city ?? null);
+
+  if (!prev || numbersChanged || cityChanged) {
+    const fields: Record<string, string | number> = {
+      tokens: nextTokens,
+      cost: nextCost,
+      residents: nextResidents,
+      buildings: nextBuildings,
+      lastReport: now,
+    };
     // só sobrescreve a city se veio uma válida; report sem city não apaga a que já existe.
     if (city) fields.city = JSON.stringify(city);
     if (profileWrite !== null) fields.profile = profileWrite;
     if (setupWrite !== undefined) fields.setup = setupWrite;
     await db.hset(kUser(season, username), fields);
-    await db.zadd(kRank(season), tokens, username);
+    if (!prev || nextTokens > prev.tokens) await db.zadd(kRank(season), nextTokens, username);
     // alta-marca do dia (pra ranking por janela).
-    await recordDailySnapshot(db, season, username, tokens, cost, now);
+    await recordDailySnapshot(db, season, username, nextTokens, nextCost, now);
     // BREAKDOWN DIÁRIO: back-data os 7 dias reais (+ chão) -> heatmap da semana.
-    if (daily) await recordBackdatedDailySnapshots(db, season, username, tokens, cost, daily, now);
+    if (daily) await recordBackdatedDailySnapshots(db, season, username, nextTokens, nextCost, daily, now);
     const entry: Entry = {
       username,
-      tokens,
-      cost,
-      residents,
-      buildings,
+      tokens: nextTokens,
+      cost: nextCost,
+      residents: nextResidents,
+      buildings: nextBuildings,
       lastReport: now,
       city: city ?? prev?.city ?? null,
       profile: mergedProfile,

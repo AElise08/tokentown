@@ -30,6 +30,28 @@ function clearRate(u) {
   }
 }
 
+test("custo e residentes avançam mesmo quando os tokens não mudam", async () => {
+  __resetStoreForTests();
+  const s = currentSeasonId();
+  const u = "costbackfill";
+  const key = "k".repeat(16);
+  let r = await submitReport({ username: u, key, seasonId: s, tokens: 1000, cost: 0, residents: 0, buildings: 2 });
+  assert.equal(r.ok, true);
+  clearRate(u);
+  r = await submitReport({ username: u, key, seasonId: s, tokens: 1000, cost: 12.5, residents: 4, buildings: 2 });
+  assert.equal(r.ok, true);
+  assert.equal(r.updated, true);
+  assert.equal(r.entry.cost, 12.5);
+  assert.equal(r.entry.residents, 4);
+
+  clearRate(u);
+  r = await submitReport({ username: u, key, seasonId: s, tokens: 900, cost: 2, residents: 1, buildings: 1 });
+  assert.equal(r.updated, false);
+  assert.equal(r.entry.tokens, 1000);
+  assert.equal(r.entry.cost, 12.5);
+  assert.equal(r.entry.residents, 4);
+});
+
 test("profile: persiste, e report SEM profile PRESERVA o existente", async () => {
   __resetStoreForTests();
   const s = currentSeasonId();

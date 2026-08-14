@@ -60,3 +60,12 @@ test("demo simulation pace is lively (fast burn, small tokens-per-building)", ()
   assert.ok(rate >= 0.25 && rate <= 0.6, `sim build rate out of range: ${rate.toFixed(3)}/s`);
   assert.ok(Number(burn[1]) >= 1000, "token burn should be clearly running");
 });
+
+test("isometric profiles vary structure by deterministic city family", () => {
+  const iso = read("public/demo/isometric-city.js");
+  assert.match(iso, /family === 0[\s\S]*financial core/);
+  assert.match(iso, /family === 4[\s\S]*industrial waterfront/);
+  assert.match(iso, /family === 6[\s\S]*twin clusters/);
+  assert.match(iso, /towerKind\s*=\s*\(family \|\| 0\) % 4/);
+  assert.match(iso, /city-layout-7|Macro-family/);
+});
