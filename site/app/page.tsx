@@ -343,8 +343,8 @@ export default async function Page({
               </span>
             </div>
             <p>
-              One command in your terminal — no install, works today. It reads your Claude Code usage
-              and your city shows up on the board in seconds.
+              One command in your terminal — no install, works today. It reads Claude Code, Codex and
+              OpenCode usage, then your city shows up on the board in seconds.
             </p>
             <code className="tier-cmd">npx tokentown</code>
             <p className="tier-note">

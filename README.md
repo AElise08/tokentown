@@ -54,10 +54,11 @@ While the agent is busy, hit **▶ recreio** for a little platformer across your
 - **No app? `npx tokentown`.** Report your city from the terminal in ~10 seconds — no install, [zero dependencies](cli/), Node 18+.
   ```bash
   npx tokentown            # first run picks a name + reports; prints your /u/<name> URL
-  npx tokentown watch      # keep it running, reports every ~10 min
+  npx tokentown schedule   # macOS: report every ~10 min without leaving Terminal open
+  npx tokentown --models   # show local cost breakdown by provider and model
   npx tokentown --dry-run  # print exactly what would be sent — nothing leaves your machine
   ```
-  Only your username and the numbers are sent — never prompts, code, or project names.
+  The CLI reads Claude Code, Codex and OpenCode. Only your username and aggregate numbers are sent — never prompts, code, or project names.
 
 ## This repo
 
@@ -77,21 +78,22 @@ cd site && npm install && npm run dev   # http://localhost:3000
 ## How syncing works (FAQ)
 
 **Does it count tokens I burned before installing / while it wasn't running?**
-Yes. Claude Code itself writes a local transcript of every session (`~/.claude/projects`). TOKENTOWN doesn't listen in real time — it **reads that history**. On every launch (app) or run (CLI) it does a full **season backfill**: every token with a timestamp inside the current 28-day season is counted, deduplicated, whether or not TOKENTOWN was running at the time. Nothing is lost.
+Yes. Claude Code, Codex and OpenCode keep local usage history. TOKENTOWN doesn't need to listen in real time — the CLI performs a full **season backfill** on every run. Every token timestamped inside the current 28-day season is counted whether or not TOKENTOWN was running at the time.
 
 **Is it automatic?**
 - **App:** yes — reads every ~1.5s (the city grows live) and reports to the board every ~3 min while open.
 - **`npx tokentown`:** one full read + one report per run — run it again whenever you want to update.
-- **`npx tokentown watch`:** keeps running and reports every ~10 min.
+- **`npx tokentown schedule`:** on macOS, reports every ~10 min in the background without an open terminal.
+- **`npx tokentown watch`:** remains available as a foreground compatibility mode.
 
 **Why is the board a few minutes behind my overlay?** Reports are throttled (~3 min) to be gentle on the server. The numbers converge the moment burning pauses.
 
-**What doesn't it see?** Anything outside local Claude Code — e.g. claude.ai in the browser, or usage on another machine (run the CLI there too; same username, it merges).
+**What doesn't it see?** Browser-only chats or usage on another machine. Run the CLI there too with the same username to merge it.
 
 ## How it works
 
-- Reads your Claude Code session transcripts under `~/.claude/projects/**/*.jsonl` (token usage, tool calls, models) with per-message **de-duplication** and a **per-season backfill** from timestamps — accurate whether the app was open or not, and it counts sub-agent usage too.
-- The city that grows = `input + output + cache_creation` tokens; the honest **cost** estimate uses every field, including cache reads, with real per-model pricing.
+- Reads local Claude Code JSONL, Codex JSONL and OpenCode SQLite usage metadata with provider-specific de-duplication/delta handling and a **per-season backfill**.
+- The city excludes cache reads; the **cost by model** includes cached input and cache writes where available. Subscription clients are labeled as API-equivalent estimates rather than invoices.
 - The overlay is a single hand-written canvas engine in a system WebView — no external assets, no bundled Chromium. Cities on the site are deterministic SVG.
 
 ---

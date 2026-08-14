@@ -1,52 +1,48 @@
 # `npx tokentown`
 
-Put your city on the [**TOKENTOWN**](https://tokentown-gamma.vercel.app) leaderboard from the terminal — **no app to install.**
+Put your city on the [TOKENTOWN](https://tokentown-gamma.vercel.app) leaderboard from the terminal. No permanent npm install is required.
 
-TOKENTOWN turns your real Claude Code token usage into a pixel city: every token your agents burn raises a building. This little CLI reads your usage on your own machine and reports this season's numbers to the leaderboard, so you get a city at `/u/<name>` in about ten seconds.
+TOKENTOWN turns local **Claude Code, Codex and OpenCode** usage into a pixel city. Every run backfills the current season, so usage is not lost while the reporter is closed.
 
-## Use it
+## Commands
 
 ```bash
-npx tokentown
+npx tokentown             # read once, report and print your city URL
+npx tokentown --models    # report and show the complete cost/model breakdown
+npx tokentown schedule    # macOS: report every 10 minutes in the background
+npx tokentown status      # show background reporter status
+npx tokentown unschedule  # remove the background reporter
+npx tokentown --dry-run   # print exactly what would be sent; send nothing
+npx tokentown watch       # optional foreground compatibility mode
 ```
 
-First run asks for a username, generates a private key, and saves a tiny config to `~/.tokentown-placar.json`. Every run after that just reports and prints your city URL.
+The first run asks for a username and stores a private key in `~/.tokentown-placar.json`. Requires Node 18+. The package has zero npm dependencies. OpenCode reading uses the system `sqlite3` executable and is skipped safely when it is unavailable.
 
-```
-npx tokentown            report your season once, print your city URL
-npx tokentown watch      keep running, report every ~10 minutes
-npx tokentown --dry-run  read & print exactly what WOULD be sent — nothing leaves your machine
-npx tokentown --help
-```
+## Local sources
 
-Requires **Node 18+**. Zero dependencies.
+- Claude Code: `~/.claude/projects/**/*.jsonl`
+- Codex: `~/.codex/sessions/**/*.jsonl`
+- OpenCode: `~/.local/share/opencode/opencode.db`
 
-## What it reads
+Only timestamps, usage counters, model/provider identifiers and tool names are aggregated. Prompts, code, conversation text and project names are never copied or sent.
 
-Your Claude Code session transcripts under `~/.claude/projects/**/*.jsonl` — token usage, tool calls and models — with the same per-message de-duplication and per-season backfill the desktop app uses, so the numbers are accurate whether or not you were running the app, and sub-agent usage is counted too.
+## Tokens and cost
 
-- **Tokens → buildings** — `input + output + cache_creation` tokens.
-- **Honest cost** — every field (including cache reads) at real per-model pricing.
-- **Residents** — the sub-agents your sessions spawned.
-- **Landmarks** — a waterfront garden at 100k tokens, a ferry at 300k, a lighthouse at 1M, a tower district at 3M.
+- City growth excludes cache reads so repeated context does not inflate buildings.
+- Cost includes input, cached input, cache writes and output when the client exposes those fields.
+- OpenCode's own recorded cost is preferred. When Codex or an OpenAI-backed OpenCode session exposes tokens but no bill, TOKENTOWN shows an **official API-equivalent estimate**, not a subscription invoice.
+- `--models` prints the local breakdown by provider and model. The server still receives only aggregate numbers and the optional setup summary.
 
-## Privacy
+## Background mode
 
-**Local-first.** Everything is read on your machine. Only your **username and the numbers** are ever sent — **never** prompts, code, conversation content, or project names.
+On macOS, `schedule` installs a small user LaunchAgent. It runs a copied, version-pinned CLI every ten minutes, including after login, without keeping Terminal or `npx tokentown watch` open. Run `schedule` again after upgrading the npm package so the background copy is refreshed.
 
-Sharing your **setup** (the skills, MCP servers, tools and models you actually use — *names and counts only*) is **opt-in**: the first run asks, and you can flip `shareSetup` in `~/.tokentown-placar.json` anytime. Run `npx tokentown --dry-run` to see the exact payload before anything is sent.
+On Linux, use cron or a systemd user timer to run `npx tokentown` periodically. Windows background scheduling is not yet built in.
 
-## Config
+## Privacy and config
 
-`~/.tokentown-placar.json` (override the path with `TOKENTOWN_CONFIG=/path/to.json` for testing). Shared with the desktop app — same file, same account. You can hand-edit a few cosmetics:
+Only your username and aggregate numbers are reported. Sharing setup names/counts is opt-in. Use `--dry-run` to inspect the payload.
 
-| field | what |
-|---|---|
-| `cityName` | your city's name on `/u/<name>` (≤ 24 chars) |
-| `motto` | a line in italics under it (≤ 48 chars) |
-| `accent` | `dourado` · `teal` · `rosa` · `violeta` · `verde` · `ambar` |
-| `shareSetup` | `true`/`false` — share your stack |
+Config: `~/.tokentown-placar.json` (override with `TOKENTOWN_CONFIG=/path/to.json`). Supported cosmetic fields are `cityName`, `motto`, `accent` and `shareSetup`.
 
----
-
-Part of the [TOKENTOWN](https://github.com/AElise08/tokentown) monorepo. Not affiliated with Anthropic.
+Part of the [TOKENTOWN](https://github.com/AElise08/tokentown) monorepo. Not affiliated with Anthropic or OpenAI.

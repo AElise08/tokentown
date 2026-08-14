@@ -1,7 +1,7 @@
 {
   "name": "tokentown",
-  "version": "0.1.0",
-  "description": "Report your real Claude Code token usage to the TOKENTOWN leaderboard — a pixel city that grows from your tokens. No app to install.",
+  "version": "0.2.0",
+  "description": "Turn local Claude Code, Codex and OpenCode usage into a TOKENTOWN pixel city.",
   "bin": {
     "tokentown": "cli.js"
   },
@@ -22,6 +22,8 @@
   "keywords": [
     "claude-code",
     "claude",
+    "codex",
+    "opencode",
     "tokens",
     "usage",
     "leaderboard",
@@ -31,5 +33,8 @@
   "files": [
     "cli.js",
     "README.md"
-  ]
+  ],
+  "scripts": {
+    "test": "node --test test-cli.js"
+  }
 }
