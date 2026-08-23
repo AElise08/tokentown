@@ -927,32 +927,32 @@
   function updateBlimp(dt){
     if(reduce) return;
     if(!blimp && t >= blimpNextAt){ var dir = Math.random()<0.5?1:-1;
-      blimp = { x: dir>0? -70 : W+70, y: 16+Math.random()*16, dir:dir, sp:0.28+Math.random()*0.12 }; }
+      blimp = { x: dir>0? -90 : W+90, y: 16+Math.random()*16, dir:dir, sp:0.28+Math.random()*0.12 }; }
     if(blimp){ blimp.x += blimp.dir*blimp.sp*(dt*0.06);
-      if(blimp.x < -82 || blimp.x > W+82){ blimp=null; blimpNextAt = t + 1800000; } } // every flight leaves 30 quiet minutes
+      if(blimp.x < -100 || blimp.x > W+100){ blimp=null; blimpNextAt = t + 1800000; } } // every flight leaves 30 quiet minutes
   }
   function drawBlimp(night){
     if(!blimp) return; var x=blimp.x|0, y=blimp.y|0;
     var body = night? '#6a5f7a' : '#8a7f96';
     // The old envelope was only 22px wide while the word is much longer;
     // give the airship enough room so the brand stays inside the silhouette.
-    var bw = 72;
-    R(x, y, bw, 11, body); R(x+6, y-1, bw-12, 1, mix(body,'#fff',0.15));
-    R(x-1, y+4, 1, 3, body); R(x+bw, y+4, 1, 3, body);     // envelope (bico e cauda)
-    R(x+23, y+11, 16, 2, mix(body,'#000',0.3));            // gôndola
+    var bw = 88;
+    R(x, y, bw, 12, body); R(x+7, y-1, bw-14, 1, mix(body,'#fff',0.15));
+    R(x-1, y+4, 1, 4, body); R(x+bw, y+4, 1, 4, body);     // envelope (bico e cauda)
+    R(x+30, y+12, 18, 3, mix(body,'#000',0.3));            // gôndola
     var lit = night ? '#ffe6a8' : '#f2b47a';               // letreiro fixo e legível
     ctx.globalAlpha = night?1:0.95;
-    R(x+7, y+2, bw-14, 7, '#40354f');
+    R(x+8, y+2, bw-16, 8, '#40354f');
     ctx.font='bold 6px monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
     ctx.fillStyle = lit; ctx.fillText(sponsorName || 'TOKENTOWN', x+bw/2, y+2);
-    if(night){ ctx.globalAlpha=0.18; R(x, y, bw, 11, '#ffe6a8'); }
+    if(night){ ctx.globalAlpha=0.18; R(x, y, bw, 12, '#ffe6a8'); }
     ctx.globalAlpha=1; ctx.textBaseline='alphabetic';
   }
 
   cv.addEventListener('click', function(event){
     if(!sponsorUrl || !blimp) return;
     var rect=cv.getBoundingClientRect(), x=(event.clientX-rect.left)*W/rect.width, y=(event.clientY-rect.top)*H/rect.height;
-    if(x>=blimp.x && x<=blimp.x+72 && y>=blimp.y-1 && y<=blimp.y+14)
+    if(x>=blimp.x && x<=blimp.x+88 && y>=blimp.y-1 && y<=blimp.y+16)
       window.open(sponsorUrl,'_blank','noopener,noreferrer');
   });
 

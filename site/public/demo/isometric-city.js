@@ -143,9 +143,9 @@
       // not reset the schedule or force a new arrival.
       var phase = sponsorName ? (now - mountedAt) % airshipCycle : Date.now() % airshipCycle;
       if (phase < airshipFlight) {
-        var x = -82 + phase * 0.019;
+        var x = -98 + phase * 0.019;
         drawBlimp(ctx, x, 43, sponsorName || "TOKENTOWN");
-        activeAirship = { x: x, y: 42, w: 72, h: 14 };
+        activeAirship = { x: x, y: 42, w: 88, h: 16 };
         if (sponsorUrl) canvas.style.cursor = "pointer";
       } else { activeAirship = null; canvas.style.cursor = "default"; }
       window.requestAnimationFrame(frame);
@@ -165,19 +165,19 @@
   }
 
   function drawBlimp(ctx, x, y, label) {
-    var width = 72;
+    var width = 88;
     var body = "#52425e";
-    fill(ctx, body, x, y, width, 9);
+    fill(ctx, body, x, y, width, 11);
     fill(ctx, "#6c5066", x + 5, y - 1, width - 10, 1);
-    fill(ctx, "#3d314e", x + 7, y + 2, width - 14, 6);
-    fill(ctx, "#6b5265", x - 1, y + 3, 1, 3);
-    fill(ctx, "#6b5265", x + width, y + 3, 1, 3);
-    fill(ctx, "#302840", x + 19, y + 9, 12, 2);
-    ctx.font = "bold 5px monospace";
+    fill(ctx, "#3d314e", x + 7, y + 2, width - 14, 8);
+    fill(ctx, "#6b5265", x - 1, y + 4, 1, 4);
+    fill(ctx, "#6b5265", x + width, y + 4, 1, 4);
+    fill(ctx, "#302840", x + 28, y + 11, 16, 3);
+    ctx.font = "bold 6px monospace";
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
     ctx.fillStyle = COLORS.gold;
-    ctx.fillText(label || "TOKENTOWN", px(x + width / 2), px(y + 2));
+    ctx.fillText(label || "TOKENTOWN", px(x + width / 2), px(y + 3));
     ctx.textBaseline = "alphabetic";
   }
 
