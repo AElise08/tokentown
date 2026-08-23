@@ -26,8 +26,10 @@ export default async function Page({
   const season = Number.isInteger(parsed) && parsed >= 0 && parsed <= cur ? parsed : cur;
   const isCurrent = season === cur;
 
-  // ranking window: default is the season. "7d" = gain over the last 7 days.
-  const window: WindowKind = sp?.window === "7d" ? "7d" : "season";
+  // "7d" only makes sense while the season is active. A closed album is a
+  // frozen final result; applying a window relative to today subtracts its
+  // final snapshot from itself and misleadingly shows zero tokens/cost.
+  const window: WindowKind = isCurrent && sp?.window === "7d" ? "7d" : "season";
 
   const now = Date.now();
   // we always fetch the season ranking (for the headline); only refetch for 7d.
@@ -125,7 +127,7 @@ export default async function Page({
         {seasonIds.map((s) => {
           const p = new URLSearchParams();
           if (s !== cur) p.set("season", String(s));
-          if (window === "7d") p.set("window", "7d");
+          if (s === cur && window === "7d") p.set("window", "7d");
           const q = p.toString();
           const past = s !== cur;
           return (
@@ -150,25 +152,37 @@ export default async function Page({
 
       <div className="window-row">
         <div className="window-tabs" role="tablist" aria-label="Ranking window">
-          <a
-            href={winHref("season")}
-            role="tab"
-            aria-selected={window === "season"}
-            className={`wtab${window === "season" ? " on" : ""}`}
-          >
-            season · 28d
-          </a>
-          <a
-            href={winHref("7d")}
-            role="tab"
-            aria-selected={window === "7d"}
-            className={`wtab${window === "7d" ? " on" : ""}`}
-          >
-            7 days
-          </a>
+          {isCurrent ? (
+            <>
+              <a
+                href={winHref("season")}
+                role="tab"
+                aria-selected={window === "season"}
+                className={`wtab${window === "season" ? " on" : ""}`}
+              >
+                season · 28d
+              </a>
+              <a
+                href={winHref("7d")}
+                role="tab"
+                aria-selected={window === "7d"}
+                className={`wtab${window === "7d" ? " on" : ""}`}
+              >
+                7 days
+              </a>
+            </>
+          ) : (
+            <span role="tab" aria-selected="true" className="wtab on">
+              season · 28d
+            </span>
+          )}
         </div>
         <span className="window-hint">
-          {window === "7d" ? "tokens & cost over the last 7 days" : "season running total"}
+          {!isCurrent
+            ? "final totals · season closed"
+            : window === "7d"
+              ? "tokens & cost over the last 7 days"
+              : "season running total"}
         </span>
         <ProfileSearch />
         {isCurrent && <LiveBoard renderedAt={now} />}

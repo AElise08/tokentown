@@ -78,3 +78,12 @@ test("site exposes a dedicated privacy page and links it from the board", () => 
   assert.match(privacy, /Prompts, responses, source code/);
   assert.match(privacy, /github\.com\/AElise08\/tokentown/);
 });
+
+test("closed season albums expose only the final 28-day totals", () => {
+  const page = read("app/page.tsx");
+  const api = read("app/api/placar/route.ts");
+  assert.match(page, /isCurrent\s*&&\s*sp\?\.window\s*===\s*["']7d["']/);
+  assert.match(page, /!isCurrent\s*\?\s*["']final totals · season closed["']/);
+  assert.match(page, /isCurrent\s*\?\s*\([\s\S]*7 days[\s\S]*\)\s*:\s*\([\s\S]*season · 28d/);
+  assert.match(api, /season\s*===\s*cur\s*&&\s*url\.searchParams\.get\(["']window["']\)\s*===\s*["']7d["']/);
+});

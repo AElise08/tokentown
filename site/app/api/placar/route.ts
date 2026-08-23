@@ -12,7 +12,9 @@ export async function GET(req: Request) {
   if (!Number.isInteger(season) || season < 0) season = cur;
 
   // janela: "7d" (ganho dos últimos 7 dias) ou "season" (padrão, temporada).
-  const window = url.searchParams.get("window") === "7d" ? "7d" : "season";
+  // Closed seasons are immutable albums. A 7-day window relative to today's
+  // date would compare the final snapshot with itself and return fake zeros.
+  const window = season === cur && url.searchParams.get("window") === "7d" ? "7d" : "season";
 
   const ranking = await getLeaderboard(season, { window, limit: 100 });
 
