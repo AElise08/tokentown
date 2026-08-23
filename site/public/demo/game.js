@@ -929,7 +929,7 @@
     if(!blimp && t >= blimpNextAt){ var dir = Math.random()<0.5?1:-1;
       blimp = { x: dir>0? -70 : W+70, y: 16+Math.random()*16, dir:dir, sp:0.28+Math.random()*0.12 }; }
     if(blimp){ blimp.x += blimp.dir*blimp.sp*(dt*0.06);
-      if(blimp.x < -82 || blimp.x > W+82){ blimp=null; blimpNextAt = t + (sponsorName ? 120000 : 1800000); } } // sponsor: 2min; fallback: 30min
+      if(blimp.x < -82 || blimp.x > W+82){ blimp=null; blimpNextAt = t + 1800000; } } // every flight leaves 30 quiet minutes
   }
   function drawBlimp(night){
     if(!blimp) return; var x=blimp.x|0, y=blimp.y|0;

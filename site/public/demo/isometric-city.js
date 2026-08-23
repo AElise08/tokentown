@@ -124,8 +124,8 @@
     drawStreetDetails(stillCtx, plan);
     drawPlatformFront(stillCtx, plan);
 
-    var airshipCycle = sponsorName ? 2 * 60 * 1000 : 30 * 60 * 1000;
     var airshipFlight = 26000;
+    var airshipCycle = airshipFlight + 30 * 60 * 1000;
     var mountedAt = performance.now();
     var activeAirship = null;
     canvas.addEventListener("click", function (event) {

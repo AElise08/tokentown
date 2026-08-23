@@ -1533,6 +1533,8 @@ tr.champ td.user .crown {
   color: var(--faint);
 }
 .mock-city {
+  position: relative;
+  overflow: hidden;
   line-height: 0;
 }
 .mock-city .tt-city {
@@ -1935,28 +1937,18 @@ tr.champ td.user .crown {
   }
 }
 /* ---- sponsored flights: site-only, fixed-price 24-hour placements ---- */
-.site-flight {
-  position: fixed;
-  z-index: 35;
-  top: clamp(72px, 10vh, 108px);
-  left: 0;
-  width: 100%;
-  height: 66px;
-  overflow: hidden;
-  pointer-events: none;
-}
-.site-airship {
+.hero-city-flight {
   position: absolute;
-  top: 5px;
-  left: 0;
+  z-index: 3;
+  top: 15%;
+  left: -210px;
   width: 190px;
   height: 52px;
   color: var(--gold);
   text-decoration: none;
   filter: drop-shadow(0 9px 8px rgba(0, 0, 0, .42));
-  pointer-events: auto;
-  will-change: transform;
-  animation: site-airship-fly 24s linear -4s infinite;
+  will-change: left, opacity;
+  animation: hero-airship-cycle 1830s linear -4s infinite;
 }
 .airship-envelope {
   position: absolute;
@@ -2015,12 +2007,40 @@ tr.champ td.user .crown {
   border-radius: 2px 2px 6px 6px;
   background: #261d34;
 }
-.site-airship:hover .airship-envelope { border-color: var(--amber); }
-.site-airship:hover { animation-play-state: paused; }
-@keyframes site-airship-fly {
-  from { transform: translateX(-220px); }
-  to { transform: translateX(calc(100vw + 24px)); }
+.hero-city-flight:hover .airship-envelope { border-color: var(--amber); }
+.hero-city-flight:hover { animation-play-state: paused; }
+@keyframes hero-airship-cycle {
+  0% { left: -210px; opacity: 1; }
+  1.64% { left: 100%; opacity: 1; }
+  1.65%, 100% { left: 100%; opacity: 0; }
 }
+
+.sponsor-lineup {
+  position: fixed;
+  z-index: 30;
+  top: 176px;
+  right: max(12px, calc((100vw - 1340px) / 2));
+  width: 190px;
+  padding: 12px;
+  color: var(--ink);
+  background: linear-gradient(180deg, rgba(42, 33, 52, .97), rgba(23, 18, 32, .97));
+  border: 1px solid #4a3b52;
+  border-radius: 11px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, .34), inset 0 1px rgba(255,255,255,.05);
+  font-family: var(--mono);
+}
+.lineup-head { padding-bottom: 9px; color: var(--gold); border-bottom: 1px solid #3a3043; font-size: 9px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+.lineup-head span { color: var(--teal); }
+.sponsor-lineup ol { display: grid; gap: 3px; margin: 8px 0 0; padding: 0; list-style: none; }
+.sponsor-lineup li { position: relative; display: grid; grid-template-columns: 8px minmax(0, 1fr); column-gap: 5px; padding: 7px 5px; border-radius: 6px; background: rgba(255,255,255,.018); }
+.sponsor-lineup li.active { background: rgba(127, 199, 191, .08); }
+.lineup-light { width: 5px; height: 5px; margin-top: 3px; border-radius: 50%; background: #65586f; }
+.active .lineup-light { background: var(--teal); box-shadow: 0 0 7px var(--teal); }
+.sponsor-lineup a, .sponsor-lineup button { min-width: 0; overflow: hidden; border: 0; color: var(--ink); background: transparent; font: 700 9px/1.2 var(--mono); text-align: left; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+.sponsor-lineup button { padding: 0; cursor: pointer; }
+.sponsor-lineup a:hover, .sponsor-lineup button:hover { color: var(--gold); }
+.sponsor-lineup small { grid-column: 2; margin-top: 3px; color: var(--faint); font-size: 7px; line-height: 1.2; }
+.lineup-gap { margin-top: 8px; color: var(--faint); font-size: 7px; line-height: 1.35; text-align: center; }
 
 .sponsor-dock {
   position: relative;
@@ -2082,11 +2102,12 @@ tr.champ td.user .crown {
 .admin-actions .danger { color: #ffaca6; border-color: #74433f; }
 
 @media (max-width: 560px) {
-  .site-flight { top: 62px; height: 58px; }
-  .site-airship { transform: scale(.86); transform-origin: left center; }
   .sponsor-dock { grid-template-columns: 1fr; gap: 11px; }
   .sponsor-launch { width: 100%; }
 }
+@media (max-width: 1363px) {
+  .sponsor-lineup { position: relative; inset: auto; width: 100%; }
+}
 @media (prefers-reduced-motion: reduce) {
-  .site-airship { left: auto; right: 12px; animation: none; }
+  .hero-city-flight { left: auto; right: 8px; opacity: 1; animation: none; }
 }

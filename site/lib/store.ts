@@ -20,6 +20,7 @@ import {
   sanitizeSponsorDraft,
   toPublicSponsor,
   type PublicSponsor,
+  type PublicSponsorSlot,
   type SponsorCampaign,
 } from "./sponsor";
 
@@ -703,6 +704,20 @@ export async function getActiveSponsor(now = Date.now()): Promise<PublicSponsor 
   const campaigns = await listSponsorCampaigns(now);
   const active = campaigns.find((c) => effectiveSponsorStatus(c, now) === "active") ?? null;
   return toPublicSponsor(active, now);
+}
+
+export async function getPublicSponsorLineup(now = Date.now(), limit = 4): Promise<PublicSponsorSlot[]> {
+  const campaigns = await listSponsorCampaigns(now);
+  return campaigns
+    .map((c) => ({ campaign: c, status: effectiveSponsorStatus(c, now) }))
+    .filter((x): x is { campaign: SponsorCampaign; status: "active" | "scheduled" } =>
+      x.status === "active" || x.status === "scheduled")
+    .sort((a, b) => (a.campaign.startsAt || 0) - (b.campaign.startsAt || 0))
+    .slice(0, Math.max(1, Math.min(limit, 8)))
+    .map(({ campaign, status }) => {
+      const { id, name, tagline, url, startsAt, endsAt } = campaign;
+      return { id, name, tagline, url, startsAt, endsAt, status };
+    });
 }
 
 // ---------------------------------------------------------------------------

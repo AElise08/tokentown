@@ -1,11 +1,26 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import type { PublicSponsor } from "@/lib/sponsor";
+import type { PublicSponsor, PublicSponsorSlot } from "@/lib/sponsor";
 import type { SiteMetrics } from "@/lib/store";
 import { formatCount } from "@/lib/format";
 
-export default function SponsorDock({ sponsor, metrics }: { sponsor: PublicSponsor | null; metrics: SiteMetrics }) {
+function slotTime(slot: PublicSponsorSlot): string {
+  if (slot.status === "active") return "now · 24h flight";
+  if (!slot.startsAt) return "next";
+  const iso = new Date(slot.startsAt).toISOString();
+  return `${iso.slice(5, 10)} · ${iso.slice(11, 16)} UTC`;
+}
+
+export default function SponsorDock({
+  sponsor,
+  lineup,
+  metrics,
+}: {
+  sponsor: PublicSponsor | null;
+  lineup: PublicSponsorSlot[];
+  metrics: SiteMetrics;
+}) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [liveMetrics, setLiveMetrics] = useState(metrics);
   const [busy, setBusy] = useState(false);
@@ -47,21 +62,26 @@ export default function SponsorDock({ sponsor, metrics }: { sponsor: PublicSpons
 
   return (
     <>
-      <div className="site-flight" aria-label={sponsor ? `Sponsored flight: ${sponsor.name}` : "TOKENTOWN airship"}>
-        {sponsor ? (
-          <a className="site-airship" href={sponsor.url} target="_blank" rel="sponsored noopener noreferrer">
-            <span className="airship-tail" aria-hidden="true" />
-            <span className="airship-envelope"><strong>{sponsor.name}</strong></span>
-            <span className="airship-gondola" aria-hidden="true" />
-          </a>
-        ) : (
-          <div className="site-airship" aria-hidden="true">
-            <span className="airship-tail" />
-            <span className="airship-envelope"><strong>TOKENTOWN</strong></span>
-            <span className="airship-gondola" />
-          </div>
-        )}
-      </div>
+      <aside className="sponsor-lineup" aria-label="Sponsored flight schedule">
+        <div className="lineup-head"><span>◍</span> flight board</div>
+        <ol>
+          {lineup.map((slot) => (
+            <li key={slot.id} className={slot.status}>
+              <span className="lineup-light" aria-hidden="true" />
+              <a href={slot.url} target="_blank" rel="sponsored noopener noreferrer">{slot.name}</a>
+              <small>{slotTime(slot)}</small>
+            </li>
+          ))}
+          {lineup.length < 3 && (
+            <li className="available">
+              <span className="lineup-light" aria-hidden="true" />
+              <button type="button" onClick={() => dialog.current?.showModal()}>your site</button>
+              <small>next available · $2</small>
+            </li>
+          )}
+        </ol>
+        <div className="lineup-gap">30 min quiet sky between sponsors</div>
+      </aside>
 
       <aside className="sponsor-dock" aria-label="TOKENTOWN sponsor">
         <div className="sponsor-bottom-copy">
@@ -71,7 +91,7 @@ export default function SponsorDock({ sponsor, metrics }: { sponsor: PublicSpons
               <strong>{sponsor.name}</strong><span>{sponsor.tagline}</span>
             </a>
           ) : (
-            <div className="sponsor-empty"><strong>put your site in the sky</strong><span>one clear 24-hour flight</span></div>
+            <div className="sponsor-empty"><strong>put your site in the city sky</strong><span>one clear 24-hour flight</span></div>
           )}
           <div className="sponsor-metrics">
             {formatCount(liveMetrics.visitors)} visitors · {formatCount(liveMetrics.pageviews)} pageviews
@@ -91,7 +111,7 @@ export default function SponsorDock({ sponsor, metrics }: { sponsor: PublicSpons
             <div><span>◍</span> launch a sponsored flight</div>
             <button type="button" aria-label="Close" onClick={() => dialog.current?.close()}>×</button>
           </div>
-          <p>Your name flies across TOKENTOWN and appears in the sponsor strip below for 24 hours after approval.</p>
+          <p>Your name flies inside TOKENTOWN&apos;s cities and appears on the flight board for 24 hours after approval.</p>
           <label>Site name <input name="name" required maxLength={18} placeholder="Linear" /></label>
           <label>Short line <input name="tagline" required maxLength={60} placeholder="Issue tracking built for speed" /></label>
           <label>Destination <input name="url" required type="url" pattern="https://.*" placeholder="https://linear.app/" /></label>
@@ -99,7 +119,7 @@ export default function SponsorDock({ sponsor, metrics }: { sponsor: PublicSpons
           <label className="sponsor-consent">
             <input name="accepted" type="checkbox" required /> I own or represent this site and accept manual review. No adult, gambling, deceptive, illegal or malicious content.
           </label>
-          <div className="sponsor-price"><span>24-hour flight</span><strong>$2.00 USD</strong></div>
+          <div className="sponsor-price"><span>24-hour flight · 30 min gap after</span><strong>$2.00 USD</strong></div>
           {error && <div className="sponsor-error" role="alert">{error}</div>}
           <button className="sponsor-pay" disabled={busy}>{busy ? "opening checkout…" : "continue to secure checkout"}</button>
           <small>No traffic guarantee. Rejected campaigns are refunded. Site-wide visitor and pageview totals are public; individual ad impressions and clicks are not tracked.</small>

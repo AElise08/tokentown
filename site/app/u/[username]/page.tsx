@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getActiveSponsor, getSiteMetrics, getUserWithRank, getUserSnaps } from "@/lib/store";
+import { getPublicSponsorLineup, getSiteMetrics, getUserWithRank, getUserSnaps } from "@/lib/store";
 import { currentSeasonId, seasonRange, daysRemaining, isFinale } from "@/lib/season";
 import { formatCount, formatCost, formatAgo, formatDate } from "@/lib/format";
 import { cityFeatures, cityComposition, cityMarcoLabels } from "@/lib/city";
@@ -84,7 +84,8 @@ export default async function UserPage({
   }
 
   const now = Date.now();
-  const [sponsor, siteMetrics] = await Promise.all([getActiveSponsor(now), getSiteMetrics()]);
+  const [sponsorLineup, siteMetrics] = await Promise.all([getPublicSponsorLineup(now), getSiteMetrics()]);
+  const sponsor = sponsorLineup.find((item) => item.status === "active") ?? null;
   const days = daysRemaining(now);
   // FINALE: only on the CURRENT season and the last night -> the city sets off fireworks.
   const finale = isCurrent && isFinale(now);
@@ -465,7 +466,7 @@ export default async function UserPage({
         </p>
       )}
 
-      <SponsorDock sponsor={sponsor} metrics={siteMetrics} />
+      <SponsorDock sponsor={sponsor} lineup={sponsorLineup} metrics={siteMetrics} />
 
       <p className="foot">
         {isCurrent ? (

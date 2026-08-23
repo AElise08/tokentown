@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   SPONSOR_DURATION_MS,
+  SPONSOR_GAP_MS,
   sanitizeSponsorDraft,
   effectiveSponsorStatus,
   nextSponsorWindow,
@@ -33,10 +34,10 @@ test("effective status and public sponsor follow the scheduled 24-hour window", 
   assert.equal(toPublicSponsor(base, now + 150)?.name, "Linear");
 });
 
-test("new approvals queue after the last active or scheduled campaign", () => {
+test("new approvals queue 30 minutes after the previous 24-hour campaign", () => {
   const now = 2_000;
   const c = { id: "c1", name: "A", tagline: "B", url: "https://a.dev/", email: "a@b.com", createdAt: 1, status: "scheduled", startsAt: now, endsAt: now + SPONSOR_DURATION_MS };
   const w = nextSponsorWindow([c], now);
-  assert.equal(w.startsAt, c.endsAt);
+  assert.equal(w.startsAt, c.endsAt + SPONSOR_GAP_MS);
   assert.equal(w.endsAt - w.startsAt, SPONSOR_DURATION_MS);
 });

@@ -17,6 +17,7 @@ import {
   markSponsorPaid,
   approveSponsorCampaign,
   getActiveSponsor,
+  getPublicSponsorLineup,
   listSponsorCampaigns,
 } from "./store.ts";
 import { currentSeasonId } from "./season.ts";
@@ -434,4 +435,15 @@ test("sponsor payment is idempotent and approval schedules a 24-hour flight", as
   assert.equal((await getActiveSponsor(now + 1)).name, "Linear");
   assert.equal(await getActiveSponsor(approved.endsAt + 1), null);
   assert.equal((await listSponsorCampaigns(now + 1))[0].email, "hello@example.com");
+
+  const c2 = await createSponsorCampaign({
+    name: "Vercel", tagline: "Ship the web", url: "https://vercel.com/", email: "hi@example.com",
+  });
+  await attachSponsorCheckout(c2.id, "cs_test_2");
+  await markSponsorPaid({ id: c2.id, checkoutSessionId: "cs_test_2" });
+  const approved2 = await approveSponsorCampaign(c2.id, now + 100);
+  assert.equal(approved2.startsAt, approved.endsAt + 30 * 60 * 1000);
+  const lineup = await getPublicSponsorLineup(now + 200);
+  assert.deepEqual(lineup.map((item) => [item.name, item.status]), [["Linear", "active"], ["Vercel", "scheduled"]]);
+  assert.ok(!("email" in lineup[0]), "public lineup must not expose receipt emails");
 });

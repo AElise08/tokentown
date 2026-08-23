@@ -56,7 +56,8 @@ export default function PrivacyPage() {
         <p>
           Clearly labeled sponsors can appear in the website&apos;s flying airship and bottom sponsor strip. Sponsor submissions
           include a site name, short line, HTTPS destination and receipt email, and are stored for payment,
-          moderation and scheduling. Campaigns run for 24 hours after manual approval. Payment is handled
+          moderation and scheduling. Campaigns run for 24 hours after manual approval, with a 30-minute
+          sponsor-free interval between campaigns. Payment is handled
           by Stripe; TOKENTOWN never receives card details.
         </p>
       </section>

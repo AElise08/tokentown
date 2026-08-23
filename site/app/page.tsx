@@ -1,4 +1,4 @@
-import { getActiveSponsor, getLeaderboard, getSiteMetrics, type WindowKind } from "@/lib/store";
+import { getLeaderboard, getPublicSponsorLineup, getSiteMetrics, type WindowKind } from "@/lib/store";
 import { currentSeasonId, daysRemaining, seasonRange, projectAnnualCost, isFinale } from "@/lib/season";
 import { formatCount, formatCost, formatAgo, formatAnnualCost, formatDate } from "@/lib/format";
 import { citySvg } from "@/lib/city";
@@ -34,7 +34,8 @@ export default async function Page({
   const window: WindowKind = isCurrent && sp?.window === "7d" ? "7d" : "season";
 
   const now = Date.now();
-  const [sponsor, siteMetrics] = await Promise.all([getActiveSponsor(now), getSiteMetrics()]);
+  const [sponsorLineup, siteMetrics] = await Promise.all([getPublicSponsorLineup(now), getSiteMetrics()]);
+  const sponsor = sponsorLineup.find((item) => item.status === "active") ?? null;
   const demoQuery = new URLSearchParams();
   if (sponsor) {
     demoQuery.set("sponsor", sponsor.name);
@@ -94,7 +95,7 @@ export default async function Page({
             </p>
           )}
         </div>
-        <aside className="hero-mock" aria-hidden="true">
+        <aside className="hero-mock">
           <div className="mock-win">
             <div className="mock-bar">
               <span className="mock-dot" />
@@ -102,7 +103,16 @@ export default async function Page({
               <span className="mock-dot" />
               <span className="mock-title">◍ your city</span>
             </div>
-            <div className="mock-city" dangerouslySetInnerHTML={{ __html: HERO_CITY }} />
+            <div className="mock-city">
+              <div aria-hidden="true" dangerouslySetInnerHTML={{ __html: HERO_CITY }} />
+              {sponsor && (
+                <a className="hero-city-flight" href={sponsor.url} target="_blank" rel="sponsored noopener noreferrer" aria-label={`Sponsored flight: ${sponsor.name}`}>
+                  <span className="airship-tail" aria-hidden="true" />
+                  <span className="airship-envelope"><strong>{sponsor.name}</strong></span>
+                  <span className="airship-gondola" aria-hidden="true" />
+                </a>
+              )}
+            </div>
             <div className="mock-cap">grows in the corner while you code</div>
           </div>
         </aside>
@@ -415,7 +425,7 @@ export default async function Page({
         </p>
       </section>
 
-      <SponsorDock sponsor={sponsor} metrics={siteMetrics} />
+      <SponsorDock sponsor={sponsor} lineup={sponsorLineup} metrics={siteMetrics} />
 
       <p className="foot">
         TOKENTOWN — leaderboard · season {cur} in progress · data at{" "}

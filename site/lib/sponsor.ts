@@ -1,5 +1,6 @@
 export const SPONSOR_PRICE_CENTS = 200;
 export const SPONSOR_DURATION_MS = 24 * 60 * 60 * 1000;
+export const SPONSOR_GAP_MS = 30 * 60 * 1000;
 
 export type SponsorStatus =
   | "draft"
@@ -29,6 +30,7 @@ export type SponsorCampaign = {
 };
 
 export type PublicSponsor = Pick<SponsorCampaign, "id" | "name" | "tagline" | "url" | "startsAt" | "endsAt">;
+export type PublicSponsorSlot = PublicSponsor & { status: "active" | "scheduled" };
 
 export type SponsorDraft = Pick<SponsorCampaign, "name" | "tagline" | "url" | "email">;
 
@@ -64,7 +66,11 @@ export function nextSponsorWindow(campaigns: SponsorCampaign[], now = Date.now()
   let startsAt = now;
   for (const c of campaigns) {
     const status = effectiveSponsorStatus(c, now);
-    if ((status === "scheduled" || status === "active") && c.endsAt && c.endsAt > startsAt) startsAt = c.endsAt;
+    if (
+      (status === "scheduled" || status === "active" || status === "completed") &&
+      c.endsAt &&
+      c.endsAt + SPONSOR_GAP_MS > startsAt
+    ) startsAt = c.endsAt + SPONSOR_GAP_MS;
   }
   return { startsAt, endsAt: startsAt + SPONSOR_DURATION_MS };
 }
