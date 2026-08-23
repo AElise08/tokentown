@@ -17,7 +17,9 @@ test("public brand uses NORTOWN at the nort.works root domain", () => {
   const cli = read("../cli/cli.js");
   assert.match(layout, /https:\/\/nort\.works/);
   assert.match(layout, /title: "NORTOWN — leaderboard"/);
-  assert.match(page, /> NORTOWN /);
+  assert.match(page, />✦<\/span> NORTOWN/);
+  assert.match(page, /className="hero-cta"[^>]*>build your city/);
+  assert.doesNotMatch(page, /◍/);
   assert.match(cli, /const DEFAULT_URL = "https:\/\/nort\.works\/api\/report"/);
   assert.match(cli, /LEGACY_DEFAULT_URL/);
 });
@@ -116,7 +118,7 @@ test("sponsored flights stay site-only and do not track per-ad impressions or cl
   const privacy = read("app/privacy/page.tsx");
   assert.match(page, /<SponsorDock\s+sponsor=\{sponsor\}\s+lineup=\{sponsorLineup\}\s+metrics=\{siteMetrics\}/);
   assert.match(dock, /put your site in the sky · \$2/);
-  assert.match(dock, /flight board/);
+  assert.match(dock, /departures/);
   assert.match(dock, /individual ad impressions and clicks are not tracked/);
   assert.match(game, /sponsorName/);
   assert.match(privacy, /does not create browsing profiles or track individual/);

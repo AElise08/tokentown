@@ -7,7 +7,7 @@
 // que o satori/resvg do next/og rasteriza). Usa cityName/motto/accent do perfil.
 //
 // NOTA satori: a fonte embutida é só latina, então evitamos glifos fora dela
-// (a marca ◍ vira um anel desenhado com <div>); e TODA <div> com mais de um
+// (a estrela da marca é um SVG); e TODA <div> com mais de um
 // filho precisa de display:flex explícito.
 //
 // Módulo compartilhado por opengraph-image.tsx e twitter-image.tsx (mesma arte).
@@ -30,18 +30,13 @@ const MUTE = "#91a8bb";
 const FAINT = "#526b80";
 const TEAL = "#6ce5ee";
 
-// marca ◍ NORTOWN desenhada (anel) — sem depender de glifo/fonte externa.
+// Estrela do norte desenhada — sem depender de glifo/fonte externa.
 function brandMark(color: string, d = 26) {
   return (
-    <div
-      style={{
-        display: "flex",
-        width: d,
-        height: d,
-        borderRadius: d,
-        border: `${Math.max(2, Math.round(d / 8))}px solid ${color}`,
-      }}
-    />
+    <svg width={d} height={d} viewBox="0 0 24 24">
+      <path d="M12 0l2.15 9.85L24 12l-9.85 2.15L12 24l-2.15-9.85L0 12l9.85-2.15L12 0z" fill={color} />
+      <circle cx="12" cy="12" r="2" fill={VOID} />
+    </svg>
   );
 }
 

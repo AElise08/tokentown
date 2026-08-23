@@ -1025,7 +1025,7 @@ function line(s) {
 
 function banner() {
   line("");
-  line("  " + gold("▛▀▖") + " " + bold("NORTOWN") + "  " + dim("where prompts become skyline"));
+  line("  " + gold("✦") + " " + bold("NORTOWN") + "  " + dim("where prompts become skyline"));
   line("");
 }
 

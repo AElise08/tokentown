@@ -71,7 +71,7 @@ export default async function UserPage({
           &lsaquo; back to the leaderboard
         </a>
         <section className="ucard empty-city">
-          <div className="uhandle">◍ {u}</div>
+          <div className="uhandle">✦ {u}</div>
           <p className="lede">
             No city for <b>{u}</b> in season {season} yet. Either the name is different, or this
             person hasn&apos;t reported this season.
@@ -217,7 +217,7 @@ export default async function UserPage({
 
       <header className="uhead">
         <div className="eyebrow">
-          <span className="mark">◍</span> {u} · profile
+          <span className="mark" aria-hidden="true">✦</span> {u} · profile
         </div>
         <h1 className={`uh1${isAlbum && isChampion ? " champ" : ""}`}>
           {isAlbum && isChampion && (

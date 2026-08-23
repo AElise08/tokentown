@@ -73,10 +73,13 @@ export default function SponsorDock({
 
   return (
     <>
-      <aside className="sponsor-lineup" aria-label="Sponsored flight schedule">
+      <aside className="sponsor-lineup" aria-label="NORTOWN departures board">
         <div className="lineup-head">
-          <span><i aria-hidden="true" /> flight board</span>
-          <button type="button" onClick={() => dialog.current?.showModal()}>$2 · 24h</button>
+          <span className="lineup-title">
+            <small>NORTOWN AIR</small>
+            <b><i aria-hidden="true" /> departures</b>
+          </span>
+          <button type="button" onClick={() => dialog.current?.showModal()}>fly · $2</button>
         </div>
         <ol>
           {lineup.map((slot, index) => (
@@ -98,7 +101,7 @@ export default function SponsorDock({
             </li>
           )}
         </ol>
-        <div className="lineup-gap"><span aria-hidden="true">☾</span> 30 min reset between 24h flights</div>
+        <div className="lineup-gap"><span aria-hidden="true">☾</span> 30 min runway reset between 24h flights</div>
       </aside>
 
       <aside className="sponsor-dock" aria-label="NORTOWN sponsor">
@@ -126,10 +129,10 @@ export default function SponsorDock({
       }}>
         <form onSubmit={submit}>
           <div className="sponsor-dialog-head">
-            <div><span>◍</span> launch a sponsored flight</div>
+            <div><span>✦</span> launch a sponsored flight</div>
             <button type="button" aria-label="Close" onClick={() => dialog.current?.close()}>×</button>
           </div>
-          <p>Your name flies inside NORTOWN&apos;s cities and appears on the flight board for 24 hours after approval.</p>
+          <p>Your name flies inside NORTOWN&apos;s cities and appears on the departures board for 24 hours after approval.</p>
           <label>Site name <input name="name" required maxLength={18} placeholder="Linear" /></label>
           <label>Short line <input name="tagline" required maxLength={60} placeholder="Issue tracking built for speed" /></label>
           <label>Destination <input name="url" required type="url" pattern="https://.*" placeholder="https://linear.app/" /></label>

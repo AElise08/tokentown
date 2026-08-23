@@ -79,14 +79,19 @@ export default async function Page({
       <SiteViewTracker />
       <header className="hero">
         <div className="hero-copy">
-          <div className="eyebrow">Token city · community leaderboard</div>
+          <div className="eyebrow">where prompts become skyline</div>
           <h1>
-            <span className="mark">◍</span> NORTOWN <span className="sub">— leaderboard</span>
+            <span className="mark" aria-hidden="true">✦</span> NORTOWN
           </h1>
           <p className="lede">
-            Every token your AI burns raises a building — here&apos;s who built the biggest city this
-            season. <a href="#why">How it works &rsaquo;</a>
+            Your AI work becomes a living pixel city. Build yours locally and take your place in
+            this season&apos;s skyline.
           </p>
+          <div className="hero-actions">
+            <a className="hero-cta" href="#get">build your city <span aria-hidden="true">→</span></a>
+            <code className="hero-command">npx tokentown schedule</code>
+            <a className="hero-how" href="#why">how it works</a>
+          </div>
           {headline && (
             <p className="burn" aria-label="Estimated annualized cost of the season's biggest cities">
               the top {headline.topN} devs here burn <span className="burn-val">≈ {headline.label}/yr</span>{" "}
@@ -101,7 +106,7 @@ export default async function Page({
               <span className="mock-dot" />
               <span className="mock-dot" />
               <span className="mock-dot" />
-              <span className="mock-title">◍ your city</span>
+              <span className="mock-title">✦ your city</span>
             </div>
             <div className="mock-city">
               <div aria-hidden="true" dangerouslySetInnerHTML={{ __html: HERO_CITY }} />
