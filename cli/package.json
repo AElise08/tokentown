@@ -1,6 +1,6 @@
 {
   "name": "tokentown",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Turn local Claude Code, Codex and OpenCode usage into a TOKENTOWN pixel city.",
   "bin": {
     "tokentown": "cli.js"

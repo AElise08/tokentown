@@ -60,6 +60,9 @@ export type ReportInput = {
   cost: number;
   residents: number;
   buildings: number;
+  // Identifica a familia do contador absoluto. Quando o algoritmo/leitor muda,
+  // o servidor ancora a nova base e passa a aplicar somente seus deltas.
+  counterId?: unknown;
   city?: unknown; // payload BRUTO da cidade real; sanitizado aqui dentro.
   profile?: unknown; // payload BRUTO do perfil (cityName/motto/accent); sanitizado aqui dentro.
   setup?: unknown; // payload BRUTO do setup (skills/mcp/hooks/tools/models); sanitizado aqui dentro.
@@ -67,7 +70,7 @@ export type ReportInput = {
 };
 
 export type ReportResult =
-  | { ok: true; status: 200; updated: boolean; entry: Entry }
+  | { ok: true; status: 200; updated: boolean; rebased: boolean; entry: Entry }
   | { ok: false; status: 400 | 403 | 429; error: string };
 
 // ---------------------------------------------------------------------------
@@ -423,11 +426,38 @@ export function __resetStoreForTests(): void {
 // SANITIZAÇÃO
 // ---------------------------------------------------------------------------
 const USERNAME_RE = /^[a-z0-9-]{2,24}$/;
+const COUNTER_ID_RE = /^[a-z0-9][a-z0-9._-]{0,47}$/;
 
 export function sanitizeUsername(raw: unknown): string | null {
   if (typeof raw !== "string") return null;
   const u = raw.trim().toLowerCase();
   return USERNAME_RE.test(u) ? u : null;
+}
+
+function sanitizeCounterId(raw: unknown): string | null {
+  if (raw == null || raw === "") return null;
+  if (typeof raw !== "string") return null;
+  const id = raw.trim().toLowerCase();
+  return COUNTER_ID_RE.test(id) ? id : null;
+}
+
+type CounterCheckpoint = {
+  id: string;
+  tokens: number;
+  cost: number;
+  residents: number;
+  buildings: number;
+};
+
+function parseCounterCheckpoint(h: Record<string, string | number> | null): CounterCheckpoint | null {
+  if (!h || typeof h.counterId !== "string" || !COUNTER_ID_RE.test(h.counterId)) return null;
+  return {
+    id: h.counterId,
+    tokens: Number(h.counterTokens) || 0,
+    cost: Number(h.counterCost) || 0,
+    residents: Number(h.counterResidents) || 0,
+    buildings: Number(h.counterBuildings) || 0,
+  };
 }
 
 function num(raw: unknown, cap: number): number | null {
@@ -637,6 +667,10 @@ export async function submitReport(input: ReportInput): Promise<ReportResult> {
   if (tokens === null || cost === null || residents === null || buildings === null)
     return { ok: false, status: 400, error: "números inválidos (não-negativos, finitos)" };
 
+  const counterId = sanitizeCounterId(input.counterId);
+  if (input.counterId != null && input.counterId !== "" && !counterId)
+    return { ok: false, status: 400, error: "counterId inválido" };
+
   // valida temporada — PÓDIO CONGELA. A atual sempre entra; a anterior só nos
   // primeiros 60 min da virada (grace de relógio), depois o pódio velho está
   // trancado -> 400 "temporada encerrada". A seguinte só com relógio adiantado.
@@ -668,7 +702,9 @@ export async function submitReport(input: ReportInput): Promise<ReportResult> {
   // SNAPSHOT monotônico por campo. Isso é importante quando um leitor novo
   // aprende a calcular custo/modelos históricos: o custo pode sair de zero
   // mesmo sem que o total de tokens tenha mudado desde o último report.
-  const prev = parseEntry(username, await db.hgetall(kUser(season, username)));
+  const prevHash = await db.hgetall(kUser(season, username));
+  const prev = parseEntry(username, prevHash);
+  const checkpoint = parseCounterCheckpoint(prevHash);
   // merge do patch sobre o profile guardado (aplica-se mesmo em report sem
   // crescimento — trocar/limpar o lema não exige queimar mais tokens).
   const mergedProfile = mergeProfile(prev?.profile ?? null, patch);
@@ -692,10 +728,47 @@ export async function submitReport(input: ReportInput): Promise<ReportResult> {
   // mesmo sem crescimento de tokens (a semana muda de dia sem novo total).
   const daily = sanitizeDailyTokens(input.dailyTokens, now);
 
-  const nextTokens = prev ? Math.max(prev.tokens, tokens) : tokens;
-  const nextCost = prev ? Math.max(prev.cost, cost) : cost;
-  const nextResidents = prev ? Math.max(prev.residents, residents) : residents;
-  const nextBuildings = prev ? Math.max(prev.buildings, buildings) : buildings;
+  // Um snapshot sem counterId mantém o contrato legado (máximo absoluto). Com
+  // counterId, o primeiro snapshot ancora a base. Os seguintes aplicam somente
+  // o crescimento desde o checkpoint — assim uma versão nova do leitor pode
+  // começar abaixo do total histórico sem deixar o perfil congelado até
+  // alcançá-lo. Se os arquivos locais forem podados e o contador cair, apenas
+  // reancoramos; nunca subtraímos do placar.
+  const continuingCounter = !!(
+    prev &&
+    counterId &&
+    checkpoint &&
+    checkpoint.id === counterId
+  );
+  const counterReset = !!(
+    continuingCounter &&
+    checkpoint &&
+    (tokens < checkpoint.tokens ||
+      cost < checkpoint.cost ||
+      residents < checkpoint.residents ||
+      buildings < checkpoint.buildings)
+  );
+  const rebased = !!(prev && counterId && (!continuingCounter || counterReset));
+  const nextTokens = !prev
+    ? tokens
+    : continuingCounter && checkpoint
+      ? prev.tokens + Math.max(0, tokens - checkpoint.tokens)
+      : Math.max(prev.tokens, tokens);
+  const nextCost = !prev
+    ? cost
+    : continuingCounter && checkpoint
+      ? prev.cost + Math.max(0, cost - checkpoint.cost)
+      : Math.max(prev.cost, cost);
+  const nextResidents = !prev
+    ? residents
+    : continuingCounter && checkpoint
+      ? prev.residents + Math.max(0, residents - checkpoint.residents)
+      : Math.max(prev.residents, residents);
+  const nextBuildings = !prev
+    ? buildings
+    : continuingCounter && checkpoint
+      ? prev.buildings + Math.max(0, buildings - checkpoint.buildings)
+      : Math.max(prev.buildings, buildings);
   const numbersChanged =
     !prev ||
     nextTokens > prev.tokens ||
@@ -716,6 +789,13 @@ export async function submitReport(input: ReportInput): Promise<ReportResult> {
     if (city) fields.city = JSON.stringify(city);
     if (profileWrite !== null) fields.profile = profileWrite;
     if (setupWrite !== undefined) fields.setup = setupWrite;
+    if (counterId) {
+      fields.counterId = counterId;
+      fields.counterTokens = tokens;
+      fields.counterCost = cost;
+      fields.counterResidents = residents;
+      fields.counterBuildings = buildings;
+    }
     await db.hset(kUser(season, username), fields);
     if (!prev || nextTokens > prev.tokens) await db.zadd(kRank(season), nextTokens, username);
     // alta-marca do dia (pra ranking por janela).
@@ -733,7 +813,7 @@ export async function submitReport(input: ReportInput): Promise<ReportResult> {
       profile: mergedProfile,
       setup: effectiveSetup,
     };
-    return { ok: true, status: 200, updated: true, entry };
+    return { ok: true, status: 200, updated: true, rebased, entry };
   }
 
   // report atrasado / sem crescimento -> mantém os números, mas ainda aplica o
@@ -741,6 +821,13 @@ export async function submitReport(input: ReportInput): Promise<ReportResult> {
   const tailFields: Record<string, string | number> = {};
   if (profileWrite !== null) tailFields.profile = profileWrite;
   if (setupWrite !== undefined) tailFields.setup = setupWrite;
+  if (counterId) {
+    tailFields.counterId = counterId;
+    tailFields.counterTokens = tokens;
+    tailFields.counterCost = cost;
+    tailFields.counterResidents = residents;
+    tailFields.counterBuildings = buildings;
+  }
   if (Object.keys(tailFields).length) await db.hset(kUser(season, username), tailFields);
   await recordDailySnapshot(db, season, username, prev.tokens, prev.cost, now);
   // BREAKDOWN DIÁRIO: back-data mesmo sem crescimento (a semana avança de dia).
@@ -749,6 +836,7 @@ export async function submitReport(input: ReportInput): Promise<ReportResult> {
     ok: true,
     status: 200,
     updated: false,
+    rebased,
     entry: { ...prev, profile: mergedProfile, setup: effectiveSetup },
   };
 }

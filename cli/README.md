@@ -2,7 +2,7 @@
 
 Put your city on the [TOKENTOWN](https://tokentown-gamma.vercel.app) leaderboard from the terminal. No permanent npm install is required.
 
-TOKENTOWN turns local **Claude Code, Codex and OpenCode** usage into a pixel city. Every run backfills the current season, so usage is not lost while the reporter is closed.
+TOKENTOWN turns local **Claude Code, Codex and OpenCode** usage into a pixel city. Every run backfills the current season, so usage is not lost while the reporter is closed. The server checkpoints this reader's absolute counter and applies subsequent growth as a delta, so upgrading from an older counter cannot freeze a city at a higher historical baseline.
 
 ## Commands
 

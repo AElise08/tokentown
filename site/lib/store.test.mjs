@@ -52,6 +52,80 @@ test("custo e residentes avançam mesmo quando os tokens não mudam", async () =
   assert.equal(r.entry.residents, 4);
 });
 
+test("counterId ancora leitor novo abaixo do histórico e depois soma apenas o delta", async () => {
+  __resetStoreForTests();
+  const s = currentSeasonId();
+  const u = "counter-rebase";
+  const key = "k".repeat(16);
+
+  // Total legado alto, produzido por outro algoritmo/leitor.
+  let r = await submitReport({
+    username: u, key, seasonId: s,
+    tokens: 60_000_000, cost: 446, residents: 42, buildings: 10_002,
+  });
+  assert.equal(r.ok, true);
+  clearRate(u);
+
+  // O novo leitor começa abaixo: preserva o histórico, mas ancora sua base.
+  r = await submitReport({
+    username: u, key, seasonId: s, counterId: "cli-aggregate-v1",
+    tokens: 21_000_000, cost: 240, residents: 40, buildings: 3_502,
+  });
+  assert.equal(r.ok, true);
+  assert.equal(r.updated, false);
+  assert.equal(r.rebased, true);
+  assert.equal(r.entry.tokens, 60_000_000);
+  assert.equal(r.entry.cost, 446);
+  clearRate(u);
+
+  // Só o crescimento desde a nova base entra no total público.
+  r = await submitReport({
+    username: u, key, seasonId: s, counterId: "cli-aggregate-v1",
+    tokens: 21_043_770, cost: 241.09, residents: 41, buildings: 3_509,
+  });
+  assert.equal(r.ok, true);
+  assert.equal(r.updated, true);
+  assert.equal(r.rebased, false);
+  assert.equal(r.entry.tokens, 60_043_770);
+  assert.ok(Math.abs(r.entry.cost - 447.09) < 1e-9);
+  assert.equal(r.entry.residents, 43);
+  assert.equal(r.entry.buildings, 10_009);
+
+  // Repetir o mesmo snapshot é idempotente.
+  clearRate(u);
+  r = await submitReport({
+    username: u, key, seasonId: s, counterId: "cli-aggregate-v1",
+    tokens: 21_043_770, cost: 241.09, residents: 41, buildings: 3_509,
+  });
+  assert.equal(r.updated, false);
+  assert.equal(r.entry.tokens, 60_043_770);
+});
+
+test("counterId reancora uma queda local sem subtrair nem repetir crescimento", async () => {
+  __resetStoreForTests();
+  const s = currentSeasonId();
+  const u = "counter-reset";
+  const key = "k".repeat(16);
+  const base = {
+    username: u, key, seasonId: s, counterId: "cli-aggregate-v1",
+    cost: 10, residents: 2, buildings: 20,
+  };
+
+  let r = await submitReport({ ...base, tokens: 100_000 });
+  assert.equal(r.entry.tokens, 100_000);
+  clearRate(u);
+  r = await submitReport({ ...base, tokens: 40_000, cost: 4, residents: 1, buildings: 8 });
+  assert.equal(r.updated, false);
+  assert.equal(r.rebased, true);
+  assert.equal(r.entry.tokens, 100_000);
+  clearRate(u);
+  r = await submitReport({ ...base, tokens: 45_000, cost: 5, residents: 1, buildings: 9 });
+  assert.equal(r.updated, true);
+  assert.equal(r.entry.tokens, 105_000);
+  assert.equal(r.entry.cost, 11);
+  assert.equal(r.entry.buildings, 21);
+});
+
 test("profile: persiste, e report SEM profile PRESERVA o existente", async () => {
   __resetStoreForTests();
   const s = currentSeasonId();

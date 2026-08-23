@@ -44,6 +44,15 @@ test("Codex cumulative counters are converted to per-event deltas", () => {
   );
 });
 
+test("report payload identifies the absolute counter for server-side rebasing", () => {
+  const payload = cli.buildPayload(
+    { username: "mel", key: "secret", shareSetup: false },
+    { seasonId: 1, tokens: 100, cost: 2, residents: 3, buildings: 4, daily: {} }
+  );
+  assert.equal(payload.counterId, cli.COUNTER_ID);
+  assert.equal(payload.counterId, "cli-aggregate-v1");
+});
+
 test("one season combines Claude Code and Codex without prompt content", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "tokentown-test-"));
   try {

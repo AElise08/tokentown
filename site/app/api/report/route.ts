@@ -68,6 +68,7 @@ export async function POST(req: Request) {
     cost: b.cost as number,
     residents: b.residents as number,
     buildings: b.buildings as number,
+    counterId: b.counterId,
     city: b.city, // payload BRUTO; sanitizado dentro de submitReport
     profile: b.profile, // payload BRUTO do perfil; sanitizado dentro de submitReport
     setup: b.setup, // payload BRUTO do setup; sanitizado dentro de submitReport
@@ -78,7 +79,7 @@ export async function POST(req: Request) {
     return Response.json({ ok: false, error: result.error }, { status: result.status });
   }
   return Response.json(
-    { ok: true, updated: result.updated, entry: result.entry },
+    { ok: true, updated: result.updated, rebased: result.rebased, entry: result.entry },
     { status: 200 }
   );
 }

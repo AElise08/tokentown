@@ -27,6 +27,10 @@ const childProcess = require("child_process");
 
 const DEFAULT_URL = "https://tokentown-gamma.vercel.app/api/report";
 const SITE_ORIGIN = "https://tokentown-gamma.vercel.app";
+// Stable identity for this absolute season counter. The server checkpoints it
+// and applies later deltas, so older totals from a different reader never keep
+// a profile frozen after the local aggregation algorithm changes.
+const COUNTER_ID = "cli-aggregate-v1";
 
 function usagePaths(home) {
   home = home || os.homedir();
@@ -1102,6 +1106,7 @@ function buildPayload(cfg, data) {
     cost: Number(data.cost) >= 0 ? Number(data.cost) : 0,
     residents: nonNeg(data.residents),
     buildings: nonNeg(data.buildings),
+    counterId: COUNTER_ID,
   };
   const profile = shapeProfile(cfg);
   if (profile) payload.profile = profile;
@@ -1252,7 +1257,13 @@ async function loadOrOnboard(p) {
 function reportResultLine(cfg, r) {
   if (r.ok && r.status === 200) {
     const updated = r.json && r.json.updated;
-    line("  " + green("✓ reported") + dim(" (HTTP 200" + (updated === false ? ", no change — already up to date" : "") + ")"));
+    const rebased = r.json && r.json.rebased;
+    const note = rebased && updated === false
+      ? ", counter synchronized — future growth will update"
+      : updated === false
+        ? ", no change — already up to date"
+        : "";
+    line("  " + green("✓ reported") + dim(" (HTTP 200" + note + ")"));
     return true;
   }
   if (r.status === 429) {
@@ -1671,4 +1682,5 @@ module.exports = {
   scheduleStatus,
   DEFAULT_URL,
   SITE_ORIGIN,
+  COUNTER_ID,
 };
