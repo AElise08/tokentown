@@ -24,6 +24,26 @@ test("public brand uses NORTOWN at the nort.works root domain", () => {
   assert.match(cli, /LEGACY_DEFAULT_URL/);
 });
 
+test("production responses use security headers and health exposes no environment diagnostics", () => {
+  const config = read("next.config.js");
+  const health = read("app/api/health/route.ts");
+  assert.match(config, /poweredByHeader:\s*false/);
+  assert.match(config, /Content-Security-Policy/);
+  assert.match(config, /X-Content-Type-Options/);
+  assert.match(config, /Permissions-Policy/);
+  assert.doesNotMatch(health, /redisEnvKeys|getUserSnaps|searchParams/);
+});
+
+test("sponsor sales stay disabled until the explicit production flag and credentials exist", () => {
+  const stripe = read("lib/stripe.ts");
+  const checkout = read("app/api/sponsors/checkout/route.ts");
+  assert.match(stripe, /SPONSOR_SALES_ENABLED\s*===\s*["']1["']/);
+  assert.match(stripe, /STRIPE_WEBHOOK_SECRET/);
+  assert.match(checkout, /sponsorSalesEnabled\(\)/);
+  assert.match(checkout, /reserveSponsorCheckout/);
+  assert.match(checkout, /deleteSponsorDraft/);
+});
+
 // ---------------------------------------------------------------------------
 // BOARD AUTO-REFRESH — the "/" board keeps itself fresh with a client component.
 // ---------------------------------------------------------------------------
@@ -116,7 +136,7 @@ test("sponsored flights stay site-only and do not track per-ad impressions or cl
   const dock = read("app/SponsorDock.tsx");
   const game = read("public/demo/isometric-city.js");
   const privacy = read("app/privacy/page.tsx");
-  assert.match(page, /<SponsorDock\s+sponsor=\{sponsor\}\s+lineup=\{sponsorLineup\}\s+metrics=\{siteMetrics\}/);
+  assert.match(page, /<SponsorDock[\s\S]*sponsor=\{sponsor\}[\s\S]*lineup=\{sponsorLineup\}[\s\S]*salesEnabled=\{salesEnabled\}/);
   assert.match(dock, /put your site in the sky · \$2/);
   assert.match(dock, /departures/);
   assert.match(dock, /individual ad impressions and clicks are not tracked/);

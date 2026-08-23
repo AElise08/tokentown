@@ -12,6 +12,7 @@ import {
   sanitizeDailyTokens,
   recordSiteView,
   getSiteMetrics,
+  reserveSiteView,
   createSponsorCampaign,
   attachSponsorCheckout,
   markSponsorPaid,
@@ -19,6 +20,12 @@ import {
   getActiveSponsor,
   getPublicSponsorLineup,
   listSponsorCampaigns,
+  cleanupSponsorCampaigns,
+  reserveSponsorCheckout,
+  reserveSponsorAdminAttempt,
+  deleteSponsorDraft,
+  pauseSponsorCampaign,
+  resumeSponsorCampaign,
 } from "./store.ts";
 import { currentSeasonId } from "./season.ts";
 import { utcDayKey } from "./window.ts";
@@ -416,6 +423,16 @@ test("site metrics count aggregate visitors separately from pageviews", async ()
   assert.deepEqual(await getSiteMetrics(), { visitors: 2, pageviews: 3 });
 });
 
+test("site view rate limit stores only a short private hash", async () => {
+  __resetStoreForTests();
+  const session = "12345678-1234-1234-1234-123456789abc";
+  assert.equal(await reserveSiteView(session), true);
+  assert.equal(await reserveSiteView(session), false);
+  const keys = [...globalThis.__ttpMem.expires.keys()];
+  assert.ok(keys.some((key) => key.startsWith("tt:site:view-rate:")));
+  assert.ok(keys.every((key) => !key.includes(session)));
+});
+
 test("sponsor payment is idempotent and approval schedules a 24-hour flight", async () => {
   __resetStoreForTests();
   const c = await createSponsorCampaign({
@@ -446,4 +463,51 @@ test("sponsor payment is idempotent and approval schedules a 24-hour flight", as
   const lineup = await getPublicSponsorLineup(now + 200);
   assert.deepEqual(lineup.map((item) => [item.name, item.status]), [["Linear", "active"], ["Vercel", "scheduled"]]);
   assert.ok(!("email" in lineup[0]), "public lineup must not expose receipt emails");
+});
+
+test("sponsor checkout is rate-limited by a private email hash", async () => {
+  __resetStoreForTests();
+  assert.equal(await reserveSponsorCheckout("hello@example.com"), true);
+  assert.equal(await reserveSponsorCheckout("HELLO@example.com"), false);
+  const m = globalThis.__ttpMem;
+  assert.ok([...m.expires.keys()].every((key) => !key.includes("hello@example.com")));
+});
+
+test("failed sponsor admin attempts have a short abuse-prevention cooldown", async () => {
+  __resetStoreForTests();
+  assert.equal(await reserveSponsorAdminAttempt("203.0.113.4"), true);
+  assert.equal(await reserveSponsorAdminAttempt("203.0.113.4"), false);
+  assert.equal(await reserveSponsorAdminAttempt("203.0.113.5"), true);
+});
+
+test("abandoned sponsor drafts are removable immediately or after retention", async () => {
+  __resetStoreForTests();
+  const first = await createSponsorCampaign({
+    name: "Draft", tagline: "Never checked out", url: "https://draft.example/", email: "draft@example.com",
+  });
+  assert.equal(await deleteSponsorDraft(first.id), true);
+  assert.equal(await deleteSponsorDraft(first.id), false);
+
+  const stale = await createSponsorCampaign({
+    name: "Stale", tagline: "Old checkout", url: "https://stale.example/", email: "stale@example.com",
+  });
+  assert.equal(await cleanupSponsorCampaigns(stale.createdAt + 24 * DAY_MS + 1), 1);
+  assert.equal((await listSponsorCampaigns(stale.createdAt + 24 * DAY_MS + 1)).length, 0);
+});
+
+test("paused sponsor flights resume with their unspent time", async () => {
+  __resetStoreForTests();
+  const campaign = await createSponsorCampaign({
+    name: "Pause", tagline: "Take a breath", url: "https://pause.example/", email: "pause@example.com",
+  });
+  await attachSponsorCheckout(campaign.id, "cs_pause");
+  await markSponsorPaid({ id: campaign.id, checkoutSessionId: "cs_pause" });
+  const now = Date.now();
+  const approved = await approveSponsorCampaign(campaign.id, now);
+  const paused = await pauseSponsorCampaign(campaign.id, now + 60_000);
+  assert.equal(paused.status, "paused");
+  assert.equal(paused.remainingMs, approved.endsAt - now - 60_000);
+  const resumed = await resumeSponsorCampaign(campaign.id, now + 120_000);
+  assert.equal(resumed.status, "active");
+  assert.equal(resumed.endsAt - resumed.startsAt, paused.remainingMs);
 });

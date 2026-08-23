@@ -14,6 +14,11 @@ export const metadata: Metadata = {
     siteName: "NORTOWN",
     type: "website",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "NORTOWN — leaderboard",
+    description: "Every token your AI agents burn becomes a building. Build your city and join the season leaderboard.",
+  },
 };
 
 export const viewport: Viewport = {

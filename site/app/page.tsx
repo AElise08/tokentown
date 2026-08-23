@@ -1,4 +1,5 @@
-import { getLeaderboard, getPublicSponsorLineup, getSiteMetrics, type WindowKind } from "@/lib/store";
+import { getLeaderboard, getPublicSponsorLineup, getSiteMetrics, getSponsorAvailability, type WindowKind } from "@/lib/store";
+import { sponsorSalesEnabled } from "@/lib/stripe";
 import { currentSeasonId, daysRemaining, seasonRange, projectAnnualCost, isFinale } from "@/lib/season";
 import { formatCount, formatCost, formatAgo, formatAnnualCost, formatDate } from "@/lib/format";
 import { citySvg } from "@/lib/city";
@@ -34,7 +35,12 @@ export default async function Page({
   const window: WindowKind = isCurrent && sp?.window === "7d" ? "7d" : "season";
 
   const now = Date.now();
-  const [sponsorLineup, siteMetrics] = await Promise.all([getPublicSponsorLineup(now), getSiteMetrics()]);
+  const [sponsorLineup, siteMetrics, sponsorAvailability] = await Promise.all([
+    getPublicSponsorLineup(now),
+    getSiteMetrics(),
+    getSponsorAvailability(now),
+  ]);
+  const salesEnabled = sponsorSalesEnabled();
   const sponsor = sponsorLineup.find((item) => item.status === "active") ?? null;
   const demoQuery = new URLSearchParams();
   if (sponsor) {
@@ -430,7 +436,13 @@ export default async function Page({
         </p>
       </section>
 
-      <SponsorDock sponsor={sponsor} lineup={sponsorLineup} metrics={siteMetrics} />
+      <SponsorDock
+        sponsor={sponsor}
+        lineup={sponsorLineup}
+        metrics={siteMetrics}
+        salesEnabled={salesEnabled}
+        nextAvailableAt={sponsorAvailability.startsAt}
+      />
 
       <p className="foot">
         NORTOWN — leaderboard · season {cur} in progress · data at{" "}

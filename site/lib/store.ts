@@ -18,6 +18,10 @@ import {
   effectiveSponsorStatus,
   nextSponsorWindow,
   sanitizeSponsorDraft,
+  SPONSOR_DRAFT_RETENTION_MS,
+  SPONSOR_DURATION_MS,
+  SPONSOR_GAP_MS,
+  SPONSOR_HISTORY_RETENTION_MS,
   toPublicSponsor,
   type PublicSponsor,
   type PublicSponsorSlot,
@@ -437,6 +441,14 @@ const kRate = (u: string) => `rl:${u}`; // rate limit
 const K_USERS = "users"; // HASH username -> keyHash
 const K_SITE_METRICS = "tt:site:metrics";
 const K_SPONSORS = "tt:sponsors:campaigns";
+const K_SPONSOR_SCHEDULE_LOCK = "tt:sponsors:schedule-lock";
+const kSponsorCheckoutRate = (email: string) =>
+  `tt:sponsors:checkout-rate:${createHash("sha256").update(email).digest("hex").slice(0, 32)}`;
+const shortPrivateHash = (scope: string, value: string) =>
+  createHash("sha256")
+    .update(`${scope}:${process.env.SPONSOR_ADMIN_KEY || "local"}:${value}`)
+    .digest("hex")
+    .slice(0, 32);
 
 // Reset do storage EM MEMÓRIA — só pra testes de lib (limpa maps e cache do KV).
 export function __resetStoreForTests(): void {
@@ -600,6 +612,11 @@ export async function getSiteMetrics(): Promise<SiteMetrics> {
   return { visitors: Number(h?.visitors) || 0, pageviews: Number(h?.pageviews) || 0 };
 }
 
+export async function reserveSiteView(sessionId: string): Promise<boolean> {
+  if (!/^[a-f0-9-]{20,64}$/i.test(sessionId)) return false;
+  return kv().setNxEx(`tt:site:view-rate:${shortPrivateHash("view", sessionId)}`, "1", 5);
+}
+
 function parseSponsorCampaign(raw: string | number | undefined): SponsorCampaign | null {
   if (typeof raw !== "string") return null;
   try {
@@ -614,13 +631,42 @@ async function saveSponsorCampaign(c: SponsorCampaign): Promise<void> {
   await kv().hset(K_SPONSORS, { [c.id]: JSON.stringify(c) });
 }
 
+function sponsorCampaignExpired(c: SponsorCampaign, now: number): boolean {
+  const status = effectiveSponsorStatus(c, now);
+  if (status === "draft") return now - c.createdAt > SPONSOR_DRAFT_RETENTION_MS;
+  if (status === "paid" || status === "scheduled" || status === "active") return false;
+  const reference = c.endsAt || c.approvedAt || c.paidAt || c.createdAt;
+  return now - reference > SPONSOR_HISTORY_RETENTION_MS;
+}
+
+export async function cleanupSponsorCampaigns(now = Date.now()): Promise<number> {
+  const db = kv();
+  const h = await db.hgetall(K_SPONSORS);
+  let removed = 0;
+  for (const [id, raw] of Object.entries(h ?? {})) {
+    const campaign = parseSponsorCampaign(raw);
+    if (campaign && sponsorCampaignExpired(campaign, now)) {
+      await db.hdel(K_SPONSORS, id);
+      removed++;
+    }
+  }
+  return removed;
+}
+
 export async function listSponsorCampaigns(now = Date.now()): Promise<SponsorCampaign[]> {
+  await cleanupSponsorCampaigns(now);
   const h = await kv().hgetall(K_SPONSORS);
   return Object.values(h ?? {})
     .map(parseSponsorCampaign)
     .filter((c): c is SponsorCampaign => !!c)
     .map((c) => ({ ...c, status: effectiveSponsorStatus(c, now) }))
-    .sort((a, b) => b.createdAt - a.createdAt);
+    .sort((a, b) => {
+      if (a.status === "paid" && b.status === "paid")
+        return (a.paidAt || a.createdAt) - (b.paidAt || b.createdAt) || a.id.localeCompare(b.id);
+      if (a.status === "paid") return -1;
+      if (b.status === "paid") return 1;
+      return b.createdAt - a.createdAt;
+    });
 }
 
 export async function getSponsorCampaign(id: string): Promise<SponsorCampaign | null> {
@@ -639,6 +685,24 @@ export async function createSponsorCampaign(raw: unknown): Promise<SponsorCampai
   };
   await saveSponsorCampaign(campaign);
   return campaign;
+}
+
+export async function reserveSponsorCheckout(email: string): Promise<boolean> {
+  const normalized = email.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) return false;
+  return kv().setNxEx(kSponsorCheckoutRate(normalized), "1", 60);
+}
+
+export async function reserveSponsorAdminAttempt(fingerprint: string): Promise<boolean> {
+  const value = fingerprint.trim().slice(0, 160) || "unknown";
+  return kv().setNxEx(`tt:sponsors:admin-rate:${shortPrivateHash("admin", value)}`, "1", 3);
+}
+
+export async function deleteSponsorDraft(id: string): Promise<boolean> {
+  const campaign = await getSponsorCampaign(id);
+  if (!campaign || campaign.status !== "draft") return false;
+  await kv().hdel(K_SPONSORS, id);
+  return true;
 }
 
 export async function attachSponsorCheckout(id: string, checkoutSessionId: string): Promise<SponsorCampaign | null> {
@@ -672,25 +736,91 @@ export async function markSponsorPaid(input: {
   return next;
 }
 
+async function withSponsorScheduleLock(
+  task: () => Promise<SponsorCampaign | null>
+): Promise<SponsorCampaign | null> {
+  const db = kv();
+  const locked = await db.setNxEx(K_SPONSOR_SCHEDULE_LOCK, randomUUID(), 15);
+  if (!locked) return null;
+  try {
+    return await task();
+  } finally {
+    await db.del(K_SPONSOR_SCHEDULE_LOCK);
+  }
+}
+
 export async function approveSponsorCampaign(id: string, now = Date.now()): Promise<SponsorCampaign | null> {
-  const c = await getSponsorCampaign(id);
-  if (!c || c.status !== "paid") return null;
-  const all = await listSponsorCampaigns(now);
-  const window = nextSponsorWindow(all.filter((x) => x.id !== id), now);
-  const next: SponsorCampaign = {
-    ...c,
-    status: "scheduled",
-    approvedAt: now,
-    startsAt: window.startsAt,
-    endsAt: window.endsAt,
+  return withSponsorScheduleLock(async () => {
+    const c = await getSponsorCampaign(id);
+    if (!c || c.status !== "paid") return null;
+    const all = await listSponsorCampaigns(now);
+    const queue = all
+      .filter((item) => item.status === "paid")
+      .sort((a, b) =>
+        (a.paidAt || a.createdAt) - (b.paidAt || b.createdAt) || a.id.localeCompare(b.id)
+      );
+    if (queue[0]?.id !== id) return null;
+    const window = nextSponsorWindow(all.filter((x) => x.id !== id), now);
+    const next: SponsorCampaign = {
+      ...c,
+      status: "scheduled",
+      approvedAt: now,
+      startsAt: window.startsAt,
+      endsAt: window.endsAt,
+    };
+    await saveSponsorCampaign(next);
+    return { ...next, status: effectiveSponsorStatus(next, now) };
+  });
+}
+
+export async function getSponsorAvailability(now = Date.now()): Promise<{ startsAt: number; waiting: number }> {
+  const campaigns = await listSponsorCampaigns(now);
+  const base = nextSponsorWindow(campaigns, now);
+  const waiting = campaigns.filter((campaign) => campaign.status === "paid").length;
+  return {
+    startsAt: base.startsAt + waiting * (SPONSOR_DURATION_MS + SPONSOR_GAP_MS),
+    waiting,
   };
+}
+
+export async function pauseSponsorCampaign(id: string, now = Date.now()): Promise<SponsorCampaign | null> {
+  const campaign = await getSponsorCampaign(id);
+  if (!campaign) return null;
+  const status = effectiveSponsorStatus(campaign, now);
+  if (status !== "paid" && status !== "scheduled" && status !== "active") return null;
+  const remainingMs = status === "active" && campaign.endsAt
+    ? Math.max(60_000, campaign.endsAt - now)
+    : SPONSOR_DURATION_MS;
+  const next: SponsorCampaign = { ...campaign, status: "paused", pausedAt: now, remainingMs };
   await saveSponsorCampaign(next);
-  return { ...next, status: effectiveSponsorStatus(next, now) };
+  return next;
+}
+
+export async function resumeSponsorCampaign(id: string, now = Date.now()): Promise<SponsorCampaign | null> {
+  return withSponsorScheduleLock(async () => {
+    const campaign = await getSponsorCampaign(id);
+    if (!campaign || campaign.status !== "paused") return null;
+    const all = await listSponsorCampaigns(now);
+    if (all.some((item) => item.status === "paid")) return null;
+    const window = nextSponsorWindow(all.filter((item) => item.id !== id), now);
+    const duration = Math.max(60_000, Math.min(campaign.remainingMs || SPONSOR_DURATION_MS, SPONSOR_DURATION_MS));
+    const next: SponsorCampaign = {
+      ...campaign,
+      status: "scheduled",
+      approvedAt: now,
+      startsAt: window.startsAt,
+      endsAt: window.startsAt + duration,
+      pausedAt: undefined,
+      remainingMs: undefined,
+    };
+    await saveSponsorCampaign(next);
+    return { ...next, status: effectiveSponsorStatus(next, now) };
+  });
 }
 
 export async function setSponsorStatus(
   id: string,
-  status: "paused" | "rejected" | "refunded",
+  status: "rejected" | "refunded",
   refundId?: string
 ): Promise<SponsorCampaign | null> {
   const c = await getSponsorCampaign(id);

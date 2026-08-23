@@ -1,15 +1,19 @@
-import { SPONSOR_PRICE_CENTS } from "@/lib/sponsor";
+import { sanitizeSponsorDraft, SPONSOR_PRICE_CENTS } from "@/lib/sponsor";
 import {
   attachSponsorCheckout,
   createSponsorCampaign,
+  deleteSponsorDraft,
   markSponsorPaid,
+  reserveSponsorCheckout,
 } from "@/lib/store";
-import { getStripe, siteOrigin } from "@/lib/stripe";
+import { getStripe, siteOrigin, sponsorSalesEnabled } from "@/lib/stripe";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
+  if (!sponsorSalesEnabled())
+    return Response.json({ ok: false, error: "sponsored flights are not on sale yet" }, { status: 503 });
   if (req.headers.get("sec-fetch-site") === "cross-site")
     return Response.json({ ok: false, error: "cross-site request blocked" }, { status: 403 });
   const contentLength = Number(req.headers.get("content-length") || 0);
@@ -27,15 +31,16 @@ export async function POST(req: Request) {
   }
   if (!body || typeof body !== "object" || (body as Record<string, unknown>).accepted !== "on")
     return Response.json({ ok: false, error: "review terms must be accepted" }, { status: 400 });
-  const campaign = await createSponsorCampaign(body);
+  const draft = sanitizeSponsorDraft(body);
+  if (!draft) return Response.json({ ok: false, error: "invalid sponsor details" }, { status: 400 });
+  if (!(await reserveSponsorCheckout(draft.email)))
+    return Response.json({ ok: false, error: "please wait a minute before trying again" }, { status: 429 });
+  const campaign = await createSponsorCampaign(draft);
   if (!campaign) return Response.json({ ok: false, error: "invalid sponsor details" }, { status: 400 });
 
   const stripe = getStripe();
   const origin = siteOrigin(req);
   if (!stripe) {
-    if (process.env.NODE_ENV === "production" && process.env.SPONSOR_DEMO_MODE !== "1") {
-      return Response.json({ ok: false, error: "checkout is not configured yet" }, { status: 503 });
-    }
     const sessionId = `demo_${campaign.id}`;
     await attachSponsorCheckout(campaign.id, sessionId);
     await markSponsorPaid({ id: campaign.id, checkoutSessionId: sessionId, email: campaign.email });
@@ -64,11 +69,15 @@ export async function POST(req: Request) {
       success_url: `${origin}/?sponsor=paid`,
       cancel_url: `${origin}/?sponsor=cancelled`,
     });
-    if (!session.url) return Response.json({ ok: false, error: "checkout unavailable" }, { status: 502 });
+    if (!session.url) {
+      await deleteSponsorDraft(campaign.id);
+      return Response.json({ ok: false, error: "checkout unavailable" }, { status: 502 });
+    }
     await attachSponsorCheckout(campaign.id, session.id);
     return Response.json({ ok: true, url: session.url });
   } catch (error) {
     console.error("sponsor checkout creation failed", error);
+    await deleteSponsorDraft(campaign.id);
     return Response.json({ ok: false, error: "checkout unavailable" }, { status: 502 });
   }
 }

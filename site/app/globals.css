@@ -2084,6 +2084,7 @@ tr.champ td.user .crown {
 .lineup-head i { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 7px rgba(108,229,238,.7); }
 .lineup-head button { flex: 0 0 auto; padding: 4px 6px; border: 1px solid #426783; border-radius: 5px; color: var(--gold); background: #10243a; font: 800 7px/1 var(--mono); cursor: pointer; }
 .lineup-head button:hover { border-color: var(--amber); background: #183450; }
+.lineup-head button:disabled, .lineup-name button:disabled { cursor: default; opacity: .55; }
 .sponsor-lineup ol { display: grid; gap: 6px; margin: 9px 0 0; padding: 0; list-style: none; }
 .sponsor-lineup li { display: grid; grid-template-columns: 38px minmax(0, 1fr); align-items: center; min-height: 42px; overflow: hidden; border: 1px solid #243f56; border-radius: 2px; background: rgba(3,12,22,.34); }
 .sponsor-lineup li.active { border-color: rgba(127,199,191,.34); background: rgba(127, 199, 191, .08); }
@@ -2126,6 +2127,7 @@ tr.champ td.user .crown {
   color: #07111f; background: var(--gold); font: 800 8px/1 var(--mono); letter-spacing: .04em; cursor: pointer;
 }
 .sponsor-launch:hover, .sponsor-pay:hover { background: #eff9ff; }
+.sponsor-launch:disabled { cursor: default; filter: saturate(.35); opacity: .58; }
 .sponsor-notice, .sponsor-error { grid-column: 1 / -1; margin-top: 2px; color: var(--amber); font-size: 8px; line-height: 1.4; }
 
 .sponsor-dialog { width: min(440px, calc(100vw - 28px)); padding: 0; border: 1px solid #31536f; border-radius: 15px; color: var(--ink); background: #0a1624; box-shadow: 0 24px 80px rgba(0,0,0,.7); font-family: var(--mono); }
@@ -2139,6 +2141,7 @@ tr.champ td.user .crown {
 .sponsor-dialog input:focus { border-color: var(--teal); }
 .sponsor-dialog .sponsor-consent { flex-direction: row; align-items: flex-start; color: var(--mute); font-weight: 500; letter-spacing: 0; line-height: 1.4; text-transform: none; }
 .sponsor-consent input { width: auto; margin-top: 1px; }
+.sponsor-consent a { color: var(--teal); }
 .sponsor-price { display: flex; justify-content: space-between; padding: 11px; border: 1px solid #3d3248; border-radius: 8px; color: var(--mute); font-size: 10px; }
 .sponsor-price strong { color: var(--gold); }
 .sponsor-pay { width: 100%; padding: 11px; font-size: 9px; }

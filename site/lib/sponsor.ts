@@ -1,6 +1,8 @@
 export const SPONSOR_PRICE_CENTS = 200;
 export const SPONSOR_DURATION_MS = 24 * 60 * 60 * 1000;
 export const SPONSOR_GAP_MS = 30 * 60 * 1000;
+export const SPONSOR_DRAFT_RETENTION_MS = 24 * 60 * 60 * 1000;
+export const SPONSOR_HISTORY_RETENTION_MS = 90 * 24 * 60 * 60 * 1000;
 
 export type SponsorStatus =
   | "draft"
@@ -27,6 +29,8 @@ export type SponsorCampaign = {
   checkoutSessionId?: string;
   paymentIntentId?: string;
   refundId?: string;
+  pausedAt?: number;
+  remainingMs?: number;
 };
 
 export type PublicSponsor = Pick<SponsorCampaign, "id" | "name" | "tagline" | "url" | "startsAt" | "endsAt">;

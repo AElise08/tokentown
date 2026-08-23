@@ -16,7 +16,7 @@ export default function SponsorAdminPage() {
     setMessage("");
   }
 
-  async function act(id: string, action: "approve" | "reject" | "pause") {
+  async function act(id: string, action: "approve" | "reject" | "pause" | "resume") {
     const res = await fetch("/api/sponsors/admin", {
       method: "POST",
       headers: { "content-type": "application/json", "x-sponsor-admin-key": key },
@@ -49,7 +49,8 @@ export default function SponsorAdminPage() {
             {c.startsAt && <small>{new Date(c.startsAt).toLocaleString()} → {new Date(c.endsAt!).toLocaleString()}</small>}
             <div className="admin-actions">
               {c.status === "paid" && <button onClick={() => act(c.id, "approve")}>Approve & schedule</button>}
-              {!(["rejected", "refunded", "completed", "paused"] as string[]).includes(c.status) &&
+              {c.status === "paused" && <button onClick={() => act(c.id, "resume")}>Resume remaining time</button>}
+              {(["paid", "scheduled", "active"] as string[]).includes(c.status) &&
                 <button onClick={() => act(c.id, "pause")}>Pause</button>}
               {(c.status === "paid" || c.status === "paused") &&
                 <button className="danger" onClick={() => act(c.id, "reject")}>Reject / refund</button>}
