@@ -1,10 +1,10 @@
 #!/bin/bash
-# Compila a casca nativa e monta o TokenTown.app (executável + Info.plist + Resources).
+# Compila a casca nativa e monta o NORTOWN.app (executável legado + Info.plist + Resources).
 # Zero deps de terceiros; usa só o toolchain do sistema (/usr/bin/swift).
 set -euo pipefail
 cd "$(dirname "$0")"
 ROOT="$(pwd)"
-APP="$ROOT/TokenTown.app"
+APP="$ROOT/NORTOWN.app"
 
 echo "==> swift build -c release"
 swift build -c release
@@ -27,8 +27,8 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>CFBundleName</key><string>TokenTown</string>
-  <key>CFBundleDisplayName</key><string>TokenTown</string>
+  <key>CFBundleName</key><string>NORTOWN</string>
+  <key>CFBundleDisplayName</key><string>NORTOWN</string>
   <key>CFBundleIdentifier</key><string>com.mel.tokentown</string>
   <key>CFBundleExecutable</key><string>TokenTown</string>
   <key>CFBundlePackageType</key><string>APPL</string>

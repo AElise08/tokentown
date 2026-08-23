@@ -101,7 +101,7 @@ export default function SponsorDock({
         <div className="lineup-gap"><span aria-hidden="true">☾</span> 30 min reset between 24h flights</div>
       </aside>
 
-      <aside className="sponsor-dock" aria-label="TOKENTOWN sponsor">
+      <aside className="sponsor-dock" aria-label="NORTOWN sponsor">
         <div className="sponsor-bottom-copy">
           <div className="sponsor-cap">{sponsor ? "now flying" : "next sponsored flight"}</div>
           {sponsor ? (
@@ -129,7 +129,7 @@ export default function SponsorDock({
             <div><span>◍</span> launch a sponsored flight</div>
             <button type="button" aria-label="Close" onClick={() => dialog.current?.close()}>×</button>
           </div>
-          <p>Your name flies inside TOKENTOWN&apos;s cities and appears on the flight board for 24 hours after approval.</p>
+          <p>Your name flies inside NORTOWN&apos;s cities and appears on the flight board for 24 hours after approval.</p>
           <label>Site name <input name="name" required maxLength={18} placeholder="Linear" /></label>
           <label>Short line <input name="tagline" required maxLength={60} placeholder="Issue tracking built for speed" /></label>
           <label>Destination <input name="url" required type="url" pattern="https://.*" placeholder="https://linear.app/" /></label>

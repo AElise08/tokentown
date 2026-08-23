@@ -30,7 +30,7 @@ const MUTE = "#a99bb0";
 const FAINT = "#6b5f76";
 const TEAL = "#7fc7bf";
 
-// marca ◍ TOKENTOWN desenhada (anel) — sem depender de glifo/fonte externa.
+// marca ◍ NORTOWN desenhada (anel) — sem depender de glifo/fonte externa.
 function brandMark(color: string, d = 26) {
   return (
     <div
@@ -49,7 +49,7 @@ function brandRow() {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 26, letterSpacing: 4, color: AMBER }}>
       {brandMark(AMBER, 26)}
-      <div style={{ display: "flex" }}>TOKENTOWN</div>
+      <div style={{ display: "flex" }}>NORTOWN</div>
       <div style={{ display: "flex", color: FAINT, letterSpacing: 2 }}>· leaderboard</div>
     </div>
   );
@@ -97,7 +97,7 @@ export async function renderOgImage(usernameRaw: string): Promise<ImageResponse>
               no city this season yet — build yours by burning tokens.
             </div>
           </div>
-          <div style={{ display: "flex", fontSize: 24, color: FAINT }}>tokentown · community leaderboard</div>
+          <div style={{ display: "flex", fontSize: 24, color: FAINT }}>nort.works · community leaderboard</div>
         </div>
       ),
       { ...size }

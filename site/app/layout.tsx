@@ -2,9 +2,18 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "TOKENTOWN — leaderboard",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://nort.works"),
+  title: "NORTOWN — leaderboard",
   description:
-    "The TOKENTOWN season leaderboard: who burned the most AI tokens building a city. Every token your AI agents burn becomes a building, live in the corner of your screen.",
+    "The NORTOWN season leaderboard: who burned the most AI tokens building a city. Every token your AI agents burn becomes a building, live in the corner of your screen.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "NORTOWN — leaderboard",
+    description: "Every token your AI agents burn becomes a building. Build your city and join the season leaderboard.",
+    url: "/",
+    siteName: "NORTOWN",
+    type: "website",
+  },
 };
 
 export const viewport: Viewport = {

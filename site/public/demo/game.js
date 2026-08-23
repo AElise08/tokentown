@@ -945,7 +945,7 @@
     ctx.globalAlpha = night?1:0.95;
     R(x+8, y+2, bw-16, 8, '#40354f');
     ctx.font='bold 6px monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
-    ctx.fillStyle = lit; ctx.fillText(sponsorName || 'TOKENTOWN', x+bw/2, y+2);
+    ctx.fillStyle = lit; ctx.fillText(sponsorName || 'NORTOWN', x+bw/2, y+2);
     if(night){ ctx.globalAlpha=0.18; R(x, y, bw, 12, '#ffe6a8'); }
     ctx.globalAlpha=1; ctx.textBaseline='alphabetic';
   }

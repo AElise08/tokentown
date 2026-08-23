@@ -2,10 +2,10 @@
 "use strict";
 
 // ---------------------------------------------------------------------------
-// TOKENTOWN — `npx tokentown`
+// NORTOWN — `npx tokentown` (legacy-compatible npm command)
 // Lightweight onboarding (no app to install): reads your REAL Claude Code token
 // usage on this machine and reports the season's numbers to the leaderboard at
-// https://tokentown-gamma.vercel.app. Only your username and the numbers are
+// https://nort.works. Only your username and the numbers are
 // ever sent — never prompts, code, conversation content, or project names.
 //
 // Zero runtime dependencies. Node 18+ (global fetch, readline, crypto).
@@ -25,8 +25,9 @@ const crypto = require("crypto");
 const readline = require("readline");
 const childProcess = require("child_process");
 
-const DEFAULT_URL = "https://tokentown-gamma.vercel.app/api/report";
-const SITE_ORIGIN = "https://tokentown-gamma.vercel.app";
+const DEFAULT_URL = "https://nort.works/api/report";
+const LEGACY_DEFAULT_URL = "https://tokentown-gamma.vercel.app/api/report";
+const SITE_ORIGIN = "https://nort.works";
 // Stable identity for this absolute season counter. The server checkpoints it
 // and applies later deltas, so older totals from a different reader never keep
 // a profile frozen after the local aggregation algorithm changes.
@@ -1024,7 +1025,7 @@ function line(s) {
 
 function banner() {
   line("");
-  line("  " + gold("▛▀▖") + " " + bold("TOKENTOWN") + "  " + dim("where prompts become skyline"));
+  line("  " + gold("▛▀▖") + " " + bold("NORTOWN") + "  " + dim("where prompts become skyline"));
   line("");
 }
 
@@ -1181,7 +1182,7 @@ function makeLineReader() {
 
 async function onboard(p) {
   line("");
-  line("  " + bold("Welcome to TOKENTOWN.") + " Let's put your city on the map.");
+  line("  " + bold("Welcome to NORTOWN.") + " Let's put your city on the map.");
   line("  " + dim("Only your username and the season numbers are ever sent —"));
   line("  " + dim("never prompts, code, conversation content, or project names."));
   line("");
@@ -1233,16 +1234,18 @@ async function onboard(p) {
   return cfg;
 }
 
-// returns { cfg, fresh }. Never rewrites an existing config except to backfill a
-// missing key.
+// returns { cfg, fresh }. Preserves user-defined endpoints, but migrates the
+// former official Vercel URL to the new first-party domain.
 async function loadOrOnboard(p) {
   const raw = readConfigRaw(p);
   if (raw && typeof raw === "object" && raw.username) {
     const cfg = Object.assign({}, DEFAULT_CONFIG, raw);
-    if (!cfg.url) cfg.url = DEFAULT_URL;
-    if (!cfg.key) {
-      cfg.key = newKey();
-      // persist the freshly generated key (merge onto the on-disk object).
+    const shouldMigrateUrl = !cfg.url || cfg.url === LEGACY_DEFAULT_URL;
+    const shouldBackfillKey = !cfg.key;
+    if (shouldMigrateUrl) cfg.url = DEFAULT_URL;
+    if (shouldBackfillKey) cfg.key = newKey();
+    if (shouldBackfillKey || shouldMigrateUrl) {
+      // Persist compatibility migrations without touching custom endpoints.
       writeConfig(p, Object.assign({}, raw, { key: cfg.key, url: cfg.url }));
     }
     return { cfg: cfg, fresh: false };
@@ -1429,7 +1432,7 @@ function systemdQuote(s) {
 
 function scheduleSystemdService(paths, cfgFile, home, nodePath) {
   return (
-    "[Unit]\nDescription=TOKENTOWN usage reporter\n\n" +
+    "[Unit]\nDescription=NORTOWN usage reporter\n\n" +
     "[Service]\nType=oneshot\n" +
     "Environment=" + systemdQuote("HOME=" + (home || os.homedir())) + "\n" +
     "Environment=" + systemdQuote("TOKENTOWN_CONFIG=" + (cfgFile || configPath())) + "\n" +
@@ -1439,7 +1442,7 @@ function scheduleSystemdService(paths, cfgFile, home, nodePath) {
 
 function scheduleSystemdTimer() {
   return (
-    "[Unit]\nDescription=Report TOKENTOWN usage every 10 minutes\n\n" +
+    "[Unit]\nDescription=Report NORTOWN usage every 10 minutes\n\n" +
     "[Timer]\nOnBootSec=1min\nOnUnitActiveSec=10min\nPersistent=true\nUnit=" + SYSTEMD_NAME + ".service\n\n" +
     "[Install]\nWantedBy=timers.target\n"
   );
@@ -1672,6 +1675,7 @@ module.exports = {
   readConfig,
   writeConfig,
   newKey,
+  loadOrOnboard,
   cityUrlFor,
   configPath,
   schedulePaths,
@@ -1681,6 +1685,7 @@ module.exports = {
   windowsTaskCommand,
   scheduleStatus,
   DEFAULT_URL,
+  LEGACY_DEFAULT_URL,
   SITE_ORIGIN,
   COUNTER_ID,
 };

@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="docs/city-card.png" alt="TOKENTOWN — a token-fueled pixel city" width="820">
+  <img src="docs/city-card.png" alt="NORTOWN — a token-fueled pixel city" width="820">
 </p>
 
-<h1 align="center">TOKENTOWN</h1>
+<h1 align="center">NORTOWN</h1>
 <p align="center"><em>where prompts become skyline</em></p>
 
 <p align="center">
@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <b><a href="https://tokentown-gamma.vercel.app">🏙️ Live leaderboard</a></b> ·
+  <b><a href="https://nort.works">🏙️ Live leaderboard</a></b> ·
   <b><a href="https://github.com/AElise08/tokentown">⬇️ Get the app</a></b>
 </p>
 
@@ -33,7 +33,7 @@ While the agent is busy, hit **▶ recreio** for a little platformer across your
 
 ## The leaderboard
 
-[**tokentown-gamma.vercel.app**](https://tokentown-gamma.vercel.app) — every dev is a real pixel city, generated from their own numbers. Share yours at `/u/<name>`.
+[**nort.works**](https://nort.works) — every dev is a real pixel city, generated from their own numbers. Share yours at `/u/<name>`.
 
 - Rank by **7 days** or the **28-day season**.
 - **How this city was built** — an opt-in panel showing the *setup* behind the city: the skills, MCP servers, tools and models you actually use. Names and counts only — it's about learning each other's stacks, not just who spent most.
@@ -48,9 +48,9 @@ While the agent is busy, hit **▶ recreio** for a little platformer across your
   ```bash
   git clone https://github.com/AElise08/tokentown.git
   cd tokentown/game/swift
-  ./build.sh && open TokenTown.app
+  ./build.sh && open NORTOWN.app
   ```
-- **Just watch:** browse everyone's cities at [tokentown-gamma.vercel.app](https://tokentown-gamma.vercel.app) — nothing to install.
+- **Just watch:** browse everyone's cities at [nort.works](https://nort.works) — nothing to install.
 - **No app? `npx tokentown`.** Report your city from the terminal in ~10 seconds — no install, [zero dependencies](cli/), Node 18+.
   ```bash
   npx tokentown            # first run picks a name + reports; prints your /u/<name> URL
@@ -78,7 +78,7 @@ cd site && npm install && npm run dev   # http://localhost:3000
 ## How syncing works (FAQ)
 
 **Does it count tokens I burned before installing / while it wasn't running?**
-Yes. Claude Code, Codex and OpenCode keep local usage history. TOKENTOWN doesn't need to listen in real time — the CLI performs a full **season backfill** on every run. Every token timestamped inside the current 28-day season is counted whether or not TOKENTOWN was running at the time.
+Yes. Claude Code, Codex and OpenCode keep local usage history. NORTOWN doesn't need to listen in real time — the CLI performs a full **season backfill** on every run. Every token timestamped inside the current 28-day season is counted whether or not NORTOWN was running at the time.
 
 **Is it automatic?**
 - **App:** yes — reads every ~1.5s (the city grows live) and reports to the board every ~3 min while open.

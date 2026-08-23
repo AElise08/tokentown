@@ -966,9 +966,9 @@
     var cx = x + (BW>>1), cy = byT + 1;
     ctx.font='bold 9px monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
     ctx.fillStyle = ink;                                          // CONTORNO (4 direções) -> legível sobre qualquer fundo
-    ctx.fillText('TOKENTOWN', cx-1, cy); ctx.fillText('TOKENTOWN', cx+1, cy);
-    ctx.fillText('TOKENTOWN', cx, cy-1); ctx.fillText('TOKENTOWN', cx, cy+1);
-    ctx.fillStyle = lit; ctx.fillText('TOKENTOWN', cx, cy);       // preenchimento claro
+    ctx.fillText('NORTOWN', cx-1, cy); ctx.fillText('NORTOWN', cx+1, cy);
+    ctx.fillText('NORTOWN', cx, cy-1); ctx.fillText('NORTOWN', cx, cy+1);
+    ctx.fillStyle = lit; ctx.fillText('NORTOWN', cx, cy);       // preenchimento claro
     if(night){ ctx.globalAlpha=0.16; R(x, y, BW, BH, '#ffe6a8'); ctx.globalAlpha=1; } // brilho noturno suave
     ctx.textAlign='left'; ctx.textBaseline='alphabetic';
   }

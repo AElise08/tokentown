@@ -33,13 +33,14 @@ export async function generateMetadata({
   const entry = await getUserWithRank(currentSeasonId(), u);
   const title = cityTitle(entry?.profile ?? null, u);
   const motto = entry?.profile?.motto;
-  const pageTitle = `${title} · TOKENTOWN leaderboard`;
+  const pageTitle = `${title} · NORTOWN leaderboard`;
   const description = motto
-    ? `“${motto}” — ${u}'s city on the TOKENTOWN leaderboard.`
-    : `${u}'s city on the TOKENTOWN leaderboard: tokens, residents and buildings this season.`;
+    ? `“${motto}” — ${u}'s city on the NORTOWN leaderboard.`
+    : `${u}'s city on the NORTOWN leaderboard: tokens, residents and buildings this season.`;
   return {
     title: pageTitle,
     description,
+    alternates: { canonical: `/u/${encodeURIComponent(u)}` },
     openGraph: { title: pageTitle, description, type: "profile" },
     twitter: { card: "summary_large_image", title: pageTitle, description },
   };
@@ -177,7 +178,7 @@ export default async function UserPage({
       <div className="profile-layout">
         <aside className="profile-rail" aria-label="Profile navigation">
           <div className="rail-topline">◆ {u.toUpperCase()} <span>+</span> PROFILE</div>
-          <a href={backHref} className="rail-brand">TokenTown</a>
+          <a href={backHref} className="rail-brand">Nortown</a>
           <div className="rail-tagline">where prompts become skyline™</div>
 
           <div className="rail-city-card">

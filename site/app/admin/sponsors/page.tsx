@@ -32,7 +32,7 @@ export default function SponsorAdminPage() {
 
   return (
     <main className="wrap sponsor-admin">
-      <a href="/" className="back">‹ back to TOKENTOWN</a>
+      <a href="/" className="back">‹ back to NORTOWN</a>
       <h1>Sponsor flights</h1>
       <div className="admin-key">
         <input type="password" value={key} onChange={(e) => setKey(e.target.value)} placeholder="Admin key" />

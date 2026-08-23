@@ -1,7 +1,7 @@
 {
   "name": "tokentown",
-  "version": "0.2.2",
-  "description": "Turn local Claude Code, Codex and OpenCode usage into a TOKENTOWN pixel city.",
+  "version": "0.3.0",
+  "description": "Turn local Claude Code, Codex and OpenCode usage into a NORTOWN pixel city.",
   "bin": {
     "tokentown": "cli.js"
   },
@@ -15,7 +15,7 @@
     "url": "git+https://github.com/AElise08/tokentown.git",
     "directory": "cli"
   },
-  "homepage": "https://tokentown-gamma.vercel.app",
+  "homepage": "https://nort.works",
   "bugs": {
     "url": "https://github.com/AElise08/tokentown/issues"
   },
@@ -28,7 +28,8 @@
     "usage",
     "leaderboard",
     "cli",
-    "tokentown"
+    "tokentown",
+    "nortown"
   ],
   "files": [
     "cli.js",

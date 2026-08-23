@@ -469,10 +469,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
         guard notificationsReady else { log("notify \(kind) ignorada (sem permissão)"); return }
         let content = UNMutableNotificationContent()
         if kind == "decision" {
-            content.title = "TOKENTOWN — precisa da sua decisão"
+            content.title = "NORTOWN — precisa da sua decisão"
             content.body = "o agente está te esperando"
         } else {
-            content.title = "TOKENTOWN — o agente terminou"
+            content.title = "NORTOWN — o agente terminou"
             content.body = "sua vez"
         }
         content.sound = .default

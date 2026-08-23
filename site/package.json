@@ -2,7 +2,7 @@
   "name": "tokentown-placar",
   "version": "0.1.0",
   "private": true,
-  "description": "Placar (leaderboard) por temporada do TOKENTOWN — ranqueia quem mais queimou tokens de IA.",
+  "description": "NORTOWN season leaderboard — every AI token becomes part of a pixel city.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

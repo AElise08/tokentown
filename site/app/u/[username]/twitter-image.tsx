@@ -5,7 +5,7 @@ import { renderOgImage } from "./og-card";
 export { size, contentType } from "./og-card";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const alt = "The dev's city on the TOKENTOWN leaderboard, with tokens, residents and buildings";
+export const alt = "The dev's city on the NORTOWN leaderboard, with tokens, residents and buildings";
 
 export default async function Image({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;

@@ -1,8 +1,8 @@
 # `npx tokentown`
 
-Put your city on the [TOKENTOWN](https://tokentown-gamma.vercel.app) leaderboard from the terminal. No permanent npm install is required.
+Put your city on the [NORTOWN](https://nort.works) leaderboard from the terminal. No permanent npm install is required. The npm command remains `tokentown` for compatibility.
 
-TOKENTOWN turns local **Claude Code, Codex and OpenCode** usage into a pixel city. Every run backfills the current season, so usage is not lost while the reporter is closed. The server checkpoints this reader's absolute counter and applies subsequent growth as a delta, so upgrading from an older counter cannot freeze a city at a higher historical baseline.
+NORTOWN turns local **Claude Code, Codex and OpenCode** usage into a pixel city. Every run backfills the current season, so usage is not lost while the reporter is closed. The server checkpoints this reader's absolute counter and applies subsequent growth as a delta, so upgrading from an older counter cannot freeze a city at a higher historical baseline.
 
 ## Commands
 
@@ -30,7 +30,7 @@ Only timestamps, usage counters, model/provider identifiers and tool names are a
 
 - City growth excludes cache reads so repeated context does not inflate buildings.
 - Cost includes input, cached input, cache writes and output when the client exposes those fields.
-- OpenCode's own recorded usage value is preferred. OpenCode Go itself is a fixed subscription ($5 introductory month, then $10/month); its per-model values represent consumption against the plan, not an additional card charge. When Codex or an OpenAI-backed OpenCode session exposes tokens but no bill, TOKENTOWN shows an **official API-equivalent estimate**, not a subscription invoice.
+- OpenCode's own recorded usage value is preferred. OpenCode Go itself is a fixed subscription ($5 introductory month, then $10/month); its per-model values represent consumption against the plan, not an additional card charge. When Codex or an OpenAI-backed OpenCode session exposes tokens but no bill, NORTOWN shows an **official API-equivalent estimate**, not a subscription invoice.
 - `--models` prints the local breakdown by provider and model. The server still receives only aggregate numbers and the optional setup summary.
 
 ## Background mode
@@ -43,4 +43,4 @@ Only your username and aggregate numbers are reported. Sharing setup names/count
 
 Config: `~/.tokentown-placar.json` (override with `TOKENTOWN_CONFIG=/path/to.json`). Supported cosmetic fields are `cityName`, `motto`, `accent` and `shareSetup`.
 
-Part of the [TOKENTOWN](https://github.com/AElise08/tokentown) monorepo. Not affiliated with Anthropic or OpenAI.
+Part of the [NORTOWN](https://nort.works) project. Source remains in the `tokentown` repository for compatibility. Not affiliated with Anthropic or OpenAI.

@@ -1,6 +1,6 @@
-# TOKENTOWN — leaderboard
+# NORTOWN — leaderboard
 
-The season leaderboard for **TOKENTOWN**: who built the biggest city by burning AI tokens.
+The season leaderboard for **NORTOWN**: who built the biggest city by burning AI tokens.
 The desktop overlay measures your **real** Claude Code token usage locally and reports the
 season total; this site ranks everyone.
 
@@ -63,9 +63,9 @@ never receives your content, prompts or code.
 
 ---
 
-# TOKENTOWN — placar (pt-BR)
+# NORTOWN — placar (pt-BR)
 
-Leaderboard web por **temporada** do [TOKENTOWN](../tokentown): quem construiu a maior
+Leaderboard web por **temporada** do **NORTOWN**: quem construiu a maior
 cidade queimando tokens de IA. O overlay desktop mede o uso **real** de tokens do Claude
 Code na máquina de cada pessoa e reporta o total da temporada; este site ranqueia.
 
@@ -149,7 +149,7 @@ O fluxo é **push = deploy** (cada push pra branch de produção republica).
 ## Como o app reporta (cliente)
 
 O módulo [`client/placar.js`](client/placar.js) é **CommonJS puro, zero dependências**
-(usa só `fetch`/`fs`/`path`/`crypto` do Node 18+). Copie ele pra dentro do app TOKENTOWN
+(usa só `fetch`/`fs`/`path`/`crypto` do Node 18+). Copie ele pra dentro do app NORTOWN
 e ligue no loop de polling. Ele:
 
 - lê/cria um config JSON `{ enabled, username, key, url }` no caminho que você passar;

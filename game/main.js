@@ -695,8 +695,8 @@ function notifyOS(kind) {
   try {
     if (!Notification || typeof Notification.isSupported !== 'function' || !Notification.isSupported()) return;
     const msg = (kind === 'decision')
-      ? { title: 'TOKENTOWN — precisa da sua decisão', body: 'o agente está te esperando' }
-      : { title: 'TOKENTOWN — o agente terminou', body: 'sua vez' };
+      ? { title: 'NORTOWN — precisa da sua decisão', body: 'o agente está te esperando' }
+      : { title: 'NORTOWN — o agente terminou', body: 'sua vez' };
     new Notification(msg).show();
   } catch (e) {}
 }

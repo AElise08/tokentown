@@ -11,6 +11,17 @@ import { fileURLToPath } from "node:url";
 const root = new URL("../", import.meta.url); // repo root (this file lives in lib/)
 const read = (rel) => readFileSync(fileURLToPath(new URL(rel, root)), "utf8");
 
+test("public brand uses NORTOWN at the nort.works root domain", () => {
+  const layout = read("app/layout.tsx");
+  const page = read("app/page.tsx");
+  const cli = read("../cli/cli.js");
+  assert.match(layout, /https:\/\/nort\.works/);
+  assert.match(layout, /title: "NORTOWN — leaderboard"/);
+  assert.match(page, /> NORTOWN /);
+  assert.match(cli, /const DEFAULT_URL = "https:\/\/nort\.works\/api\/report"/);
+  assert.match(cli, /LEGACY_DEFAULT_URL/);
+});
+
 // ---------------------------------------------------------------------------
 // BOARD AUTO-REFRESH — the "/" board keeps itself fresh with a client component.
 // ---------------------------------------------------------------------------

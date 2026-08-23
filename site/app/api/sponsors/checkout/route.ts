@@ -55,7 +55,7 @@ export async function POST(req: Request) {
             currency: "usd",
             unit_amount: SPONSOR_PRICE_CENTS,
             product_data: {
-              name: "TOKENTOWN sponsored flight · 24 hours",
+              name: "NORTOWN sponsored flight · 24 hours",
               description: `${campaign.name} — ${campaign.tagline}`,
             },
           },

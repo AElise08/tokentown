@@ -121,3 +121,21 @@ test("Windows Task Scheduler command uses absolute quoted paths", () => {
   assert.equal(command, '"C:\\Program Files\\nodejs\\node.exe" "C:\\Users\\Mel User\\.tokentown\\runner\\cli.js"');
   assert.doesNotMatch(command, /npx|watch/);
 });
+
+test("official legacy URL migrates to nort.works without replacing custom endpoints", async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "nortown-config-test-"));
+  try {
+    const legacyPath = path.join(root, "legacy.json");
+    fs.writeFileSync(legacyPath, JSON.stringify({ username: "mel", key: "secret", url: cli.LEGACY_DEFAULT_URL }));
+    const legacy = await cli.loadOrOnboard(legacyPath);
+    assert.equal(legacy.cfg.url, cli.DEFAULT_URL);
+    assert.equal(JSON.parse(fs.readFileSync(legacyPath, "utf8")).url, "https://nort.works/api/report");
+
+    const customPath = path.join(root, "custom.json");
+    fs.writeFileSync(customPath, JSON.stringify({ username: "mel", key: "secret", url: "https://example.test/api/report" }));
+    const custom = await cli.loadOrOnboard(customPath);
+    assert.equal(custom.cfg.url, "https://example.test/api/report");
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});

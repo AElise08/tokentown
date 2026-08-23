@@ -144,7 +144,7 @@
       var phase = sponsorName ? Math.max(0, Date.now() - flightEpoch) % airshipCycle : Date.now() % airshipCycle;
       if (phase < airshipFlight) {
         var x = -98 + phase * 0.019;
-        drawBlimp(ctx, x, 43, sponsorName || "TOKENTOWN");
+        drawBlimp(ctx, x, 43, sponsorName || "NORTOWN");
         activeAirship = { x: x, y: 42, w: 88, h: 16 };
         if (sponsorUrl) canvas.style.cursor = "pointer";
       } else { activeAirship = null; canvas.style.cursor = "default"; }
@@ -177,7 +177,7 @@
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
     ctx.fillStyle = COLORS.gold;
-    ctx.fillText(label || "TOKENTOWN", px(x + width / 2), px(y + 3));
+    ctx.fillText(label || "NORTOWN", px(x + width / 2), px(y + 3));
     ctx.textBaseline = "alphabetic";
   }
 

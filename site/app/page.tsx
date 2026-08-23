@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 // A deterministic mockup skyline for the hero — evokes the corner overlay
 // (built from a seed, not a real user). Rendered once per request.
 const HERO_CITY = citySvg(
-  { username: "tokentown", tokens: 2_400_000, residents: 44, buildings: 1280 },
+  { username: "nortown", tokens: 2_400_000, residents: 44, buildings: 1280 },
   "full"
 );
 
@@ -81,7 +81,7 @@ export default async function Page({
         <div className="hero-copy">
           <div className="eyebrow">Token city · community leaderboard</div>
           <h1>
-            <span className="mark">◍</span> TOKENTOWN <span className="sub">— leaderboard</span>
+            <span className="mark">◍</span> NORTOWN <span className="sub">— leaderboard</span>
           </h1>
           <p className="lede">
             Every token your AI burns raises a building — here&apos;s who built the biggest city this
@@ -356,7 +356,7 @@ export default async function Page({
           <div className="demo-frame">
             <iframe
               src={demoSrc}
-              title="TOKENTOWN overlay — rooftops platformer, simulated demo"
+              title="NORTOWN overlay — rooftops platformer, simulated demo"
               width={340}
               height={380}
               loading="lazy"
@@ -428,7 +428,7 @@ export default async function Page({
       <SponsorDock sponsor={sponsor} lineup={sponsorLineup} metrics={siteMetrics} />
 
       <p className="foot">
-        TOKENTOWN — leaderboard · season {cur} in progress · data at{" "}
+        NORTOWN — leaderboard · season {cur} in progress · data at{" "}
         <code>
           /api/placar?season={season}
           {window === "7d" ? "&window=7d" : ""}
