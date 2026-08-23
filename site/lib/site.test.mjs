@@ -94,7 +94,8 @@ test("sponsored flights stay site-only and do not track per-ad impressions or cl
   const game = read("public/demo/isometric-city.js");
   const privacy = read("app/privacy/page.tsx");
   assert.match(page, /<SponsorDock\s+sponsor=\{sponsor\}\s+metrics=\{siteMetrics\}/);
-  assert.match(dock, /launch your balloon · \$2/);
+  assert.match(dock, /put your site in the sky · \$2/);
+  assert.match(dock, /className="site-airship"/);
   assert.match(dock, /individual ad impressions and clicks are not tracked/);
   assert.match(game, /sponsorName/);
   assert.match(privacy, /does not create browsing profiles or track individual/);

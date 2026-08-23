@@ -172,7 +172,6 @@ export default async function UserPage({
       style={accent ? ({ "--accent": accent } as React.CSSProperties) : undefined}
     >
       <SiteViewTracker />
-      <SponsorDock sponsor={sponsor} metrics={siteMetrics} />
       <div className="profile-layout">
         <aside className="profile-rail" aria-label="Profile navigation">
           <div className="rail-topline">◆ {u.toUpperCase()} <span>+</span> PROFILE</div>
@@ -465,6 +464,8 @@ export default async function UserPage({
           <LiveRefresh renderedAt={now} />
         </p>
       )}
+
+      <SponsorDock sponsor={sponsor} metrics={siteMetrics} />
 
       <p className="foot">
         {isCurrent ? (

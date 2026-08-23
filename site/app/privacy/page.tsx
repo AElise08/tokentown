@@ -54,7 +54,7 @@ export default function PrivacyPage() {
       <section>
         <h2>Sponsored flights</h2>
         <p>
-          Clearly labeled sponsors can appear in the website&apos;s side dock and airship. Sponsor submissions
+          Clearly labeled sponsors can appear in the website&apos;s flying airship and bottom sponsor strip. Sponsor submissions
           include a site name, short line, HTTPS destination and receipt email, and are stored for payment,
           moderation and scheduling. Campaigns run for 24 hours after manual approval. Payment is handled
           by Stripe; TOKENTOWN never receives card details.

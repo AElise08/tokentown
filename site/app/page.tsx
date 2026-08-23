@@ -76,7 +76,6 @@ export default async function Page({
   return (
     <main className="wrap">
       <SiteViewTracker />
-      <SponsorDock sponsor={sponsor} metrics={siteMetrics} />
       <header className="hero">
         <div className="hero-copy">
           <div className="eyebrow">Token city · community leaderboard</div>
@@ -415,6 +414,8 @@ export default async function Page({
           It never receives your content, prompts or code.
         </p>
       </section>
+
+      <SponsorDock sponsor={sponsor} metrics={siteMetrics} />
 
       <p className="foot">
         TOKENTOWN — leaderboard · season {cur} in progress · data at{" "}

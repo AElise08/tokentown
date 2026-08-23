@@ -47,25 +47,38 @@ export default function SponsorDock({ sponsor, metrics }: { sponsor: PublicSpons
 
   return (
     <>
-      <aside className="sponsor-dock" aria-label="TOKENTOWN sponsor">
-        <div className="sponsor-cap">sponsored flight</div>
+      <div className="site-flight" aria-label={sponsor ? `Sponsored flight: ${sponsor.name}` : "TOKENTOWN airship"}>
         {sponsor ? (
-          <a className="sponsor-live" href={sponsor.url} target="_blank" rel="sponsored noopener noreferrer">
-            <span className="sponsor-airship" aria-hidden="true">▰</span>
-            <strong>{sponsor.name}</strong>
-            <span>{sponsor.tagline}</span>
+          <a className="site-airship" href={sponsor.url} target="_blank" rel="sponsored noopener noreferrer">
+            <span className="airship-tail" aria-hidden="true" />
+            <span className="airship-envelope"><strong>{sponsor.name}</strong></span>
+            <span className="airship-gondola" aria-hidden="true" />
           </a>
         ) : (
-          <div className="sponsor-empty">
-            <strong>your name in the sky</strong>
-            <span>side dock + airship · 24 hours</span>
+          <div className="site-airship" aria-hidden="true">
+            <span className="airship-tail" />
+            <span className="airship-envelope"><strong>TOKENTOWN</strong></span>
+            <span className="airship-gondola" />
           </div>
         )}
-        <div className="sponsor-metrics">
-          {formatCount(liveMetrics.visitors)} visitors · {formatCount(liveMetrics.pageviews)} pageviews
+      </div>
+
+      <aside className="sponsor-dock" aria-label="TOKENTOWN sponsor">
+        <div className="sponsor-bottom-copy">
+          <div className="sponsor-cap">{sponsor ? "now flying" : "next sponsored flight"}</div>
+          {sponsor ? (
+            <a className="sponsor-live" href={sponsor.url} target="_blank" rel="sponsored noopener noreferrer">
+              <strong>{sponsor.name}</strong><span>{sponsor.tagline}</span>
+            </a>
+          ) : (
+            <div className="sponsor-empty"><strong>put your site in the sky</strong><span>one clear 24-hour flight</span></div>
+          )}
+          <div className="sponsor-metrics">
+            {formatCount(liveMetrics.visitors)} visitors · {formatCount(liveMetrics.pageviews)} pageviews
+          </div>
         </div>
         <button className="sponsor-launch" type="button" onClick={() => dialog.current?.showModal()}>
-          launch your balloon · $2
+          put your site in the sky · $2
         </button>
         {notice && <div className="sponsor-notice" role="status">{notice}</div>}
       </aside>
@@ -78,7 +91,7 @@ export default function SponsorDock({ sponsor, metrics }: { sponsor: PublicSpons
             <div><span>◍</span> launch a sponsored flight</div>
             <button type="button" aria-label="Close" onClick={() => dialog.current?.close()}>×</button>
           </div>
-          <p>Your site appears in the side dock and on the TOKENTOWN airship for 24 hours after approval.</p>
+          <p>Your name flies across TOKENTOWN and appears in the sponsor strip below for 24 hours after approval.</p>
           <label>Site name <input name="name" required maxLength={18} placeholder="Linear" /></label>
           <label>Short line <input name="tagline" required maxLength={60} placeholder="Issue tracking built for speed" /></label>
           <label>Destination <input name="url" required type="url" pattern="https://.*" placeholder="https://linear.app/" /></label>
