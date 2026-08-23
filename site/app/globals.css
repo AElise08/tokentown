@@ -2018,29 +2018,38 @@ tr.champ td.user .crown {
 .sponsor-lineup {
   position: fixed;
   z-index: 30;
-  top: 176px;
-  right: max(12px, calc((100vw - 1340px) / 2));
-  width: 190px;
-  padding: 12px;
+  top: 158px;
+  right: max(12px, calc((100vw - 1400px) / 2));
+  width: 220px;
+  padding: 13px;
   color: var(--ink);
-  background: linear-gradient(180deg, rgba(42, 33, 52, .97), rgba(23, 18, 32, .97));
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.018) 0 1px, transparent 1px 5px),
+    linear-gradient(180deg, rgba(42, 33, 52, .98), rgba(19, 15, 28, .98));
   border: 1px solid #4a3b52;
   border-radius: 11px;
   box-shadow: 0 16px 36px rgba(0, 0, 0, .34), inset 0 1px rgba(255,255,255,.05);
   font-family: var(--mono);
 }
-.lineup-head { padding-bottom: 9px; color: var(--gold); border-bottom: 1px solid #3a3043; font-size: 9px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
-.lineup-head span { color: var(--teal); }
-.sponsor-lineup ol { display: grid; gap: 3px; margin: 8px 0 0; padding: 0; list-style: none; }
-.sponsor-lineup li { position: relative; display: grid; grid-template-columns: 8px minmax(0, 1fr); column-gap: 5px; padding: 7px 5px; border-radius: 6px; background: rgba(255,255,255,.018); }
-.sponsor-lineup li.active { background: rgba(127, 199, 191, .08); }
-.lineup-light { width: 5px; height: 5px; margin-top: 3px; border-radius: 50%; background: #65586f; }
-.active .lineup-light { background: var(--teal); box-shadow: 0 0 7px var(--teal); }
-.sponsor-lineup a, .sponsor-lineup button { min-width: 0; overflow: hidden; border: 0; color: var(--ink); background: transparent; font: 700 9px/1.2 var(--mono); text-align: left; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
-.sponsor-lineup button { padding: 0; cursor: pointer; }
-.sponsor-lineup a:hover, .sponsor-lineup button:hover { color: var(--gold); }
-.sponsor-lineup small { grid-column: 2; margin-top: 3px; color: var(--faint); font-size: 7px; line-height: 1.2; }
-.lineup-gap { margin-top: 8px; color: var(--faint); font-size: 7px; line-height: 1.35; text-align: center; }
+.lineup-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 10px; border-bottom: 1px solid #3a3043; }
+.lineup-head > span { display: flex; align-items: center; gap: 6px; color: var(--gold); font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.lineup-head i { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 7px rgba(127,199,191,.7); }
+.lineup-head button { flex: 0 0 auto; padding: 4px 6px; border: 1px solid #6b5265; border-radius: 5px; color: var(--gold); background: #241b30; font: 800 7px/1 var(--mono); cursor: pointer; }
+.lineup-head button:hover { border-color: var(--amber); background: #30233c; }
+.sponsor-lineup ol { display: grid; gap: 6px; margin: 9px 0 0; padding: 0; list-style: none; }
+.sponsor-lineup li { display: grid; grid-template-columns: 38px minmax(0, 1fr); align-items: center; min-height: 42px; overflow: hidden; border: 1px solid #342a3e; border-radius: 7px; background: rgba(255,255,255,.018); }
+.sponsor-lineup li.active { border-color: rgba(127,199,191,.34); background: rgba(127, 199, 191, .08); }
+.sponsor-lineup li.available { border-style: dashed; background: rgba(255,215,154,.025); }
+.lineup-seq { align-self: stretch; display: grid; place-items: center; padding: 0 5px; color: var(--faint); border-right: 1px solid #342a3e; font-size: 7px; font-weight: 800; letter-spacing: .06em; }
+.active .lineup-seq { color: var(--teal); border-color: rgba(127,199,191,.25); background: rgba(127,199,191,.06); }
+.available .lineup-seq { color: var(--amber-dk); }
+.lineup-name { display: flex; min-width: 0; flex-direction: column; gap: 4px; padding: 7px 8px; }
+.lineup-name a, .lineup-name button { min-width: 0; overflow: hidden; padding: 0; border: 0; color: var(--ink); background: transparent; font: 800 10px/1.15 var(--mono); text-align: left; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+.lineup-name button { color: var(--gold); cursor: pointer; }
+.lineup-name a:hover, .lineup-name button:hover { color: var(--gold); }
+.lineup-name small { overflow: hidden; color: var(--faint); font-size: 7px; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+.lineup-gap { display: flex; justify-content: center; gap: 5px; margin-top: 9px; color: var(--faint); font-size: 7px; line-height: 1.35; text-align: center; }
+.lineup-gap span { color: var(--amber-dk); }
 
 .sponsor-dock {
   position: relative;
@@ -2107,6 +2116,10 @@ tr.champ td.user .crown {
 }
 @media (max-width: 1363px) {
   .sponsor-lineup { position: relative; inset: auto; width: 100%; }
+  .sponsor-lineup ol { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+}
+@media (max-width: 560px) {
+  .sponsor-lineup ol { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-city-flight { left: auto; right: 8px; opacity: 1; animation: none; }

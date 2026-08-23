@@ -5,8 +5,12 @@ import type { PublicSponsor, PublicSponsorSlot } from "@/lib/sponsor";
 import type { SiteMetrics } from "@/lib/store";
 import { formatCount } from "@/lib/format";
 
-function slotTime(slot: PublicSponsorSlot): string {
-  if (slot.status === "active") return "now · 24h flight";
+function slotTime(slot: PublicSponsorSlot, nowMs: number | null): string {
+  if (slot.status === "active") {
+    if (!nowMs || !slot.endsAt) return "flying now";
+    const mins = Math.max(0, Math.ceil((slot.endsAt - nowMs) / 60_000));
+    return `${Math.floor(mins / 60)}h ${mins % 60}m remaining`;
+  }
   if (!slot.startsAt) return "next";
   const iso = new Date(slot.startsAt).toISOString();
   return `${iso.slice(5, 10)} · ${iso.slice(11, 16)} UTC`;
@@ -22,6 +26,7 @@ export default function SponsorDock({
   metrics: SiteMetrics;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const [nowMs, setNowMs] = useState<number | null>(null);
   const [liveMetrics, setLiveMetrics] = useState(metrics);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -32,6 +37,12 @@ export default function SponsorDock({
     if (status === "paid" || status === "demo-paid")
       setNotice("Payment received · your flight is waiting for approval.");
     else if (status === "cancelled") setNotice("Checkout cancelled · nothing was charged.");
+  }, []);
+
+  useEffect(() => {
+    setNowMs(Date.now());
+    const timer = window.setInterval(() => setNowMs(Date.now()), 60_000);
+    return () => window.clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -63,24 +74,31 @@ export default function SponsorDock({
   return (
     <>
       <aside className="sponsor-lineup" aria-label="Sponsored flight schedule">
-        <div className="lineup-head"><span>◍</span> flight board</div>
+        <div className="lineup-head">
+          <span><i aria-hidden="true" /> flight board</span>
+          <button type="button" onClick={() => dialog.current?.showModal()}>$2 · 24h</button>
+        </div>
         <ol>
-          {lineup.map((slot) => (
+          {lineup.map((slot, index) => (
             <li key={slot.id} className={slot.status}>
-              <span className="lineup-light" aria-hidden="true" />
-              <a href={slot.url} target="_blank" rel="sponsored noopener noreferrer">{slot.name}</a>
-              <small>{slotTime(slot)}</small>
+              <span className="lineup-seq">{slot.status === "active" ? "LIVE" : String(index + 1).padStart(2, "0")}</span>
+              <span className="lineup-name">
+                <a href={slot.url} target="_blank" rel="sponsored noopener noreferrer">{slot.name}</a>
+                <small>{slotTime(slot, nowMs)}</small>
+              </span>
             </li>
           ))}
           {lineup.length < 3 && (
             <li className="available">
-              <span className="lineup-light" aria-hidden="true" />
-              <button type="button" onClick={() => dialog.current?.showModal()}>your site</button>
-              <small>next available · $2</small>
+              <span className="lineup-seq">OPEN</span>
+              <span className="lineup-name">
+                <button type="button" onClick={() => dialog.current?.showModal()}>your site here →</button>
+                <small>next available flight</small>
+              </span>
             </li>
           )}
         </ol>
-        <div className="lineup-gap">30 min quiet sky between sponsors</div>
+        <div className="lineup-gap"><span aria-hidden="true">☾</span> 30 min reset between 24h flights</div>
       </aside>
 
       <aside className="sponsor-dock" aria-label="TOKENTOWN sponsor">
