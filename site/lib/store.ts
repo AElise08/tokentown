@@ -1,4 +1,4 @@
-import { createHash } from "crypto";
+import { createHash, randomUUID } from "crypto";
 import { currentSeasonId, isReportSeasonValid } from "./season";
 import { sanitizeCity, type RealCity } from "./city";
 import { sanitizeProfile, mergeProfile, type Profile } from "./profile";
@@ -14,6 +14,14 @@ import {
   type UserWindowInput,
   type SnapPoint,
 } from "./window";
+import {
+  effectiveSponsorStatus,
+  nextSponsorWindow,
+  sanitizeSponsorDraft,
+  toPublicSponsor,
+  type PublicSponsor,
+  type SponsorCampaign,
+} from "./sponsor";
 
 export type { WindowKind, SnapPoint, UserWindowInput } from "./window";
 export { utcDayKey, dayKeyRefMs, parseSnaps, windowDelta, rankWindow, MAX_SNAP_DAYS, WINDOW_7D_MS } from "./window";
@@ -91,6 +99,7 @@ interface KV {
   backend: "upstash" | "memory" | "node-redis" | "memory-fallback";
   hget(key: string, field: string): Promise<string | null>;
   hset(key: string, obj: Record<string, string | number>): Promise<void>;
+  hincrby(key: string, field: string, amount: number): Promise<number>;
   hdel(key: string, field: string): Promise<void>;
   hgetall(key: string): Promise<Record<string, string | number> | null>;
   zadd(key: string, score: number, member: string): Promise<void>;
@@ -154,6 +163,9 @@ function makeUpstashKV(): KV {
     },
     async hset(key, obj) {
       await redis.hset(key, obj);
+    },
+    async hincrby(key, field, amount) {
+      return Number(await redis.hincrby(key, field, amount));
     },
     async hdel(key, field) {
       await redis.hdel(key, field);
@@ -223,6 +235,12 @@ function makeMemoryKV(): KV {
     async hset(key, obj) {
       const m = h(key);
       for (const [f, v] of Object.entries(obj)) m.set(f, v);
+    },
+    async hincrby(key, field, amount) {
+      const m = h(key);
+      const next = (Number(m.get(field)) || 0) + amount;
+      m.set(field, next);
+      return next;
     },
     async hdel(key, field) {
       hashes.get(key)?.delete(field);
@@ -320,6 +338,9 @@ function makeNodeRedisKV(url: string): KV {
     async hset(key, obj) {
       return guard((c) => c.hSet(key, obj as Record<string, string | number>).then(() => undefined), () => mem.hset(key, obj));
     },
+    async hincrby(key, field, amount) {
+      return guard((c) => c.hIncrBy(key, field, amount), () => mem.hincrby(key, field, amount));
+    },
     async hdel(key, field) {
       return guard((c) => c.hDel(key, field).then(() => undefined), () => mem.hdel(key, field));
     },
@@ -413,6 +434,8 @@ const kUser = (s: number, u: string) => `s${s}:u:${u}`; // HASH detalhes
 const kSnap = (s: number, u: string) => `s${s}:snap:${u}`; // HASH dia AAAAMMDD -> "tokens|cost"
 const kRate = (u: string) => `rl:${u}`; // rate limit
 const K_USERS = "users"; // HASH username -> keyHash
+const K_SITE_METRICS = "tt:site:metrics";
+const K_SPONSORS = "tt:sponsors:campaigns";
 
 // Reset do storage EM MEMÓRIA — só pra testes de lib (limpa maps e cache do KV).
 export function __resetStoreForTests(): void {
@@ -553,6 +576,133 @@ function parseEntry(username: string, h: Record<string, string | number> | null)
     profile: parseProfileField(h.profile),
     setup: parseSetupField(h.setup),
   };
+}
+
+// ---------------------------------------------------------------------------
+// SITE VIEWS + SPONSOR FLIGHTS
+// Only aggregate site counters are stored. Sponsor campaigns deliberately do
+// not track per-ad impressions, clicks, visitors, IP addresses or user agents.
+// ---------------------------------------------------------------------------
+export type SiteMetrics = { visitors: number; pageviews: number };
+
+export async function recordSiteView(newVisitor: boolean): Promise<SiteMetrics> {
+  const db = kv();
+  const pageviews = await db.hincrby(K_SITE_METRICS, "pageviews", 1);
+  const visitors = newVisitor
+    ? await db.hincrby(K_SITE_METRICS, "visitors", 1)
+    : Number(await db.hget(K_SITE_METRICS, "visitors")) || 0;
+  return { visitors, pageviews };
+}
+
+export async function getSiteMetrics(): Promise<SiteMetrics> {
+  const h = await kv().hgetall(K_SITE_METRICS);
+  return { visitors: Number(h?.visitors) || 0, pageviews: Number(h?.pageviews) || 0 };
+}
+
+function parseSponsorCampaign(raw: string | number | undefined): SponsorCampaign | null {
+  if (typeof raw !== "string") return null;
+  try {
+    const c = JSON.parse(raw) as SponsorCampaign;
+    return c && typeof c.id === "string" && sanitizeSponsorDraft(c) ? c : null;
+  } catch {
+    return null;
+  }
+}
+
+async function saveSponsorCampaign(c: SponsorCampaign): Promise<void> {
+  await kv().hset(K_SPONSORS, { [c.id]: JSON.stringify(c) });
+}
+
+export async function listSponsorCampaigns(now = Date.now()): Promise<SponsorCampaign[]> {
+  const h = await kv().hgetall(K_SPONSORS);
+  return Object.values(h ?? {})
+    .map(parseSponsorCampaign)
+    .filter((c): c is SponsorCampaign => !!c)
+    .map((c) => ({ ...c, status: effectiveSponsorStatus(c, now) }))
+    .sort((a, b) => b.createdAt - a.createdAt);
+}
+
+export async function getSponsorCampaign(id: string): Promise<SponsorCampaign | null> {
+  if (!/^[a-f0-9-]{20,40}$/i.test(id)) return null;
+  return parseSponsorCampaign((await kv().hget(K_SPONSORS, id)) ?? undefined);
+}
+
+export async function createSponsorCampaign(raw: unknown): Promise<SponsorCampaign | null> {
+  const draft = sanitizeSponsorDraft(raw);
+  if (!draft) return null;
+  const campaign: SponsorCampaign = {
+    id: randomUUID(),
+    ...draft,
+    status: "draft",
+    createdAt: Date.now(),
+  };
+  await saveSponsorCampaign(campaign);
+  return campaign;
+}
+
+export async function attachSponsorCheckout(id: string, checkoutSessionId: string): Promise<SponsorCampaign | null> {
+  const c = await getSponsorCampaign(id);
+  if (!c || c.status !== "draft") return c;
+  const next = { ...c, checkoutSessionId };
+  await saveSponsorCampaign(next);
+  return next;
+}
+
+export async function markSponsorPaid(input: {
+  id: string;
+  checkoutSessionId: string;
+  paymentIntentId?: string;
+  email?: string;
+}): Promise<SponsorCampaign | null> {
+  const c = await getSponsorCampaign(input.id);
+  if (!c) return null;
+  // Stripe can retry webhooks: an already-paid/approved campaign is a no-op.
+  if (c.status !== "draft") return c;
+  if (c.checkoutSessionId && c.checkoutSessionId !== input.checkoutSessionId) return null;
+  const next: SponsorCampaign = {
+    ...c,
+    status: "paid",
+    paidAt: Date.now(),
+    checkoutSessionId: input.checkoutSessionId,
+    paymentIntentId: input.paymentIntentId,
+    email: input.email || c.email,
+  };
+  await saveSponsorCampaign(next);
+  return next;
+}
+
+export async function approveSponsorCampaign(id: string, now = Date.now()): Promise<SponsorCampaign | null> {
+  const c = await getSponsorCampaign(id);
+  if (!c || c.status !== "paid") return null;
+  const all = await listSponsorCampaigns(now);
+  const window = nextSponsorWindow(all.filter((x) => x.id !== id), now);
+  const next: SponsorCampaign = {
+    ...c,
+    status: "scheduled",
+    approvedAt: now,
+    startsAt: window.startsAt,
+    endsAt: window.endsAt,
+  };
+  await saveSponsorCampaign(next);
+  return { ...next, status: effectiveSponsorStatus(next, now) };
+}
+
+export async function setSponsorStatus(
+  id: string,
+  status: "paused" | "rejected" | "refunded",
+  refundId?: string
+): Promise<SponsorCampaign | null> {
+  const c = await getSponsorCampaign(id);
+  if (!c) return null;
+  const next: SponsorCampaign = { ...c, status, ...(refundId ? { refundId } : {}) };
+  await saveSponsorCampaign(next);
+  return next;
+}
+
+export async function getActiveSponsor(now = Date.now()): Promise<PublicSponsor | null> {
+  const campaigns = await listSponsorCampaigns(now);
+  const active = campaigns.find((c) => effectiveSponsorStatus(c, now) === "active") ?? null;
+  return toPublicSponsor(active, now);
 }
 
 // ---------------------------------------------------------------------------

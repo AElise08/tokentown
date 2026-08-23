@@ -10,6 +10,14 @@ import {
   getLeaderboard,
   getUserSnaps,
   sanitizeDailyTokens,
+  recordSiteView,
+  getSiteMetrics,
+  createSponsorCampaign,
+  attachSponsorCheckout,
+  markSponsorPaid,
+  approveSponsorCampaign,
+  getActiveSponsor,
+  listSponsorCampaigns,
 } from "./store.ts";
 import { currentSeasonId } from "./season.ts";
 import { utcDayKey } from "./window.ts";
@@ -397,4 +405,33 @@ test("deleteUser: username inexistente -> 404", async () => {
   const d = await deleteUser({ username: "nobody-here", key: "k".repeat(16) });
   assert.equal(d.ok, false);
   assert.equal(d.status, 404);
+});
+
+test("site metrics count aggregate visitors separately from pageviews", async () => {
+  __resetStoreForTests();
+  await recordSiteView(true);
+  await recordSiteView(false);
+  await recordSiteView(true);
+  assert.deepEqual(await getSiteMetrics(), { visitors: 2, pageviews: 3 });
+});
+
+test("sponsor payment is idempotent and approval schedules a 24-hour flight", async () => {
+  __resetStoreForTests();
+  const c = await createSponsorCampaign({
+    name: "Linear", tagline: "Issues at speed", url: "https://linear.app/", email: "hello@example.com",
+  });
+  assert.ok(c);
+  await attachSponsorCheckout(c.id, "cs_test_1");
+  let paid = await markSponsorPaid({ id: c.id, checkoutSessionId: "cs_test_1", paymentIntentId: "pi_1" });
+  assert.equal(paid.status, "paid");
+  paid = await markSponsorPaid({ id: c.id, checkoutSessionId: "cs_test_1", paymentIntentId: "pi_duplicate" });
+  assert.equal(paid.paymentIntentId, "pi_1");
+
+  const now = 5_000_000;
+  const approved = await approveSponsorCampaign(c.id, now);
+  assert.equal(approved.status, "active");
+  assert.equal(approved.endsAt - approved.startsAt, 24 * 60 * 60 * 1000);
+  assert.equal((await getActiveSponsor(now + 1)).name, "Linear");
+  assert.equal(await getActiveSponsor(approved.endsAt + 1), null);
+  assert.equal((await listSponsorCampaigns(now + 1))[0].email, "hello@example.com");
 });

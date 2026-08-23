@@ -90,6 +90,12 @@
     var seed = (Number(data && data.seed) || hashSeed(data && data.username)) >>> 0;
     var random = rng(seed);
     var buildings = clamp(Math.floor(Number(data && data.buildings) || 0), 0, 9999);
+    var sponsorName = String((data && data.sponsorName) || "").replace(/[<>]/g, "").trim().slice(0, 18);
+    var sponsorUrl = "";
+    try {
+      var sponsorParsed = new URL(String((data && data.sponsorUrl) || ""));
+      if (sponsorParsed.protocol === "https:") sponsorUrl = sponsorParsed.toString();
+    } catch (e) {}
     var activity = clamp((Number(data && data.tokens) || 0) / 12000000, 0.25, 1);
     var plan = cityPlan({
       seed: seed,
@@ -118,18 +124,30 @@
     drawStreetDetails(stillCtx, plan);
     drawPlatformFront(stillCtx, plan);
 
-    var airshipCycle = 30 * 60 * 1000;
+    var airshipCycle = sponsorName ? 2 * 60 * 1000 : 30 * 60 * 1000;
     var airshipFlight = 26000;
+    var mountedAt = performance.now();
+    var activeAirship = null;
+    canvas.addEventListener("click", function (event) {
+      if (!sponsorUrl || !activeAirship) return;
+      var rect = canvas.getBoundingClientRect();
+      var x = ((event.clientX - rect.left) * W) / rect.width;
+      var y = ((event.clientY - rect.top) * H) / rect.height;
+      if (x >= activeAirship.x && x <= activeAirship.x + activeAirship.w && y >= activeAirship.y && y <= activeAirship.y + activeAirship.h)
+        window.open(sponsorUrl, "_blank", "noopener,noreferrer");
+    });
     function frame(now) {
       ctx.clearRect(0, 0, W, H);
       ctx.drawImage(still, 0, 0);
       // Use wall-clock time instead of page-load time: opening a profile does
       // not reset the schedule or force a new arrival.
-      var phase = Date.now() % airshipCycle;
+      var phase = sponsorName ? (now - mountedAt) % airshipCycle : Date.now() % airshipCycle;
       if (phase < airshipFlight) {
-        var x = -62 + phase * 0.018;
-        drawBlimp(ctx, x, 43);
-      }
+        var x = -82 + phase * 0.019;
+        drawBlimp(ctx, x, 43, sponsorName || "TOKENTOWN");
+        activeAirship = { x: x, y: 42, w: 72, h: 14 };
+        if (sponsorUrl) canvas.style.cursor = "pointer";
+      } else { activeAirship = null; canvas.style.cursor = "default"; }
       window.requestAnimationFrame(frame);
     }
     window.requestAnimationFrame(frame);
@@ -146,8 +164,8 @@
     }
   }
 
-  function drawBlimp(ctx, x, y) {
-    var width = 50;
+  function drawBlimp(ctx, x, y, label) {
+    var width = 72;
     var body = "#52425e";
     fill(ctx, body, x, y, width, 9);
     fill(ctx, "#6c5066", x + 5, y - 1, width - 10, 1);
@@ -155,11 +173,11 @@
     fill(ctx, "#6b5265", x - 1, y + 3, 1, 3);
     fill(ctx, "#6b5265", x + width, y + 3, 1, 3);
     fill(ctx, "#302840", x + 19, y + 9, 12, 2);
-    ctx.font = "bold 6px monospace";
+    ctx.font = "bold 5px monospace";
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
     ctx.fillStyle = COLORS.gold;
-    ctx.fillText("TOKENTOWN", px(x + width / 2), px(y + 2));
+    ctx.fillText(label || "TOKENTOWN", px(x + width / 2), px(y + 2));
     ctx.textBaseline = "alphabetic";
   }
 

@@ -9,7 +9,7 @@
     "start": "next start",
     "build:prod": "NEXT_DIST_DIR=.next-build next build",
     "start:prod": "NEXT_DIST_DIR=.next-build next start",
-    "test:lib": "node --import ./lib/tshook.mjs --test lib/city.test.mjs lib/window.test.mjs lib/profile.test.mjs lib/setup.test.mjs lib/setup-view.test.mjs lib/store.test.mjs lib/format.test.mjs lib/site.test.mjs",
+    "test:lib": "node --import ./lib/tshook.mjs --test lib/city.test.mjs lib/window.test.mjs lib/profile.test.mjs lib/setup.test.mjs lib/setup-view.test.mjs lib/sponsor.test.mjs lib/store.test.mjs lib/format.test.mjs lib/site.test.mjs",
     "lint": "next lint"
   },
   "dependencies": {
@@ -17,7 +17,8 @@
     "next": "^15.1.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "redis": "^4.7.1"
+    "redis": "^4.7.1",
+    "stripe": "^22.5.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.7",

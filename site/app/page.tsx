@@ -1,10 +1,12 @@
-import { getLeaderboard, type WindowKind } from "@/lib/store";
+import { getActiveSponsor, getLeaderboard, getSiteMetrics, type WindowKind } from "@/lib/store";
 import { currentSeasonId, daysRemaining, seasonRange, projectAnnualCost, isFinale } from "@/lib/season";
 import { formatCount, formatCost, formatAgo, formatAnnualCost, formatDate } from "@/lib/format";
 import { citySvg } from "@/lib/city";
 import { accentHex } from "@/lib/profile";
 import LiveBoard from "./LiveBoard";
 import ProfileSearch from "./ProfileSearch";
+import SiteViewTracker from "./SiteViewTracker";
+import SponsorDock from "./SponsorDock";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +34,13 @@ export default async function Page({
   const window: WindowKind = isCurrent && sp?.window === "7d" ? "7d" : "season";
 
   const now = Date.now();
+  const [sponsor, siteMetrics] = await Promise.all([getActiveSponsor(now), getSiteMetrics()]);
+  const demoQuery = new URLSearchParams();
+  if (sponsor) {
+    demoQuery.set("sponsor", sponsor.name);
+    demoQuery.set("sponsorUrl", sponsor.url);
+  }
+  const demoSrc = demoQuery.size ? `/demo/index.html?${demoQuery}` : "/demo/index.html";
   // we always fetch the season ranking (for the headline); only refetch for 7d.
   const seasonRanking = await getLeaderboard(season, { window: "season", limit: 100 });
   const ranking =
@@ -66,6 +75,8 @@ export default async function Page({
 
   return (
     <main className="wrap">
+      <SiteViewTracker />
+      <SponsorDock sponsor={sponsor} metrics={siteMetrics} />
       <header className="hero">
         <div className="hero-copy">
           <div className="eyebrow">Token city · community leaderboard</div>
@@ -335,7 +346,7 @@ export default async function Page({
           </div>
           <div className="demo-frame">
             <iframe
-              src="/demo/index.html"
+              src={demoSrc}
               title="TOKENTOWN overlay — rooftops platformer, simulated demo"
               width={340}
               height={380}

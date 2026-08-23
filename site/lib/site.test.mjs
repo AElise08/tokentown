@@ -87,3 +87,16 @@ test("closed season albums expose only the final 28-day totals", () => {
   assert.match(page, /isCurrent\s*\?\s*\([\s\S]*7 days[\s\S]*\)\s*:\s*\([\s\S]*season · 28d/);
   assert.match(api, /season\s*===\s*cur\s*&&\s*url\.searchParams\.get\(["']window["']\)\s*===\s*["']7d["']/);
 });
+
+test("sponsored flights stay site-only and do not track per-ad impressions or clicks", () => {
+  const page = read("app/page.tsx");
+  const dock = read("app/SponsorDock.tsx");
+  const game = read("public/demo/isometric-city.js");
+  const privacy = read("app/privacy/page.tsx");
+  assert.match(page, /<SponsorDock\s+sponsor=\{sponsor\}\s+metrics=\{siteMetrics\}/);
+  assert.match(dock, /launch your balloon · \$2/);
+  assert.match(dock, /individual ad impressions and clicks are not tracked/);
+  assert.match(game, /sponsorName/);
+  assert.match(privacy, /does not create browsing profiles or track individual/);
+  assert.doesNotMatch(dock, /\/api\/sponsors\/(impression|click)/);
+});

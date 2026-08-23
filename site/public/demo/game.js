@@ -21,6 +21,9 @@
   // snapshot from one person's city. The normal demo remains unchanged.
   var query = new URLSearchParams(window.location.search);
   var profileMode = query.get('mode') === 'profile';
+  var sponsorName = String(query.get('sponsor') || '').replace(/[<>]/g,'').trim().slice(0,18);
+  var sponsorUrl = '';
+  try { var sponsorParsed = new URL(query.get('sponsorUrl') || ''); if(sponsorParsed.protocol === 'https:') sponsorUrl = sponsorParsed.toString(); } catch(e) {}
   if(profileMode) document.body.classList.add('profile-mode');
   function hashSeed(s){ var h=2166136261; s=String(s||'anon');
     for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
@@ -56,7 +59,9 @@
     era: Math.max(0, Math.floor(qNum('era', 0))),
     types: qCounts('types'),
     specials: qList('specials'),
-    marcos: qList('marcos')
+    marcos: qList('marcos'),
+    sponsorName: sponsorName,
+    sponsorUrl: sponsorUrl
   } : null;
   var profileTargetBuildings = profileSnapshot ? profileSnapshot.buildings : 0;
   var profileRenderer = query.get('renderer') || 'iso';
@@ -918,31 +923,38 @@
   }
 
   // ---- DIRIGÍVEL raro: a cada 30-60min cruza o céu devagar; letreiro "TOKENTOWN" piscando ----
-  var blimp = null, blimpNextAt = 1800000;
+  var blimp = null, blimpNextAt = sponsorName ? 1200 : 1800000;
   function updateBlimp(dt){
     if(reduce) return;
     if(!blimp && t >= blimpNextAt){ var dir = Math.random()<0.5?1:-1;
       blimp = { x: dir>0? -70 : W+70, y: 16+Math.random()*16, dir:dir, sp:0.28+Math.random()*0.12 }; }
     if(blimp){ blimp.x += blimp.dir*blimp.sp*(dt*0.06);
-      if(blimp.x < -74 || blimp.x > W+74){ blimp=null; blimpNextAt = t + 1800000; } } // a cada 30min
+      if(blimp.x < -82 || blimp.x > W+82){ blimp=null; blimpNextAt = t + (sponsorName ? 120000 : 1800000); } } // sponsor: 2min; fallback: 30min
   }
   function drawBlimp(night){
     if(!blimp) return; var x=blimp.x|0, y=blimp.y|0;
     var body = night? '#6a5f7a' : '#8a7f96';
     // The old envelope was only 22px wide while the word is much longer;
     // give the airship enough room so the brand stays inside the silhouette.
-    var bw = 62;
+    var bw = 72;
     R(x, y, bw, 11, body); R(x+6, y-1, bw-12, 1, mix(body,'#fff',0.15));
     R(x-1, y+4, 1, 3, body); R(x+bw, y+4, 1, 3, body);     // envelope (bico e cauda)
     R(x+23, y+11, 16, 2, mix(body,'#000',0.3));            // gôndola
     var lit = night ? '#ffe6a8' : '#f2b47a';               // letreiro fixo e legível
     ctx.globalAlpha = night?1:0.95;
     R(x+7, y+2, bw-14, 7, '#40354f');
-    ctx.font='bold 7px monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
-    ctx.fillStyle = lit; ctx.fillText('TOKENTOWN', x+bw/2, y+2);
+    ctx.font='bold 6px monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillStyle = lit; ctx.fillText(sponsorName || 'TOKENTOWN', x+bw/2, y+2);
     if(night){ ctx.globalAlpha=0.18; R(x, y, bw, 11, '#ffe6a8'); }
     ctx.globalAlpha=1; ctx.textBaseline='alphabetic';
   }
+
+  cv.addEventListener('click', function(event){
+    if(!sponsorUrl || !blimp) return;
+    var rect=cv.getBoundingClientRect(), x=(event.clientX-rect.left)*W/rect.width, y=(event.clientY-rect.top)*H/rect.height;
+    if(x>=blimp.x && x<=blimp.x+72 && y>=blimp.y-1 && y<=blimp.y+14)
+      window.open(sponsorUrl,'_blank','noopener,noreferrer');
+  });
 
   function draw(dt){
     t += dt;

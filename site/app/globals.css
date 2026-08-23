@@ -1934,3 +1934,65 @@ tr.champ td.user .crown {
     grid-template-columns: minmax(92px, 116px) 1fr 36px;
   }
 }
+/* ---- sponsored flights: site-only, fixed-price 24-hour placements ---- */
+.sponsor-dock {
+  position: fixed;
+  z-index: 40;
+  top: 150px;
+  right: max(12px, calc((100vw - 1340px) / 2));
+  width: 184px;
+  padding: 12px;
+  color: var(--ink);
+  background: linear-gradient(180deg, rgba(42, 33, 52, .97), rgba(23, 18, 32, .97));
+  border: 1px solid #4a3b52;
+  border-radius: 12px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, .36), inset 0 1px rgba(255, 255, 255, .06);
+  font-family: var(--mono);
+}
+.sponsor-cap { color: var(--amber-dk); font-size: 8px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.sponsor-live, .sponsor-empty { display: flex; flex-direction: column; gap: 5px; margin: 10px 0; color: inherit; text-decoration: none; }
+.sponsor-live:hover strong { color: var(--gold); }
+.sponsor-live strong, .sponsor-empty strong { color: var(--gold); font-size: 13px; overflow-wrap: anywhere; }
+.sponsor-live > span:last-child, .sponsor-empty span { color: var(--mute); font-size: 9px; line-height: 1.45; }
+.sponsor-airship { color: var(--teal) !important; font-size: 15px !important; letter-spacing: -.2em; }
+.sponsor-metrics { padding-top: 8px; border-top: 1px solid #352c3d; color: var(--faint); font-size: 7.5px; line-height: 1.4; }
+.sponsor-launch, .sponsor-pay {
+  width: 100%; margin-top: 9px; padding: 8px 7px; border: 1px solid #6b5265; border-radius: 7px;
+  color: #171220; background: var(--gold); font: 800 8px/1 var(--mono); letter-spacing: .04em; cursor: pointer;
+}
+.sponsor-launch:hover, .sponsor-pay:hover { background: #ffe4b5; }
+.sponsor-notice, .sponsor-error { margin-top: 8px; color: var(--amber); font-size: 8px; line-height: 1.4; }
+
+.sponsor-dialog { width: min(440px, calc(100vw - 28px)); padding: 0; border: 1px solid #574863; border-radius: 15px; color: var(--ink); background: #171220; box-shadow: 0 24px 80px rgba(0,0,0,.7); font-family: var(--mono); }
+.sponsor-dialog::backdrop { background: rgba(10, 7, 16, .76); backdrop-filter: blur(3px); }
+.sponsor-dialog form { display: flex; flex-direction: column; gap: 12px; padding: 18px; }
+.sponsor-dialog-head { display: flex; align-items: center; justify-content: space-between; color: var(--gold); font-size: 12px; font-weight: 800; }
+.sponsor-dialog-head button { border: 0; color: var(--mute); background: transparent; font-size: 24px; cursor: pointer; }
+.sponsor-dialog p, .sponsor-dialog small { color: var(--mute); font-size: 9px; line-height: 1.55; }
+.sponsor-dialog label { display: flex; flex-direction: column; gap: 5px; color: var(--amber-dk); font-size: 8px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+.sponsor-dialog input { width: 100%; padding: 10px; border: 1px solid #3d3248; border-radius: 7px; outline: none; color: var(--ink); background: #100d17; font: 11px var(--mono); }
+.sponsor-dialog input:focus { border-color: var(--teal); }
+.sponsor-dialog .sponsor-consent { flex-direction: row; align-items: flex-start; color: var(--mute); font-weight: 500; letter-spacing: 0; line-height: 1.4; text-transform: none; }
+.sponsor-consent input { width: auto; margin-top: 1px; }
+.sponsor-price { display: flex; justify-content: space-between; padding: 11px; border: 1px solid #3d3248; border-radius: 8px; color: var(--mute); font-size: 10px; }
+.sponsor-price strong { color: var(--gold); }
+.sponsor-pay { padding: 11px; font-size: 9px; }
+.sponsor-pay:disabled { cursor: wait; opacity: .6; }
+
+.sponsor-admin { padding-top: 48px; }
+.sponsor-admin h1 { margin: 24px 0 16px; color: var(--gold); }
+.admin-key { display: flex; gap: 8px; }
+.admin-key input, .admin-key button, .admin-actions button { padding: 9px 11px; border: 1px solid #4a3b52; border-radius: 7px; color: var(--ink); background: #171220; font-family: var(--mono); }
+.admin-campaigns { display: grid; gap: 12px; margin-top: 22px; }
+.admin-campaigns article { padding: 15px; border: 1px solid #352c3d; border-radius: 10px; background: #171220; }
+.admin-campaigns article > div:first-child { display: flex; justify-content: space-between; }
+.admin-campaigns p, .admin-campaigns a, .admin-campaigns small { display: block; margin-top: 7px; overflow-wrap: anywhere; }
+.admin-campaigns small { color: var(--mute); }
+.admin-status { padding: 3px 7px; border-radius: 999px; color: var(--teal); background: #202d32; font-size: 8px; text-transform: uppercase; }
+.admin-actions { display: flex; gap: 7px; margin-top: 12px; }
+.admin-actions button { cursor: pointer; }
+.admin-actions .danger { color: #ffaca6; border-color: #74433f; }
+
+@media (max-width: 1363px) {
+  .sponsor-dock { position: relative; inset: auto; width: 100%; margin: 0 0 16px; }
+}
