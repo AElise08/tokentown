@@ -61,7 +61,8 @@
     specials: qList('specials'),
     marcos: qList('marcos'),
     sponsorName: sponsorName,
-    sponsorUrl: sponsorUrl
+    sponsorUrl: sponsorUrl,
+    flightEpoch: Math.max(0, qNum('flightEpoch', Date.now()))
   } : null;
   var profileTargetBuildings = profileSnapshot ? profileSnapshot.buildings : 0;
   var profileRenderer = query.get('renderer') || 'iso';

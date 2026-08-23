@@ -70,6 +70,16 @@ test("isometric profiles vary structure by deterministic city family", () => {
   assert.match(iso, /city-layout-7|Macro-family/);
 });
 
+test("profile rail is the same synchronized isometric city as the main view", () => {
+  const profile = read("app/u/[username]/page.tsx");
+  const game = read("public/demo/game.js");
+  const iso = read("public/demo/isometric-city.js");
+  assert.match(profile, /flightEpoch:\s*String\(now\)/);
+  assert.match(profile, /const railDemoSrc = profileDemoSrc/);
+  assert.match(game, /flightEpoch:/);
+  assert.match(iso, /Date\.now\(\) - flightEpoch/);
+});
+
 test("site exposes a dedicated privacy page and links it from the board", () => {
   const page = read("app/page.tsx");
   const privacy = read("app/privacy/page.tsx");

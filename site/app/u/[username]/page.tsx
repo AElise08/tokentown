@@ -135,6 +135,7 @@ export default async function UserPage({
       : "",
     season: String(season),
     renderer: "iso-original",
+    flightEpoch: String(now),
   });
   if (entry.city) {
     demoParams.set("marcos", entry.city.marcos.join(","));
@@ -150,9 +151,9 @@ export default async function UserPage({
     demoParams.set("sponsorUrl", sponsor.url);
   }
   const profileDemoSrc = `/demo/index.html?${demoParams.toString()}`;
-  const railDemoParams = new URLSearchParams(demoParams);
-  railDemoParams.set("renderer", "classic");
-  const railDemoSrc = `/demo/index.html?${railDemoParams.toString()}`;
+  // The rail is a true miniature of the main city: same renderer, snapshot,
+  // seed and flight epoch. It no longer invents a second skyline.
+  const railDemoSrc = profileDemoSrc;
 
   // landmarks: from the real city (app vocabulary) or derived from the numbers (fallback).
   let marcos: string[];

@@ -126,7 +126,7 @@
 
     var airshipFlight = 26000;
     var airshipCycle = airshipFlight + 30 * 60 * 1000;
-    var mountedAt = performance.now();
+    var flightEpoch = Number(data && data.flightEpoch) || Date.now();
     var activeAirship = null;
     canvas.addEventListener("click", function (event) {
       if (!sponsorUrl || !activeAirship) return;
@@ -139,9 +139,9 @@
     function frame(now) {
       ctx.clearRect(0, 0, W, H);
       ctx.drawImage(still, 0, 0);
-      // Use wall-clock time instead of page-load time: opening a profile does
-      // not reset the schedule or force a new arrival.
-      var phase = sponsorName ? (now - mountedAt) % airshipCycle : Date.now() % airshipCycle;
+      // Both the rail thumbnail and the large city receive the same epoch, so
+      // their sponsored airship occupies the same normalized position.
+      var phase = sponsorName ? Math.max(0, Date.now() - flightEpoch) % airshipCycle : Date.now() % airshipCycle;
       if (phase < airshipFlight) {
         var x = -98 + phase * 0.019;
         drawBlimp(ctx, x, 43, sponsorName || "TOKENTOWN");
