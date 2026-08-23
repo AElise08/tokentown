@@ -2,7 +2,7 @@
 // CARD DE COMPARTILHAMENTO (og:image / twitter card) da página /u/[username].
 //
 // Colar o link /u/mel no WhatsApp/X/Discord mostra A CIDADE da pessoa com stats.
-// 1200x630, fundo #141019, paleta dourada, com a MESMA cidade renderizada pelo
+// 1200x630, fundo polar-night e paleta azul, com a MESMA cidade renderizada pelo
 // lib/city.ts (reaproveitada como SVG e embutida via <img data:image/svg+xml…>,
 // que o satori/resvg do next/og rasteriza). Usa cityName/motto/accent do perfil.
 //
@@ -23,12 +23,12 @@ import { topSkills, modelDonut } from "@/lib/setup-view";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const VOID = "#141019";
-const GOLD = "#ffd79a";
-const AMBER = "#f2b47a";
-const MUTE = "#a99bb0";
-const FAINT = "#6b5f76";
-const TEAL = "#7fc7bf";
+const VOID = "#07111f";
+const GOLD = "#d5edff";
+const AMBER = "#77bfff";
+const MUTE = "#91a8bb";
+const FAINT = "#526b80";
+const TEAL = "#6ce5ee";
 
 // marca ◍ NORTOWN desenhada (anel) — sem depender de glifo/fonte externa.
 function brandMark(color: string, d = 26) {

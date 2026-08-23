@@ -6,24 +6,24 @@
 <title>NORTOWN</title>
 <style>
   :root{
-    --void:#141019; --panel:#1e1826; --panel2:#171220;
-    --edge:#302636; --edge-hi:#4a3b52;
-    --amber:#f2b47a; --amber-dk:#c9895a; --gold:#ffd79a;
-    --rose:#c98a94; --teal:#7fc7bf; --violet:#9a86c4;
-    --ink:#efe6df; --mute:#a99bb0; --faint:#6b5f76;
+    --void:#07111f; --panel:#0f1d2d; --panel2:#0a1624;
+    --edge:#20364d; --edge-hi:#365876;
+    --amber:#77bfff; --amber-dk:#4389c9; --gold:#d5edff;
+    --rose:#8fb9dc; --teal:#6ce5ee; --violet:#829fd1;
+    --ink:#e8f2fb; --mute:#91a8bb; --faint:#526b80;
     --mono:ui-monospace,'SF Mono','JetBrains Mono',Menlo,Consolas,monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{background:var(--void);color:var(--ink);font-family:var(--mono);-webkit-font-smoothing:antialiased}
   body{min-height:100vh;padding:clamp(14px,3vw,42px);overflow-x:hidden;line-height:1.55;
     background:
-      radial-gradient(130% 90% at 80% 0%, #2a1d3a 0%, rgba(20,16,25,0) 55%),
-      radial-gradient(110% 80% at 8% 100%, #241826 0%, rgba(20,16,25,0) 60%),
+      radial-gradient(130% 90% at 80% 0%, #112943 0%, rgba(7,17,31,0) 55%),
+      radial-gradient(110% 80% at 8% 100%, #0c2235 0%, rgba(7,17,31,0) 60%),
       var(--void)}
   .wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(16px,2.4vw,28px)}
   .eyebrow{font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--amber);display:flex;align-items:center;gap:9px}
   .eyebrow::before{content:"";width:22px;height:2px;background:var(--amber);opacity:.7}
-  h1{font-size:clamp(28px,6.5vw,52px);font-weight:800;letter-spacing:.05em;line-height:1;color:var(--gold);text-shadow:2px 2px 0 rgba(201,137,90,.55);text-wrap:balance}
+  h1{font-size:clamp(28px,6.5vw,52px);font-weight:800;letter-spacing:.05em;line-height:1;color:var(--gold);text-shadow:2px 2px 0 rgba(52,120,180,.55);text-wrap:balance}
   .lede{color:var(--mute);max-width:60ch;font-size:14px}
   .lede b{color:var(--ink);font-weight:600}.lede .tk{color:var(--amber);font-weight:600}
 
@@ -42,7 +42,7 @@
     box-shadow:inset 0 1px 0 rgba(255,255,255,.09),inset 0 -2px 0 rgba(0,0,0,.4),0 2px 0 #0c0812,0 30px 52px -20px rgba(0,0,0,.7),0 8px 22px -8px rgba(0,0,0,.55);animation:bob 7s ease-in-out infinite}
   @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
   .frame-top{display:flex;align-items:center;justify-content:space-between;padding:1px 4px 9px}
-  .brand{font-size:12px;font-weight:800;letter-spacing:.16em;color:var(--gold);text-shadow:1px 1px 0 rgba(201,137,90,.5)}
+  .brand{font-size:12px;font-weight:800;letter-spacing:.16em;color:var(--gold);text-shadow:1px 1px 0 rgba(52,120,180,.5)}
   .live{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.13em;color:var(--teal);text-transform:uppercase}
   .live .led{width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 7px var(--teal);animation:pulse 1.7s ease-in-out infinite}
   .live.off{color:var(--faint)}.live.off .led{background:var(--faint);box-shadow:none;animation:none}

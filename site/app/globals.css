@@ -1,18 +1,20 @@
 :root {
-  --void: #141019;
-  --panel: #1e1826;
-  --panel2: #171220;
-  --edge: #302636;
-  --edge-hi: #4a3b52;
-  --amber: #f2b47a;
-  --amber-dk: #c9895a;
-  --gold: #ffd79a;
-  --silver: #cfd3da;
-  --bronze: #d19a6a;
-  --teal: #7fc7bf;
-  --ink: #efe6df;
-  --mute: #a99bb0;
-  --faint: #6b5f76;
+  /* NORTOWN: polar-night chrome. Legacy variable names remain so profile
+     accents and older components keep working without a markup migration. */
+  --void: #07111f;
+  --panel: #0f1d2d;
+  --panel2: #0a1624;
+  --edge: #20364d;
+  --edge-hi: #365876;
+  --amber: #77bfff;
+  --amber-dk: #4389c9;
+  --gold: #d5edff;
+  --silver: #b9cee0;
+  --bronze: #7392ad;
+  --teal: #6ce5ee;
+  --ink: #e8f2fb;
+  --mute: #91a8bb;
+  --faint: #526b80;
   --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
   /* editorial serif accent — SYSTEM fonts only (no @font-face, no external
      request, CSP-safe). Used sparingly on titles for a magazine feel over the
@@ -41,8 +43,8 @@ body {
   overflow-x: hidden;
   /* fundo chapado + duas manchas de luz bem suaves (não é gradiente de hero) */
   background:
-    radial-gradient(130% 90% at 82% -10%, #241a33 0%, rgba(20, 16, 25, 0) 55%),
-    radial-gradient(110% 80% at 6% 110%, #201623 0%, rgba(20, 16, 25, 0) 60%),
+    radial-gradient(130% 90% at 82% -10%, #112943 0%, rgba(7, 17, 31, 0) 55%),
+    radial-gradient(110% 80% at 6% 110%, #0c2235 0%, rgba(7, 17, 31, 0) 60%),
     var(--void);
 }
 
@@ -90,7 +92,7 @@ h1 {
   letter-spacing: 0.05em;
   line-height: 1;
   color: var(--gold);
-  text-shadow: 2px 2px 0 rgba(201, 137, 90, 0.5);
+  text-shadow: 2px 2px 0 rgba(52, 120, 180, 0.5);
   margin-top: 10px;
 }
 h1 .mark {
@@ -536,7 +538,7 @@ tr.top3 td.pos::before {
 .demo-card {
   border: 1px solid var(--edge);
   border-radius: 12px;
-  background: #141019;
+  background: #081522;
   padding: 12px 12px 14px;
   display: flex;
   flex-direction: column;
@@ -584,7 +586,7 @@ tr.top3 td.pos::before {
 .get {
   border: 1px solid var(--edge);
   border-radius: 14px;
-  background: linear-gradient(180deg, #1c1526, #160f1f);
+  background: linear-gradient(180deg, #0f2032, #091624);
   padding: clamp(18px, 3vw, 26px);
   scroll-margin-top: 20px;
 }
@@ -606,7 +608,7 @@ tr.top3 td.pos::before {
   gap: 10px;
   border: 1px solid var(--edge);
   border-radius: 12px;
-  background: #181121;
+  background: #0b1928;
   padding: 15px 16px 16px;
 }
 .tier-top {
@@ -648,7 +650,7 @@ tr.top3 td.pos::before {
 .tier-cmd {
   font-size: 12.5px;
   color: var(--teal);
-  background: #241b30;
+  background: #10243a;
   border: 1px solid var(--edge);
   border-radius: 6px;
   padding: 7px 10px;
@@ -1957,11 +1959,11 @@ tr.champ td.user .crown {
   place-items: center;
   padding: 0 24px;
   overflow: hidden;
-  border: 1px solid #796076;
+  border: 1px solid #4e7698;
   border-radius: 52% 48% 50% 50% / 58% 58% 42% 42%;
   background:
     linear-gradient(180deg, rgba(255,255,255,.13), transparent 24%),
-    linear-gradient(180deg, #66506b, #3a2d48 72%, #241c33);
+    linear-gradient(180deg, #426b8e, #24445f 72%, #132a40);
   box-shadow: inset 0 -5px 0 rgba(15, 10, 24, .22), inset 0 1px rgba(255,255,255,.12);
 }
 .airship-envelope::before,
@@ -1971,7 +1973,7 @@ tr.champ td.user .crown {
   left: 19px;
   right: 19px;
   height: 1px;
-  background: rgba(255, 220, 164, .16);
+  background: rgba(180, 226, 255, .18);
 }
 .airship-envelope::before { top: 9px; }
 .airship-envelope::after { bottom: 8px; }
@@ -1995,7 +1997,7 @@ tr.champ td.user .crown {
   width: 25px;
   height: 26px;
   clip-path: polygon(0 0, 100% 34%, 100% 66%, 0 100%, 22% 50%);
-  background: #48384f;
+  background: #284b68;
 }
 .airship-gondola {
   position: absolute;
@@ -2003,9 +2005,9 @@ tr.champ td.user .crown {
   left: 77px;
   width: 39px;
   height: 10px;
-  border: 1px solid #59445c;
+  border: 1px solid #3d6584;
   border-radius: 2px 2px 6px 6px;
-  background: #261d34;
+  background: #10283d;
 }
 .hero-city-flight:hover .airship-envelope { border-color: var(--amber); }
 .hero-city-flight:hover { animation-play-state: paused; }
@@ -2025,8 +2027,8 @@ tr.champ td.user .crown {
   color: var(--ink);
   background:
     repeating-linear-gradient(0deg, rgba(255,255,255,.018) 0 1px, transparent 1px 5px),
-    linear-gradient(180deg, rgba(42, 33, 52, .98), rgba(19, 15, 28, .98));
-  border: 1px solid #4a3b52;
+    linear-gradient(180deg, rgba(17, 39, 60, .98), rgba(7, 19, 32, .98));
+  border: 1px solid #31536f;
   border-radius: 11px;
   box-shadow: 0 16px 36px rgba(0, 0, 0, .34), inset 0 1px rgba(255,255,255,.05);
   font-family: var(--mono);
@@ -2034,8 +2036,8 @@ tr.champ td.user .crown {
 .lineup-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 10px; border-bottom: 1px solid #3a3043; }
 .lineup-head > span { display: flex; align-items: center; gap: 6px; color: var(--gold); font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
 .lineup-head i { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 7px rgba(127,199,191,.7); }
-.lineup-head button { flex: 0 0 auto; padding: 4px 6px; border: 1px solid #6b5265; border-radius: 5px; color: var(--gold); background: #241b30; font: 800 7px/1 var(--mono); cursor: pointer; }
-.lineup-head button:hover { border-color: var(--amber); background: #30233c; }
+.lineup-head button { flex: 0 0 auto; padding: 4px 6px; border: 1px solid #426783; border-radius: 5px; color: var(--gold); background: #10243a; font: 800 7px/1 var(--mono); cursor: pointer; }
+.lineup-head button:hover { border-color: var(--amber); background: #183450; }
 .sponsor-lineup ol { display: grid; gap: 6px; margin: 9px 0 0; padding: 0; list-style: none; }
 .sponsor-lineup li { display: grid; grid-template-columns: 38px minmax(0, 1fr); align-items: center; min-height: 42px; overflow: hidden; border: 1px solid #342a3e; border-radius: 7px; background: rgba(255,255,255,.018); }
 .sponsor-lineup li.active { border-color: rgba(127,199,191,.34); background: rgba(127, 199, 191, .08); }
@@ -2061,8 +2063,8 @@ tr.champ td.user .crown {
   width: 100%;
   padding: 16px 18px;
   color: var(--ink);
-  background: linear-gradient(180deg, rgba(42, 33, 52, .97), rgba(23, 18, 32, .97));
-  border: 1px solid #4a3b52;
+  background: linear-gradient(180deg, rgba(17, 39, 60, .97), rgba(9, 23, 38, .97));
+  border: 1px solid #31536f;
   border-radius: 12px;
   box-shadow: 0 14px 32px rgba(0, 0, 0, .24), inset 0 1px rgba(255, 255, 255, .06);
   font-family: var(--mono);
@@ -2074,13 +2076,13 @@ tr.champ td.user .crown {
 .sponsor-live > span:last-child, .sponsor-empty span { color: var(--mute); font-size: 9px; line-height: 1.45; }
 .sponsor-metrics { color: var(--faint); font-size: 7.5px; line-height: 1.4; }
 .sponsor-launch, .sponsor-pay {
-  width: auto; margin: 0; padding: 11px 14px; border: 1px solid #6b5265; border-radius: 7px;
-  color: #171220; background: var(--gold); font: 800 8px/1 var(--mono); letter-spacing: .04em; cursor: pointer;
+  width: auto; margin: 0; padding: 11px 14px; border: 1px solid #5d9bd0; border-radius: 7px;
+  color: #07111f; background: var(--gold); font: 800 8px/1 var(--mono); letter-spacing: .04em; cursor: pointer;
 }
-.sponsor-launch:hover, .sponsor-pay:hover { background: #ffe4b5; }
+.sponsor-launch:hover, .sponsor-pay:hover { background: #eff9ff; }
 .sponsor-notice, .sponsor-error { grid-column: 1 / -1; margin-top: 2px; color: var(--amber); font-size: 8px; line-height: 1.4; }
 
-.sponsor-dialog { width: min(440px, calc(100vw - 28px)); padding: 0; border: 1px solid #574863; border-radius: 15px; color: var(--ink); background: #171220; box-shadow: 0 24px 80px rgba(0,0,0,.7); font-family: var(--mono); }
+.sponsor-dialog { width: min(440px, calc(100vw - 28px)); padding: 0; border: 1px solid #31536f; border-radius: 15px; color: var(--ink); background: #0a1624; box-shadow: 0 24px 80px rgba(0,0,0,.7); font-family: var(--mono); }
 .sponsor-dialog::backdrop { background: rgba(10, 7, 16, .76); backdrop-filter: blur(3px); }
 .sponsor-dialog form { display: flex; flex-direction: column; gap: 12px; padding: 18px; }
 .sponsor-dialog-head { display: flex; align-items: center; justify-content: space-between; color: var(--gold); font-size: 12px; font-weight: 800; }

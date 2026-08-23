@@ -6,9 +6,9 @@
 <title>NORTOWN — live overlay demo</title>
 <style>
   :root{
-    --void:#141019; --panel:#1e1826; --panel2:#171220; --edge-hi:#4a3b52;
-    --amber:#f2b47a; --amber-dk:#c9895a; --gold:#ffd79a;
-    --teal:#7fc7bf; --ink:#efe6df; --mute:#a99bb0; --faint:#6b5f76;
+    --void:#07111f; --panel:#0f1d2d; --panel2:#0a1624; --edge-hi:#365876;
+    --amber:#77bfff; --amber-dk:#4389c9; --gold:#d5edff;
+    --teal:#6ce5ee; --ink:#e8f2fb; --mute:#91a8bb; --faint:#526b80;
     --mono:ui-monospace,'SF Mono','JetBrains Mono',Menlo,Consolas,monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -24,7 +24,7 @@
     box-shadow:inset 0 1px 0 rgba(255,255,255,.09),inset 0 -2px 0 rgba(0,0,0,.4),
       0 20px 40px -16px rgba(0,0,0,.7),0 6px 16px -6px rgba(0,0,0,.55)}
   .bar{display:flex;align-items:center;justify-content:space-between;padding:1px 3px 8px}
-  .brand{font-size:11px;font-weight:800;letter-spacing:.15em;color:var(--gold);text-shadow:1px 1px 0 rgba(201,137,90,.5)}
+  .brand{font-size:11px;font-weight:800;letter-spacing:.15em;color:var(--gold);text-shadow:1px 1px 0 rgba(52,120,180,.5)}
   .live{display:flex;align-items:center;gap:5px;font-size:8px;letter-spacing:.12em;color:var(--teal);text-transform:uppercase}
   .live .led{width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 6px var(--teal);animation:pulse 1.7s ease-in-out infinite}
   .live.off{color:var(--faint)}.live.off .led{background:var(--faint);box-shadow:none;animation:none}
