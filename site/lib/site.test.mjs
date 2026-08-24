@@ -105,12 +105,11 @@ test("isometric profiles vary structure by deterministic city family", () => {
 
 test("profile keeps the isometric main view and synchronized pixel mini", () => {
   const profile = read("app/u/[username]/page.tsx");
-  assert.match(profile, /citySvg\(/);
-  assert.match(profile, /className="rail-pixel-city"/);
   assert.match(profile, /renderer:\s*"iso-original"/);
   assert.match(profile, /flightEpoch:\s*String\(now\)/);
   assert.match(profile, /profileDemoSrc/);
-  assert.match(profile, /same city|pixelCityMini/);
+  assert.match(profile, /railDemoParams\.set\("renderer",\s*"classic"\)/);
+  assert.match(profile, /const railDemoSrc = `\/demo\/index\.html\?/);
 });
 
 test("site exposes a dedicated privacy page and links it from the board", () => {

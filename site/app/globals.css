@@ -1001,15 +1001,6 @@ td.city {
   height: 126px;
   border: 0;
 }
-.rail-pixel-city {
-  line-height: 0;
-  background: #141230;
-}
-.rail-pixel-city .tt-city {
-  display: block;
-  width: 100%;
-  height: auto;
-}
 .rail-user {
   padding: 10px 10px 1px;
   color: var(--ink);

@@ -3,7 +3,7 @@ import { getPublicSponsorLineup, getSiteMetrics, getSponsorAvailability, getUser
 import { sponsorSalesEnabled } from "@/lib/stripe";
 import { currentSeasonId, seasonRange, daysRemaining, isFinale } from "@/lib/season";
 import { formatCount, formatCost, formatAgo, formatDate } from "@/lib/format";
-import { cityFeatures, cityComposition, cityMarcoLabels, citySvg } from "@/lib/city";
+import { cityFeatures, cityComposition, cityMarcoLabels } from "@/lib/city";
 import { cityTitle, accentHex } from "@/lib/profile";
 import { setupView, weekHeatmap, pct } from "@/lib/setup-view";
 import LiveRefresh from "./LiveRefresh";
@@ -127,19 +127,6 @@ export default async function UserPage({
   const pop = entry.city ? entry.city.pop : entry.residents;
   const composition = entry.city ? cityComposition(entry.city) : [];
 
-  const pixelCityMini = citySvg(
-    {
-      username: u,
-      tokens: entry.tokens,
-      residents: pop,
-      buildings: entry.buildings,
-      city: entry.city,
-      accent,
-    },
-    "mini",
-    finale
-  );
-
   const demoParams = new URLSearchParams({
     mode: "profile",
     username: u,
@@ -169,6 +156,9 @@ export default async function UserPage({
     demoParams.set("sponsorUrl", sponsor.url);
   }
   const profileDemoSrc = `/demo/index.html?${demoParams.toString()}`;
+  const railDemoParams = new URLSearchParams(demoParams);
+  railDemoParams.set("renderer", "classic");
+  const railDemoSrc = `/demo/index.html?${railDemoParams.toString()}`;
 
   // landmarks: from the real city (app vocabulary) or derived from the numbers (fallback).
   let marcos: string[];
@@ -196,12 +186,7 @@ export default async function UserPage({
           <div className="rail-tagline">where prompts become skyline™</div>
 
           <div className="rail-city-card">
-            <div
-              className="rail-pixel-city"
-              role="img"
-              aria-label={`pixel city of ${u}`}
-              dangerouslySetInnerHTML={{ __html: pixelCityMini }}
-            />
+            <iframe src={railDemoSrc} title={`pixel city of ${u}`} loading="lazy" />
             <div className="rail-user"><span className="rail-led" /> {u}</div>
             <div className="rail-meta">T{season} · {isCurrent ? "ACTIVE BUILD" : "SEASON CLOSED"}</div>
           </div>
