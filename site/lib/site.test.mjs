@@ -103,10 +103,13 @@ test("isometric profiles vary structure by deterministic city family", () => {
   assert.match(iso, /city-layout-7|Macro-family/);
 });
 
-test("profile rail is the same synchronized isometric city as the main view", () => {
+test("profile keeps the pixel skyline primary and syncs the isometric detail view", () => {
   const profile = read("app/u/[username]/page.tsx");
   const game = read("public/demo/game.js");
   const iso = read("public/demo/isometric-city.js");
+  assert.match(profile, /citySvg\(/);
+  assert.match(profile, /className="citybig profile-pixel"/);
+  assert.match(profile, /className="profile-iso-card"/);
   assert.match(profile, /flightEpoch:\s*String\(now\)/);
   assert.match(profile, /const railDemoSrc = profileDemoSrc/);
   assert.match(game, /flightEpoch:/);

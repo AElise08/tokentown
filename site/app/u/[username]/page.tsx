@@ -3,7 +3,7 @@ import { getPublicSponsorLineup, getSiteMetrics, getSponsorAvailability, getUser
 import { sponsorSalesEnabled } from "@/lib/stripe";
 import { currentSeasonId, seasonRange, daysRemaining, isFinale } from "@/lib/season";
 import { formatCount, formatCost, formatAgo, formatDate } from "@/lib/format";
-import { cityFeatures, cityComposition, cityMarcoLabels } from "@/lib/city";
+import { cityFeatures, cityComposition, cityMarcoLabels, citySvg } from "@/lib/city";
 import { cityTitle, accentHex } from "@/lib/profile";
 import { setupView, weekHeatmap, pct } from "@/lib/setup-view";
 import LiveRefresh from "./LiveRefresh";
@@ -126,6 +126,19 @@ export default async function UserPage({
   // residents/composition: from the REAL city when present, else from the fallback.
   const pop = entry.city ? entry.city.pop : entry.residents;
   const composition = entry.city ? cityComposition(entry.city) : [];
+
+  const pixelCity = citySvg(
+    {
+      username: u,
+      tokens: entry.tokens,
+      residents: pop,
+      buildings: entry.buildings,
+      city: entry.city,
+      accent,
+    },
+    "full",
+    finale
+  );
 
   // The profile uses the same canvas renderer as the live demo. Only the
   // person's snapshot is passed in; game.js remains the single visual source.
@@ -256,8 +269,22 @@ export default async function UserPage({
         </a>
       </header>
 
-      <div id="profile-city" className="citybig profile-game" role="img" aria-label={`city of ${u}`}>
-        <iframe src={profileDemoSrc} title={`live city of ${u}`} loading="eager" />
+      <div id="profile-city" className="profile-city-stack">
+        <div
+          className="citybig profile-pixel"
+          role="img"
+          aria-label={`pixel city of ${u}`}
+          dangerouslySetInnerHTML={{ __html: pixelCity }}
+        />
+        <div className="profile-iso-card">
+          <div className="profile-iso-label">
+            <span>live isometric view</span>
+            <small>same city · same flight path</small>
+          </div>
+          <div className="profile-iso-frame">
+            <iframe src={profileDemoSrc} title={`live isometric city of ${u}`} loading="eager" />
+          </div>
+        </div>
       </div>
 
       {marcos.length > 0 && (
