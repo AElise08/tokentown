@@ -135,6 +135,17 @@ test("profile keeps the isometric main view and synchronized pixel mini", () => 
   assert.match(profile, /const railDemoSrc = `\/demo\/index\.html\?/);
 });
 
+test("profile exposes an isolated accelerated city-growth preview", () => {
+  const profile = read("app/u/[username]/page.tsx");
+  const game = read("public/demo/game.js");
+  const iso = read("public/demo/isometric-city.js");
+  assert.match(profile, /sp\?\.preview === "growth"/);
+  assert.match(profile, /demoParams\.set\("growthPreview", "1"\)/);
+  assert.match(game, /query\.get\('growthPreview'\) === '1'/);
+  assert.match(iso, /function updateGrowthPreview\(now\)/);
+  assert.match(iso, /previewFrom \+ \(previewTo - previewFrom\) \* progress/);
+});
+
 test("site exposes a dedicated privacy page and links it from the board", () => {
   const page = read("app/page.tsx");
   const privacy = read("app/privacy/page.tsx");

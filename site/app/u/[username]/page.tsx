@@ -52,7 +52,7 @@ export default async function UserPage({
   searchParams,
 }: {
   params: Promise<{ username: string }>;
-  searchParams: Promise<{ season?: string }>;
+  searchParams: Promise<{ season?: string; preview?: string }>;
 }) {
   const { username } = await params;
   const sp = await searchParams;
@@ -155,10 +155,14 @@ export default async function UserPage({
     demoParams.set("sponsor", sponsor.name);
     demoParams.set("sponsorUrl", sponsor.url);
   }
-  const profileDemoSrc = `/demo/index.html?${demoParams.toString()}`;
   const railDemoParams = new URLSearchParams(demoParams);
   railDemoParams.set("renderer", "classic");
   const railDemoSrc = `/demo/index.html?${railDemoParams.toString()}`;
+  if (sp?.preview === "growth") {
+    demoParams.set("growthPreview", "1");
+    demoParams.set("growthTo", String(entry.buildings + Math.max(12_000, Math.round(entry.buildings * 1.5))));
+  }
+  const profileDemoSrc = `/demo/index.html?${demoParams.toString()}`;
 
   // landmarks: from the real city (app vocabulary) or derived from the numbers (fallback).
   let marcos: string[];

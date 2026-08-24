@@ -88,7 +88,6 @@
     ctx.imageSmoothingEnabled = false;
 
     var seed = (Number(data && data.seed) || hashSeed(data && data.username)) >>> 0;
-    var random = rng(seed);
     var buildings = clamp(Math.floor(Number(data && data.buildings) || 0), 0, 5000000);
     var sponsorName = String((data && data.sponsorName) || "").replace(/[<>]/g, "").trim().slice(0, 18);
     var sponsorUrl = "";
@@ -97,33 +96,60 @@
       if (sponsorParsed.protocol === "https:") sponsorUrl = sponsorParsed.toString();
     } catch (e) {}
     var activity = clamp((Number(data && data.tokens) || 0) / 12000000, 0.25, 1);
-    var plan = cityPlan({
-      seed: seed,
-      buildings: buildings,
-      era: data && data.era,
-      types: data && data.types,
-      marcos: data && data.marcos
-    });
+    function renderCity(buildingCount) {
+      var random = rng(seed);
+      var plan = cityPlan({
+        seed: seed,
+        buildings: buildingCount,
+        era: data && data.era,
+        types: data && data.types,
+        marcos: data && data.marcos
+      });
+      var next = document.createElement("canvas");
+      next.width = W;
+      next.height = H;
+      var nextCtx = next.getContext("2d");
+      nextCtx.imageSmoothingEnabled = false;
+      drawSky(nextCtx, random);
+      drawPlatform(nextCtx, plan);
+      drawStreetSurface(nextCtx, plan);
+      for (var o = 0; o < plan.outer.length; o++) drawBuilding(nextCtx, plan.outer[o], activity);
+      for (var i = 0; i < plan.background.length; i++) drawBuilding(nextCtx, plan.background[i], activity);
+      for (var j = 0; j < plan.middle.length; j++) drawBuilding(nextCtx, plan.middle[j], activity);
+      drawLandmark(nextCtx, activity, plan.family, plan.towerX, plan.towerTop);
+      for (var k = 0; k < plan.foreground.length; k++) drawBuilding(nextCtx, plan.foreground[k], activity);
+      drawTrees(nextCtx, plan);
+      drawStreetDetails(nextCtx, plan);
+      drawPlatformFront(nextCtx, plan);
+      return next;
+    }
 
-    // Render the city once to a low-resolution backing canvas. The moving
-    // airship is composited over it each frame, so the buildings themselves
-    // stay perfectly deterministic and crisp.
-    var still = document.createElement("canvas");
-    still.width = W;
-    still.height = H;
-    var stillCtx = still.getContext("2d");
-    stillCtx.imageSmoothingEnabled = false;
-    drawSky(stillCtx, random);
-    drawPlatform(stillCtx, plan);
-    drawStreetSurface(stillCtx, plan);
-    for (var o = 0; o < plan.outer.length; o++) drawBuilding(stillCtx, plan.outer[o], activity);
-    for (var i = 0; i < plan.background.length; i++) drawBuilding(stillCtx, plan.background[i], activity);
-    for (var j = 0; j < plan.middle.length; j++) drawBuilding(stillCtx, plan.middle[j], activity);
-    drawLandmark(stillCtx, activity, plan.family, plan.towerX, plan.towerTop);
-    for (var k = 0; k < plan.foreground.length; k++) drawBuilding(stillCtx, plan.foreground[k], activity);
-    drawTrees(stillCtx, plan);
-    drawStreetDetails(stillCtx, plan);
-    drawPlatformFront(stillCtx, plan);
+    // Normal profiles render one deterministic snapshot. The opt-in growth
+    // preview rebuilds only this tiny backing canvas, leaving the real profile
+    // and leaderboard numbers untouched.
+    var previewGrowth = Boolean(data && data.previewGrowth);
+    var previewFrom = buildings;
+    var previewTo = clamp(Math.floor(Number(data && data.previewTo) || (previewFrom + Math.max(12000, previewFrom * 1.5))), previewFrom + 100, 5000000);
+    var previewStarted = null;
+    var previewRendered = previewFrom;
+    var previewBadge = document.getElementById("autoBadge");
+    var still = renderCity(previewFrom);
+    function formatBuildings(value) {
+      return Math.floor(value).toLocaleString("en-US");
+    }
+    function updateGrowthPreview(now) {
+      if (!previewGrowth) return;
+      if (previewStarted == null) previewStarted = now;
+      var phase = (now - previewStarted) % 22000;
+      var progress = phase <= 2000 ? 0 : phase >= 18000 ? 1 : (phase - 2000) / 16000;
+      progress = progress * progress * (3 - 2 * progress);
+      var nextBuildings = Math.floor(previewFrom + (previewTo - previewFrom) * progress);
+      if (Math.abs(nextBuildings - previewRendered) >= 50 || nextBuildings === previewFrom || nextBuildings === previewTo) {
+        still = renderCity(nextBuildings);
+        previewRendered = nextBuildings;
+        if (previewBadge) previewBadge.textContent = "growth preview · " + formatBuildings(nextBuildings) + " buildings";
+      }
+    }
 
     var airshipFlight = 26000;
     var airshipCycle = airshipFlight + 30 * 60 * 1000;
@@ -138,6 +164,7 @@
         window.open(sponsorUrl, "_blank", "noopener,noreferrer");
     });
     function frame(now) {
+      updateGrowthPreview(now);
       ctx.clearRect(0, 0, W, H);
       ctx.drawImage(still, 0, 0);
       // Both the rail thumbnail and the large city receive the same epoch, so

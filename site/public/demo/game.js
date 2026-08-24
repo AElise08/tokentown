@@ -62,10 +62,13 @@
     marcos: qList('marcos'),
     sponsorName: sponsorName,
     sponsorUrl: sponsorUrl,
-    flightEpoch: Math.max(0, qNum('flightEpoch', Date.now()))
+    flightEpoch: Math.max(0, qNum('flightEpoch', Date.now())),
+    previewGrowth: query.get('growthPreview') === '1',
+    previewTo: Math.max(0, Math.floor(qNum('growthTo', 0)))
   } : null;
   var profileTargetBuildings = profileSnapshot ? profileSnapshot.buildings : 0;
   var profileRenderer = query.get('renderer') || 'iso';
+  if(profileSnapshot && profileSnapshot.previewGrowth) document.body.classList.add('growth-preview');
   if(profileMode && profileRenderer !== 'classic' && window.TokentownIsoCity){
     window.TokentownIsoCity.mount(document.getElementById('scene'), profileSnapshot);
     return;
