@@ -146,6 +146,8 @@ export default function SponsorDock({
           <div className="sponsor-metrics">{formatCount(liveMetrics.visitors)} sessions · {formatCount(liveMetrics.pageviews)} pageviews</div>
         </header>
 
+        {notice && <div className="sponsor-notice" role="status"><span aria-hidden="true">●</span>{notice}</div>}
+
         <div className="sponsor-preview" aria-label="Live sponsored flight preview and sponsor board">
           <div className="sponsor-preview-sky">
             <div className="sponsor-preview-label"><span>LIVE PLACEMENT PREVIEW</span><small>the real NORTOWN city</small></div>
@@ -199,7 +201,6 @@ export default function SponsorDock({
             <span className="sponsor-launch-price"><b>{salesEnabled ? `$${plan.priceCents / 100}` : "—"}</b><small aria-hidden="true">→</small></span>
           </button>
         </div>
-        {notice && <div className="sponsor-notice" role="status">{notice}</div>}
         <p className="sponsor-terms-note">No traffic guarantee · labeled as sponsored · individual ad impressions and clicks are not tracked.</p>
       </aside>
 

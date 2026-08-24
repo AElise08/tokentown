@@ -2235,7 +2235,9 @@ tr.champ td.user .crown {
 .sponsor-launch-price { display: flex; align-items: center; gap: 8px; padding-left: 12px; border-left: 1px dashed rgba(7,17,31,.25); }
 .sponsor-launch-price b { color: #07111f; font-size: 16px; line-height: 1; }
 .sponsor-launch-price small { color: #315b79; font-size: 15px; line-height: 1; }
-.sponsor-notice, .sponsor-error { margin-top: 2px; color: var(--amber); font-size: 8px; line-height: 1.4; }
+.sponsor-notice { display: flex; align-items: center; gap: 8px; margin: 0; padding: 9px 11px; border: 1px solid rgba(108,229,238,.42); border-radius: 6px; color: var(--ink); background: rgba(27,91,105,.2); font-size: 8px; font-weight: 800; line-height: 1.4; }
+.sponsor-notice > span { color: var(--teal); text-shadow: 0 0 8px rgba(108,229,238,.7); }
+.sponsor-error { margin-top: 2px; color: var(--amber); font-size: 8px; line-height: 1.4; }
 .sponsor-terms-note { margin: -8px 0 0; color: var(--faint); font-size: 7px; line-height: 1.4; text-align: center; }
 
 /* Compact sponsor terminal: uses the same pixel city as the leaderboard. */

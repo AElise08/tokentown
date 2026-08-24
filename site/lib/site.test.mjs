@@ -208,12 +208,16 @@ test("sponsored flights stay site-only and do not track per-ad impressions or cl
 test("sponsor checkout is centered and the selected plan drives the CTA", () => {
   const dock = read("app/SponsorDock.tsx");
   const css = read("app/globals.css");
+  const checkout = read("app/api/sponsors/checkout/route.ts");
   assert.match(dock, /aria-labelledby="sponsor-dialog-title"/);
   assert.match(dock, /starts \$\{availabilityLabel/);
   assert.match(dock, /continue to Stripe · \$\$\{plan\.priceCents \/ 100\}/);
   assert.match(css, /\.sponsor-dialog\s*\{[\s\S]*?position:\s*fixed;[\s\S]*?inset:\s*0;[\s\S]*?margin:\s*auto;/);
   assert.match(css, /\.sponsor-launch-copy/);
   assert.match(css, /\.sponsor-flight-plan/);
+  assert.match(checkout, /\?sponsor=paid#sponsor/);
+  assert.match(checkout, /\?sponsor=cancelled#sponsor/);
+  assert.match(css, /\.sponsor-notice\s*\{[\s\S]*?border:/);
 });
 
 test("sponsor CTA sits before Why the app and the board paginates at 100 cities", () => {

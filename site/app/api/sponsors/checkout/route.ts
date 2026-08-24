@@ -68,8 +68,8 @@ export async function POST(req: Request) {
           },
         },
       ],
-      success_url: `${origin}/?sponsor=paid`,
-      cancel_url: `${origin}/?sponsor=cancelled`,
+      success_url: `${origin}/?sponsor=paid#sponsor`,
+      cancel_url: `${origin}/?sponsor=cancelled#sponsor`,
     });
     if (!session.url) {
       await deleteSponsorDraft(campaign.id);
