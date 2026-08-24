@@ -116,10 +116,10 @@
       for (var o = 0; o < plan.outer.length; o++) drawBuilding(nextCtx, plan.outer[o], activity);
       for (var i = 0; i < plan.background.length; i++) drawBuilding(nextCtx, plan.background[i], activity);
       for (var j = 0; j < plan.middle.length; j++) drawBuilding(nextCtx, plan.middle[j], activity);
-      drawLandmark(nextCtx, activity, plan.family, plan.towerX, plan.towerTop);
+      if (plan.buildingCount >= 25) drawLandmark(nextCtx, activity, plan.family, plan.towerX, plan.towerTop);
       for (var k = 0; k < plan.foreground.length; k++) drawBuilding(nextCtx, plan.foreground[k], activity);
-      drawTrees(nextCtx, plan);
-      drawStreetDetails(nextCtx, plan);
+      if (plan.buildingCount >= 4) drawTrees(nextCtx, plan);
+      if (plan.buildingCount >= 8) drawStreetDetails(nextCtx, plan);
       drawPlatformFront(nextCtx, plan);
       return next;
     }
@@ -253,24 +253,26 @@
       });
     });
 
-    // Density affects occupied lots in steps that are visible at profile size.
-    var desired = buildingCount > 0
-      ? clamp(10 + Math.floor(buildingCount / 4) + (family % 3), 10, all.length)
-      : 12 + (family % 3);
+    // A new town is genuinely empty. Its first authored lot appears with the
+    // first reported building, then one more visible lot is occupied per four
+    // buildings until the compact centre is full.
+    var desired = buildingCount > 0 ? clamp(Math.ceil(buildingCount / 4), 1, all.length) : 0;
     var ranked = all.slice().sort(function (a, b) {
       var ar = hashSeed(seed + ":slot:" + a.id);
       var br = hashSeed(seed + ":slot:" + b.id);
       return ar === br ? 0 : ar < br ? -1 : 1;
     });
     ranked.forEach(function (building, rank) { building.growthRank = rank; });
-    var selected = ranked.slice(0, desired);
-    // Never let a sparse city lose one of its three depth layers.
-    [0, 1, 2].forEach(function (depth) {
-      if (!selected.some(function (b) { return b.depth === depth; })) {
-        var replacement = all.find(function (b) { return b.depth === depth; });
-        if (replacement) selected[selected.length - 1 - depth] = replacement;
-      }
+    var selected = [];
+    // The first three lots step from foreground to middle to background, so a
+    // tiny town remains readable without inventing extra uncounted buildings.
+    [2, 1, 0].slice(0, Math.min(3, desired)).forEach(function (depth) {
+      var anchor = ranked.find(function (b) { return b.depth === depth; });
+      if (anchor) selected.push(anchor);
     });
+    for (var ri = 0; ri < ranked.length && selected.length < desired; ri++) {
+      if (selected.indexOf(ranked[ri]) < 0) selected.push(ranked[ri]);
+    }
     selected.sort(function (a, b) { return a.depth - b.depth || a.x - b.x; });
     var localTypes = Object.keys(types).reduce(function (out, key) {
       out[key] = Math.min(4, Math.max(0, Math.floor(Number(types[key]) || 0)));
@@ -301,6 +303,7 @@
       roadStyle: hashSeed(seed + ":roads") % 4,
       treeStyle: hashSeed(seed + ":trees") % 4
     };
+    groups.buildingCount = buildingCount;
     // Once the authored lots are occupied, every 100 reported buildings adds
     // one permanent upgrade to a stable lot. Upgrades rotate through all lots,
     // so the city keeps rising well beyond 10k without reshuffling its identity.

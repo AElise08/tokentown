@@ -126,6 +126,19 @@ test("isometric city keeps growing beyond the old 9,999-building ceiling", () =>
   assert.deepEqual(plan({ ...input, buildings: 10_588 }), current, "growth remains deterministic");
 });
 
+test("a new isometric town starts empty and occupies its first lots honestly", () => {
+  const context = { window: {}, URL, console };
+  runInNewContext(read("public/demo/isometric-city.js"), context);
+  const plan = context.window.TokentownIsoCity.plan;
+  const input = { seed: 12_345, era: 0, types: {}, marcos: [] };
+  const count = (city) => city.outer.length + city.background.length + city.middle.length + city.foreground.length;
+  assert.equal(count(plan({ ...input, buildings: 0 })), 0);
+  assert.equal(count(plan({ ...input, buildings: 1 })), 1);
+  assert.equal(count(plan({ ...input, buildings: 4 })), 1);
+  assert.equal(count(plan({ ...input, buildings: 5 })), 2);
+  assert.match(read("public/demo/isometric-city.js"), /plan\.buildingCount >= 25/);
+});
+
 test("profile keeps the isometric main view and synchronized pixel mini", () => {
   const profile = read("app/u/[username]/page.tsx");
   assert.match(profile, /renderer:\s*"iso-original"/);
