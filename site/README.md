@@ -38,7 +38,9 @@ followed by a 30-minute sponsor-free interval. There is no advertiser page and n
 an inline modal. Configure Stripe and the private moderation key using `.env.example`. Without
 Stripe, local development can use `SPONSOR_DEMO_MODE=1`. Production sales also require
 `SPONSOR_SALES_ENABLED=1`; keep it disabled until Stripe, its signed webhook and moderation have
-been tested. Only aggregate browser sessions/pageviews
+been tested. Set `STRIPE_SPONSOR_PRICE_ID` to the fixed one-time $2 Price created in the matching
+Stripe environment; Checkout falls back to inline price data only when this optional value is absent.
+Only aggregate browser sessions/pageviews
 are counted; individual sponsor impressions and clicks are deliberately not tracked.
 
 ### Get your city

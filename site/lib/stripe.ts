@@ -19,6 +19,11 @@ export function getStripe(): Stripe | null {
   return cached;
 }
 
+export function sponsorPriceId(): string | null {
+  const value = process.env.STRIPE_SPONSOR_PRICE_ID?.trim();
+  return value && /^price_[A-Za-z0-9]+$/.test(value) ? value : null;
+}
+
 export function siteOrigin(req?: Request): string {
   const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (configured && /^https?:\/\//.test(configured)) return configured.replace(/\/+$/, "");

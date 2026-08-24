@@ -6,7 +6,7 @@ import {
   markSponsorPaid,
   reserveSponsorCheckout,
 } from "@/lib/store";
-import { getStripe, siteOrigin, sponsorSalesEnabled } from "@/lib/stripe";
+import { getStripe, siteOrigin, sponsorPriceId, sponsorSalesEnabled } from "@/lib/stripe";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -48,13 +48,14 @@ export async function POST(req: Request) {
   }
 
   try {
+    const fixedPrice = sponsorPriceId();
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       customer_email: campaign.email,
       client_reference_id: campaign.id,
       metadata: { campaignId: campaign.id },
       line_items: [
-        {
+        fixedPrice ? { quantity: 1, price: fixedPrice } : {
           quantity: 1,
           price_data: {
             currency: "usd",

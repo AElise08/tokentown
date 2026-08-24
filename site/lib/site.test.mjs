@@ -40,7 +40,9 @@ test("sponsor sales stay disabled until the explicit production flag and credent
   const checkout = read("app/api/sponsors/checkout/route.ts");
   assert.match(stripe, /SPONSOR_SALES_ENABLED\s*===\s*["']1["']/);
   assert.match(stripe, /STRIPE_WEBHOOK_SECRET/);
+  assert.match(stripe, /STRIPE_SPONSOR_PRICE_ID/);
   assert.match(checkout, /sponsorSalesEnabled\(\)/);
+  assert.match(checkout, /fixedPrice \? \{ quantity: 1, price: fixedPrice \}/);
   assert.match(checkout, /reserveSponsorCheckout/);
   assert.match(checkout, /deleteSponsorDraft/);
 });
