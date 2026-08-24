@@ -205,3 +205,14 @@ test("sponsor checkout is centered and the $2 / 24h CTA has clear hierarchy", ()
   assert.match(css, /\.sponsor-launch-copy/);
   assert.match(css, /\.sponsor-flight-plan/);
 });
+
+test("sponsor CTA sits before Why the app and the board paginates at 100 cities", () => {
+  const page = read("app/page.tsx");
+  const css = read("app/globals.css");
+  assert.match(page, /const BOARD_PAGE_SIZE = 100/);
+  assert.match(page, /searchParams: Promise<\{ season\?: string; window\?: string; page\?: string \}>/);
+  assert.match(page, /fullRanking\.slice\(pageStart, pageStart \+ BOARD_PAGE_SIZE\)/);
+  assert.match(page, /className="board-pagination"/);
+  assert.ok(page.indexOf("<SponsorDock") < page.indexOf("WHY THE APP"));
+  assert.match(css, /\.board-pagination\s*\{/);
+});

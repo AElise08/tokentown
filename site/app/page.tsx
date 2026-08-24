@@ -10,6 +10,8 @@ import SiteViewTracker from "./SiteViewTracker";
 import SponsorDock from "./SponsorDock";
 
 export const dynamic = "force-dynamic";
+const BOARD_PAGE_SIZE = 100;
+const BOARD_MAX_CITIES = 10_000;
 
 // A deterministic mockup skyline for the hero — evokes the corner overlay
 // (built from a seed, not a real user). Rendered once per request.
@@ -21,7 +23,7 @@ const HERO_CITY = citySvg(
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ season?: string; window?: string }>;
+  searchParams: Promise<{ season?: string; window?: string; page?: string }>;
 }) {
   const sp = await searchParams;
   const cur = currentSeasonId();
@@ -49,9 +51,17 @@ export default async function Page({
   }
   const demoSrc = demoQuery.size ? `/demo/index.html?${demoQuery}` : "/demo/index.html";
   // we always fetch the season ranking (for the headline); only refetch for 7d.
-  const seasonRanking = await getLeaderboard(season, { window: "season", limit: 100 });
-  const ranking =
-    window === "7d" ? await getLeaderboard(season, { window: "7d", limit: 100 }) : seasonRanking;
+  const seasonRanking = await getLeaderboard(season, { window: "season", limit: BOARD_MAX_CITIES });
+  const fullRanking =
+    window === "7d"
+      ? await getLeaderboard(season, { window: "7d", limit: BOARD_MAX_CITIES })
+      : seasonRanking;
+  const parsedPage = Number.parseInt(sp?.page || "1", 10);
+  const requestedPage = Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+  const pageCount = Math.max(1, Math.ceil(fullRanking.length / BOARD_PAGE_SIZE));
+  const page = Math.min(requestedPage, pageCount);
+  const pageStart = (page - 1) * BOARD_PAGE_SIZE;
+  const ranking = fullRanking.slice(pageStart, pageStart + BOARD_PAGE_SIZE);
   const range = seasonRange(season);
   const days = daysRemaining(now);
   // FINALE: last night of the CURRENT season -> fireworks over every city + banner.
@@ -72,6 +82,15 @@ export default async function Page({
     const p = new URLSearchParams();
     if (season !== cur) p.set("season", String(season));
     if (w === "7d") p.set("window", "7d");
+    const q = p.toString();
+    return q ? `/?${q}` : "/";
+  };
+
+  const pageHref = (targetPage: number) => {
+    const p = new URLSearchParams();
+    if (season !== cur) p.set("season", String(season));
+    if (window === "7d") p.set("window", "7d");
+    if (targetPage > 1) p.set("page", String(targetPage));
     const q = p.toString();
     return q ? `/?${q}` : "/";
   };
@@ -319,6 +338,27 @@ export default async function Page({
         )}
       </section>
 
+      {fullRanking.length > 0 && (
+        <nav className="board-pagination" aria-label="Leaderboard pages">
+          <span className="board-page-count">
+            showing {pageStart + 1}–{Math.min(pageStart + BOARD_PAGE_SIZE, fullRanking.length)} of {fullRanking.length} cities
+          </span>
+          <div className="board-page-controls">
+            {page > 1 ? <a href={pageHref(page - 1)}>‹ previous</a> : <span aria-disabled="true">‹ previous</span>}
+            <b>page {page} / {pageCount}</b>
+            {page < pageCount ? <a href={pageHref(page + 1)}>next ›</a> : <span aria-disabled="true">next ›</span>}
+          </div>
+        </nav>
+      )}
+
+      <SponsorDock
+        sponsor={sponsor}
+        lineup={sponsorLineup}
+        metrics={siteMetrics}
+        salesEnabled={salesEnabled}
+        nextAvailableAt={sponsorAvailability.startsAt}
+      />
+
       {/* WHY THE APP — the pitch comes AFTER the board: it's not another tokenmaxxing counter. */}
       <section className="why" id="why">
         <h2 className="why-h">Why the app</h2>
@@ -435,14 +475,6 @@ export default async function Page({
           It never receives your content, prompts or code.
         </p>
       </section>
-
-      <SponsorDock
-        sponsor={sponsor}
-        lineup={sponsorLineup}
-        metrics={siteMetrics}
-        salesEnabled={salesEnabled}
-        nextAvailableAt={sponsorAvailability.startsAt}
-      />
 
       <p className="foot">
         NORTOWN — leaderboard · season {cur} in progress · data at{" "}

@@ -1983,6 +1983,27 @@ tr.champ td.user .crown {
   }
 }
 /* ---- sponsored flights: site-only, fixed-price 24-hour placements ---- */
+.board-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 18px;
+  margin-top: -12px;
+  padding: 10px 13px;
+  border: 1px solid var(--edge);
+  border-radius: 9px;
+  color: var(--faint);
+  background: rgba(8, 20, 33, .72);
+  font-size: 9px;
+}
+.board-page-count { letter-spacing: .035em; }
+.board-page-controls { display: flex; align-items: center; gap: 11px; white-space: nowrap; }
+.board-page-controls a, .board-page-controls span { min-width: 62px; color: var(--mute); text-decoration: none; }
+.board-page-controls a:last-child, .board-page-controls span:last-child { text-align: right; }
+.board-page-controls a:hover { color: var(--gold); }
+.board-page-controls span[aria-disabled="true"] { opacity: .35; }
+.board-page-controls b { color: var(--ink); font-size: 8px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+
 .hero-city-flight {
   position: absolute;
   z-index: 3;
@@ -2214,6 +2235,8 @@ tr.champ td.user .crown {
 .admin-actions .danger { color: #ffaca6; border-color: #74433f; }
 
 @media (max-width: 560px) {
+  .board-pagination { align-items: stretch; flex-direction: column; margin-top: -8px; }
+  .board-page-controls { justify-content: space-between; }
   .sponsor-dock { grid-template-columns: 1fr; gap: 11px; }
   .sponsor-launch { width: 100%; min-width: 0; }
   .sponsor-dialog { width: calc(100vw - 16px); max-height: calc(100dvh - 16px); }
