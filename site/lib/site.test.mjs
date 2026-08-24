@@ -252,6 +252,16 @@ test("sponsor block uses the real city, three plans and a public flight log", ()
   assert.match(css, /\.sponsor-plan-picker\s*\{/);
 });
 
+test("successful sponsor payments activate or queue automatically", () => {
+  const webhook = read("app/api/sponsors/webhook/route.ts");
+  const checkout = read("app/api/sponsors/checkout/route.ts");
+  const dock = read("app/SponsorDock.tsx");
+  assert.match(webhook, /finalizeSponsorPayment/);
+  assert.match(checkout, /finalizeSponsorPayment/);
+  assert.match(dock, /activated automatically after payment/);
+  assert.doesNotMatch(dock, /waiting for approval|Reviewed before takeoff|after approval/);
+});
+
 test("public season navigation starts at T1 and never exposes the private T0", () => {
   const season = read("lib/season.ts");
   const page = read("app/page.tsx");

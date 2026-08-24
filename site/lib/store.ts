@@ -789,6 +789,18 @@ export async function approveSponsorCampaign(id: string, now = Date.now()): Prom
   });
 }
 
+// Successful payments take off automatically. If another campaign is already
+// flying, this places the new one in the next open slot while preserving the
+// sponsor-free 30-minute interval. Webhook retries are idempotent.
+export async function finalizeSponsorPayment(
+  input: Parameters<typeof markSponsorPaid>[0],
+  now = Date.now()
+): Promise<SponsorCampaign | null> {
+  const paid = await markSponsorPaid(input);
+  if (!paid || paid.status !== "paid") return paid;
+  return approveSponsorCampaign(paid.id, now);
+}
+
 export async function getSponsorAvailability(now = Date.now()): Promise<{ startsAt: number; waiting: number }> {
   const campaigns = await listSponsorCampaigns(now);
   const base = nextSponsorWindow(campaigns, now);

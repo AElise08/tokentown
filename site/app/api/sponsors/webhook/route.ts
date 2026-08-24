@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { markSponsorPaid } from "@/lib/store";
+import { finalizeSponsorPayment } from "@/lib/store";
 import { getStripe } from "@/lib/stripe";
 
 export const runtime = "nodejs";
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     const id = session.metadata?.campaignId || session.client_reference_id;
     if (id) {
       const paymentIntentId = typeof session.payment_intent === "string" ? session.payment_intent : undefined;
-      await markSponsorPaid({
+      const campaign = await finalizeSponsorPayment({
         id,
         checkoutSessionId: session.id,
         paymentIntentId,
@@ -40,6 +40,8 @@ export async function POST(req: Request) {
         planId: session.metadata?.sponsorPlan,
         amountTotal: session.amount_total ?? undefined,
       });
+      if (!campaign)
+        return Response.json({ ok: false, error: "automatic scheduling unavailable" }, { status: 503 });
     }
   }
   return Response.json({ received: true });

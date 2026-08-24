@@ -18,6 +18,7 @@ import {
   attachSponsorCheckout,
   markSponsorPaid,
   approveSponsorCampaign,
+  finalizeSponsorPayment,
   getActiveSponsor,
   getPublicSponsorLineup,
   getPublicSponsorHistory,
@@ -492,21 +493,19 @@ test("site view rate limit stores only a short private hash", async () => {
   assert.ok(keys.every((key) => !key.includes(session)));
 });
 
-test("sponsor payment is idempotent and approval schedules a 24-hour flight", async () => {
+test("sponsor payment is idempotent and automatically schedules a 24-hour flight", async () => {
   __resetStoreForTests();
   const c = await createSponsorCampaign({
     name: "Linear", tagline: "Issues at speed", url: "https://linear.app/", email: "hello@example.com",
   });
   assert.ok(c);
   await attachSponsorCheckout(c.id, "cs_test_1");
-  let paid = await markSponsorPaid({ id: c.id, checkoutSessionId: "cs_test_1", paymentIntentId: "pi_1" });
-  assert.equal(paid.status, "paid");
-  paid = await markSponsorPaid({ id: c.id, checkoutSessionId: "cs_test_1", paymentIntentId: "pi_duplicate" });
-  assert.equal(paid.paymentIntentId, "pi_1");
-
   const now = 5_000_000;
-  const approved = await approveSponsorCampaign(c.id, now);
+  const approved = await finalizeSponsorPayment({ id: c.id, checkoutSessionId: "cs_test_1", paymentIntentId: "pi_1" }, now);
   assert.equal(approved.status, "active");
+  const duplicate = await finalizeSponsorPayment({ id: c.id, checkoutSessionId: "cs_test_1", paymentIntentId: "pi_duplicate" }, now + 1);
+  assert.equal(duplicate.paymentIntentId, "pi_1");
+  assert.equal(duplicate.status, "scheduled");
   assert.equal(approved.endsAt - approved.startsAt, 24 * 60 * 60 * 1000);
   assert.equal((await getActiveSponsor(now + 1)).name, "Linear");
   assert.equal(await getActiveSponsor(approved.endsAt + 1), null);
@@ -516,8 +515,7 @@ test("sponsor payment is idempotent and approval schedules a 24-hour flight", as
     name: "Vercel", tagline: "Ship the web", url: "https://vercel.com/", email: "hi@example.com", planId: "three",
   });
   await attachSponsorCheckout(c2.id, "cs_test_2");
-  await markSponsorPaid({ id: c2.id, checkoutSessionId: "cs_test_2" });
-  const approved2 = await approveSponsorCampaign(c2.id, now + 100);
+  const approved2 = await finalizeSponsorPayment({ id: c2.id, checkoutSessionId: "cs_test_2" }, now + 100);
   assert.equal(approved2.startsAt, approved.endsAt + 30 * 60 * 1000);
   assert.equal(approved2.endsAt - approved2.startsAt, 3 * DAY_MS);
   const lineup = await getPublicSponsorLineup(now + 200);

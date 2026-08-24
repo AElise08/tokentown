@@ -63,7 +63,7 @@ export default function SponsorDock({
   useEffect(() => {
     const status = new URLSearchParams(window.location.search).get("sponsor");
     if (status === "paid" || status === "demo-paid")
-      setNotice("Payment received · your flight is waiting for approval.");
+      setNotice("Payment confirmed · your flight is active now or scheduled in the next open slot.");
     else if (status === "cancelled") setNotice("Checkout cancelled · nothing was charged.");
   }, []);
 
@@ -178,7 +178,7 @@ export default function SponsorDock({
                 ))}
               </ol>
             ) : (
-              <div className="sponsor-log-empty"><b>No flights logged yet.</b><span>The first approved sponsor takes position 01.</span></div>
+              <div className="sponsor-log-empty"><b>No flights logged yet.</b><span>The first paid sponsor takes position 01.</span></div>
             )}
           </section>
         </div>
@@ -220,7 +220,7 @@ export default function SponsorDock({
             </div>
             <button type="button" aria-label="Close" onClick={() => dialog.current?.close()}>×</button>
           </div>
-          <p id="sponsor-dialog-description">A {plan.label} sponsored flight across every city and the public sponsor board, after approval.</p>
+          <p id="sponsor-dialog-description">A {plan.label} sponsored flight across every city and the public sponsor board, activated automatically after payment.</p>
           <fieldset className="sponsor-modal-plans">
             <legend>Flight plan</legend>
             {(Object.values(SPONSOR_PLANS) as Array<(typeof SPONSOR_PLANS)[SponsorPlanId]>).map((item) => (
@@ -246,7 +246,7 @@ export default function SponsorDock({
           </label>
           {error && <div className="sponsor-error" role="alert">{error}</div>}
           <button className="sponsor-pay" disabled={busy}>{busy ? "opening Stripe…" : `continue to Stripe · $${plan.priceCents / 100}`}</button>
-          <small>Reviewed before takeoff. Rejected submissions are refunded. No traffic guarantee. Individual ad impressions and clicks are not tracked.</small>
+          <small>Starts automatically after payment. No traffic guarantee. Individual ad impressions and clicks are not tracked.</small>
         </form>
       </dialog>
     </>

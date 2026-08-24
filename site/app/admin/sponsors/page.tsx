@@ -48,7 +48,7 @@ export default function SponsorAdminPage() {
             <small>{c.email} · {SPONSOR_PLANS[c.planId].label} / ${(c.priceCents / 100).toFixed(2)} USD · created {new Date(c.createdAt).toLocaleString()}</small>
             {c.startsAt && <small>{new Date(c.startsAt).toLocaleString()} → {new Date(c.endsAt!).toLocaleString()}</small>}
             <div className="admin-actions">
-              {c.status === "paid" && <button onClick={() => act(c.id, "approve")}>Approve & schedule</button>}
+              {c.status === "paid" && <button onClick={() => act(c.id, "approve")}>Activate (recovery)</button>}
               {c.status === "paused" && <button onClick={() => act(c.id, "resume")}>Resume remaining time</button>}
               {(["paid", "scheduled", "active"] as string[]).includes(c.status) &&
                 <button onClick={() => act(c.id, "pause")}>Pause</button>}

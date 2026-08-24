@@ -59,13 +59,13 @@ export default function PrivacyPage() {
         <p>
           Clearly labeled sponsors can appear in the website&apos;s flying airship, departures board and sponsor dock. Sponsor submissions
           include a site name, short line, HTTPS destination and receipt email, and are stored for payment,
-          moderation and scheduling. Campaigns run for the purchased 1, 3 or 10 days after manual approval, with a 30-minute
+          automatic scheduling and abuse prevention. Campaigns run for the purchased 1, 3 or 10 days after successful payment, with a 30-minute
           sponsor-free interval between campaigns. Payment is handled
           by Stripe; NORTOWN never receives card details.
         </p>
         <p>
-          Submissions are manually reviewed. Rejected paid campaigns are refunded; approved flights receive
-          the full purchased duration but no traffic, impression or click guarantee. Abandoned drafts are removed
+          Paid campaigns are activated or queued automatically. NORTOWN may pause or remove deceptive, illegal or malicious campaigns
+          and issue a refund when appropriate. Flights receive the full purchased duration but no traffic, impression or click guarantee. Abandoned drafts are removed
           after 24 hours. Completed, rejected and refunded campaign records are removed after 90 days.
         </p>
       </section>

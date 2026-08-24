@@ -3,7 +3,7 @@ import {
   attachSponsorCheckout,
   createSponsorCampaign,
   deleteSponsorDraft,
-  markSponsorPaid,
+  finalizeSponsorPayment,
   reserveSponsorCheckout,
 } from "@/lib/store";
 import { getStripe, siteOrigin, sponsorPriceId, sponsorSalesEnabled } from "@/lib/stripe";
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     return Response.json({ ok: false, error: "invalid JSON" }, { status: 400 });
   }
   if (!body || typeof body !== "object" || (body as Record<string, unknown>).accepted !== "on")
-    return Response.json({ ok: false, error: "review terms must be accepted" }, { status: 400 });
+    return Response.json({ ok: false, error: "flight terms must be accepted" }, { status: 400 });
   const draft = sanitizeSponsorDraft(body);
   if (!draft) return Response.json({ ok: false, error: "invalid sponsor details" }, { status: 400 });
   if (!(await reserveSponsorCheckout(draft.email)))
@@ -43,7 +43,9 @@ export async function POST(req: Request) {
   if (!stripe) {
     const sessionId = `demo_${campaign.id}`;
     await attachSponsorCheckout(campaign.id, sessionId);
-    await markSponsorPaid({ id: campaign.id, checkoutSessionId: sessionId, email: campaign.email });
+    const activated = await finalizeSponsorPayment({ id: campaign.id, checkoutSessionId: sessionId, email: campaign.email });
+    if (!activated)
+      return Response.json({ ok: false, error: "automatic scheduling unavailable" }, { status: 503 });
     return Response.json({ ok: true, demo: true, url: `${origin}/?sponsor=demo-paid` });
   }
 
