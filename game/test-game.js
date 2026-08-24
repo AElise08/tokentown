@@ -1,6 +1,6 @@
 // Testes do game.js (renderer) rodando em node com DOM/canvas STUBADOS à mão
 // (ZERO deps). Carrega o IIFE do game.js sob stubs e dirige alguns quadros pra
-// checar o HUD — foco na ÉPOCA NOVA (01/07/2026): "temporada 0 · faltam Nd",
+// checar o HUD — foco na época pública (T1 em 24/08/2026),
 // na POPULAÇÃO derivada da cidade, na drenagem do backlog de auto-builds e no
 // shape do retrato da cidade (city blob) enviado por window.tt.sendCity.
 //   node test-game.js
@@ -13,7 +13,7 @@ const vm = require("vm");
 const SRC = fs.readFileSync(path.join(__dirname, "game.js"), "utf8");
 
 // época idêntica à do game.js — pra calcular o esperado do HUD sem hardcode frágil.
-const EPOCH = Date.UTC(2026, 6, 1), MS = 28 * 86400000;
+const EPOCH = Date.UTC(2026, 6, 27), MS = 28 * 86400000;
 const refSeasonId = Math.floor((Date.now() - EPOCH) / MS);
 const refDaysLeft = Math.max(0, Math.ceil((EPOCH + (refSeasonId + 1) * MS - Date.now()) / 86400000));
 const refSeasonStr = "temporada " + refSeasonId + " · faltam " + refDaysLeft + "d";
@@ -109,15 +109,15 @@ let total = 0, fails = 0;
 function t(name, fn) { total++; try { fn(); process.stdout.write("."); } catch (e) { fails++; console.log("\nFAIL: " + name + "\n  " + (e && e.message)); } }
 
 // ---- PREVIEW (sem window.tt): temporada local ------------------------------
-t("preview: HUD mostra temporada 0 (época nova)", () => {
+t("preview: HUD mostra a temporada pública 1", () => {
   const g = loadGame(); g.pump(4);
-  assert.ok(/^temporada 0 · faltam \d+d$/.test(g.els.season.textContent), "season=" + g.els.season.textContent);
+  assert.ok(/^temporada 1 · faltam \d+d$/.test(g.els.season.textContent), "season=" + g.els.season.textContent);
 });
 t("preview: dias restantes batem com a fórmula da época", () => {
   const g = loadGame(); g.pump(4);
   assert.strictEqual(g.els.season.textContent, refSeasonStr);
 });
-t("preview: seasonId corrente = 0", () => { assert.strictEqual(refSeasonId, 0); });
+t("preview: seasonId corrente = 1", () => { assert.strictEqual(refSeasonId, 1); });
 t("preview: 'ao vivo' no navegador", () => {
   const g = loadGame(); g.pump(4);
   assert.strictEqual(g.els.liveTxt.textContent, "ao vivo");

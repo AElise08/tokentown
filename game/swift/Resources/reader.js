@@ -17,7 +17,7 @@
   // =========================================================================
   // TEMPORADAS — MESMA fórmula do main.js e do placar web (manter em sincronia).
   // =========================================================================
-  var SEASON_EPOCH = Date.UTC(2026, 6, 1);
+  var SEASON_EPOCH = Date.UTC(2026, 6, 27); // T1 = 24/08/2026 00:00 UTC
   var SEASON_MS = 28 * 86400000;
   var TOK_PER_BUILD_REAL = 6000;
   function currentSeasonId(now) { return Math.floor(((now || Date.now()) - SEASON_EPOCH) / SEASON_MS); }

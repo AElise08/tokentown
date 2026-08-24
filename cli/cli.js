@@ -50,9 +50,9 @@ function configPath() {
 
 // ---------------------------------------------------------------------------
 // SEASONS — fixed 28-day windows on a global calendar (same formula as the app
-// and the server; keep in sync). Epoch: 01/07/2026 00:00 UTC.
+// and the server; keep in sync). T1 starts 24/08/2026 00:00 UTC.
 // ---------------------------------------------------------------------------
-const SEASON_EPOCH = Date.UTC(2026, 6, 1);
+const SEASON_EPOCH = Date.UTC(2026, 6, 27);
 const SEASON_MS = 28 * 86400000;
 const TOK_PER_BUILD_REAL = 6000; // one building per ~6k real tokens
 const ERA_STEP = 2000000; // era changes every ~2M tokens

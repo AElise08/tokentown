@@ -22,6 +22,7 @@ import {
   isReportSeasonValid,
   REPORT_GRACE_MS,
   currentSeasonId,
+  seasonRange,
 } from "./season.ts";
 import { formatAnnualCost } from "./format.ts";
 
@@ -38,6 +39,12 @@ const mkEntry = (username, tokens, cost, extra = {}) => ({
   buildings: extra.buildings ?? 0,
   lastReport: extra.lastReport ?? 0,
   city: extra.city ?? null,
+});
+
+test("public Season 1 starts on Aug 24, 2026 and lasts 28 days", () => {
+  assert.equal(seasonStart(1), Date.UTC(2026, 7, 24));
+  assert.equal(currentSeasonId(Date.UTC(2026, 7, 24)), 1);
+  assert.equal(seasonRange(1).end.getTime(), Date.UTC(2026, 8, 20, 23, 59, 59, 999));
 });
 
 // ===========================================================================

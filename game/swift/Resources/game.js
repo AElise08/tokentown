@@ -27,7 +27,7 @@
     return 'rgb('+((A[0]+(B[0]-A[0])*t)|0)+','+((A[1]+(B[1]-A[1])*t)|0)+','+((A[2]+(B[2]-A[2])*t)|0)+')'; }
 
   // ---------- temporadas (MESMA fórmula do main.js e do placar web) ----------
-  var SEASON_EPOCH = Date.UTC(2026, 6, 1);   // 01/07/2026 00:00 UTC (nascimento do jogo)
+  var SEASON_EPOCH = Date.UTC(2026, 6, 27);  // T1 = 24/08/2026 00:00 UTC
   var SEASON_MS = 28 * 86400000;             // 28 dias
   function localSeasonId(){ return Math.floor((Date.now() - SEASON_EPOCH) / SEASON_MS); }
   function localDaysLeft(){ var end = SEASON_EPOCH + (localSeasonId()+1)*SEASON_MS;

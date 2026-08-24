@@ -89,7 +89,7 @@ Sem nenhuma outra dependência de runtime.
 Temporadas globais de **28 dias**, iguais pra todo mundo (mesma fórmula do app):
 
 ```js
-const SEASON_EPOCH = Date.UTC(2026, 0, 5);            // 05/01/2026 00:00 UTC
+const SEASON_EPOCH = Date.UTC(2026, 6, 27);           // T1 starts 24/08/2026 00:00 UTC
 const seasonId = Math.floor((Date.now() - SEASON_EPOCH) / (28 * 86400000));
 ```
 

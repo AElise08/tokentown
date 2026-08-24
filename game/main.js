@@ -14,13 +14,13 @@ const reporter = createReporter({ configPath: path.join(os.homedir(), '.tokentow
 
 // ---------------------------------------------------------------------------
 // TEMPORADAS — janelas fixas de 28 dias por CALENDÁRIO GLOBAL (não por abertura).
-// ÉPOCA: 01/07/2026, quando o jogo nasceu → hoje (12/07/2026) = T0 (faltam 17 dias).
+// ÉPOCA: T0 privado começa 27/07/2026; T1 público começa 24/08/2026.
 // A MESMA fórmula roda no placar web — mantenha estas 3 linhas em sincronia lá:
-//   const SEASON_EPOCH = Date.UTC(2026, 6, 1);   // 01/07/2026 00:00 UTC
+//   const SEASON_EPOCH = Date.UTC(2026, 6, 27);  // T1 = 24/08/2026 00:00 UTC
 //   const SEASON_MS    = 28 * 86400000;          // 28 dias em ms
 //   const seasonId     = Math.floor((Date.now() - SEASON_EPOCH) / SEASON_MS);
 // ---------------------------------------------------------------------------
-const SEASON_EPOCH = Date.UTC(2026, 6, 1);
+const SEASON_EPOCH = Date.UTC(2026, 6, 27);
 const SEASON_MS = 28 * 86400000;
 const TOK_PER_BUILD_REAL = 6000; // igual ao renderer — usado só pra arquivar nº de prédios
 
@@ -36,7 +36,7 @@ function daysLeftIn(now) {
 // ARQUIVAR a anterior em history e zerar os contadores da temporada nova.
 function computeBoot(disk, now) {
   const sid = currentSeasonId(now);
-  // ÉPOCA NOVA (01/07/2026): um state salvo com seasonId MAIOR que o atual só pode
+  // ÉPOCA NOVA (T1 em 24/08/2026): um state salvo com seasonId MAIOR que o atual só pode
   // ter vindo de uma época antiga, onde hoje cairia numa temporada bem à frente. Isso
   // não é histórico legítimo — era tudo teste de hoje. Descarta LIMPO (zera contadores
   // E history, SEM arquivar) e recomeça a T0 do zero.

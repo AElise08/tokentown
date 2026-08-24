@@ -1,6 +1,6 @@
 // Testes do caminho de PREVIEW do game.js (index.html no navegador, SEM window.tt):
 // a cidade simula um fluxo calmo e a temporada é calculada localmente. Confirma que
-// a época NOVA (01/07/2026) faz o preview nascer na temporada 0. ZERO deps.
+// a época pública faz a T1 nascer em 24/08/2026. ZERO deps.
 //   node test-preview.js
 "use strict";
 const assert = require("assert");
@@ -9,7 +9,7 @@ const path = require("path");
 const vm = require("vm");
 
 const SRC = fs.readFileSync(path.join(__dirname, "game.js"), "utf8");
-const EPOCH = Date.UTC(2026, 6, 1), MS = 28 * 86400000;
+const EPOCH = Date.UTC(2026, 6, 27), MS = 28 * 86400000;
 const refSeasonId = Math.floor((Date.now() - EPOCH) / MS);
 const refDaysLeft = Math.max(0, Math.ceil((EPOCH + (refSeasonId + 1) * MS - Date.now()) / 86400000));
 
@@ -42,10 +42,10 @@ function loadPreview(indexOnly) {
 let total = 0, fails = 0;
 function t(name, fn) { total++; try { fn(); process.stdout.write("."); } catch (e) { fails++; console.log("\nFAIL: " + name + "\n  " + (e && e.message)); } }
 
-t("preview nasce na temporada 0 (época nova)", () => {
+t("preview nasce na temporada pública 1", () => {
   const g = loadPreview(); g.pump(4);
   assert.strictEqual(g.els.season.textContent, "temporada " + refSeasonId + " · faltam " + refDaysLeft + "d");
-  assert.strictEqual(refSeasonId, 0);
+  assert.strictEqual(refSeasonId, 1);
 });
 t("preview sempre 'ao vivo' no navegador", () => {
   const g = loadPreview(); g.pump(4);

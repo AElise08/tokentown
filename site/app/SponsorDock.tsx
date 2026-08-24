@@ -152,13 +152,13 @@ export default function SponsorDock({
             <iframe className="sponsor-real-city" src={previewCitySrc} title="NORTOWN pixel city sponsor preview" loading="lazy" tabIndex={-1} />
             <a
               className="sponsor-preview-airship"
-              href={sponsor?.url || "#sponsor-booking"}
+              href={sponsor?.url || "/"}
               target={sponsor ? "_blank" : undefined}
               rel={sponsor ? "sponsored noopener noreferrer" : undefined}
-              aria-label={sponsor ? `Active ad: visit ${sponsor.name}` : "Book your sponsored flight"}
+              aria-label={sponsor ? `Active ad: visit ${sponsor.name}` : "NORTOWN active house ad"}
             >
               <i className="preview-tail" aria-hidden="true" />
-              <span><b>{sponsor?.name || "YOUR NAME"}</b><small>{sponsor ? "ACTIVE AD" : "YOUR AD"}</small></span>
+              <span><b>{sponsor?.name || "NORTOWN"}</b><small>ACTIVE AD</small></span>
               <i className="preview-gondola" aria-hidden="true" />
             </a>
           </div>
@@ -190,10 +190,6 @@ export default function SponsorDock({
               </button>
             ))}
           </fieldset>
-          <div className="sponsor-review-note">
-            <b>Pay once, then we review.</b>
-            <span>Approved sites start at the next open slot. Rejected sites are refunded. There is a 30-minute pause between flights.</span>
-          </div>
           <button className="sponsor-launch" type="button" disabled={!salesEnabled} onClick={openCheckout}>
             <span className="sponsor-launch-copy">
               <small>{salesEnabled ? `starts ${availabilityLabel(nextAvailableAt, nowMs)}` : "sponsored flights"}</small>

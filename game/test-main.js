@@ -1,7 +1,7 @@
 // Testes puros do main.js (node puro, sem Electron, ZERO deps).
 //   node test-main.js
 // Cobrem: preços, tokens/custo por usage, dedupe, subagentes, temporadas (época
-// NOVA 01/07/2026), computeBoot (retomar / arquivar / DESCARTAR época incompatível),
+// T1 pública em 24/08/2026), computeBoot (retomar / arquivar / DESCARTAR época incompatível),
 // leitura incremental (readNew), o BACKFILL da temporada a partir dos transcripts,
 // o estado 3-vias do tail (tailShape: 'decision' quando o Claude Code espera a Mel
 // autorizar; 'live' pensando; 'idle' só com turno fechado) e a sanitização do
@@ -83,7 +83,10 @@ t("countNewSubagents sem content -> 0", () => assert.strictEqual(m.countNewSubag
 
 // ---------------------------------------------------------------- temporadas (época NOVA)
 const NOW = Date.parse("2026-07-12T19:00:00Z"); // hoje, per enunciado
-t("SEASON_EPOCH = 01/07/2026 UTC", () => assert.strictEqual(m.SEASON_EPOCH, Date.UTC(2026, 6, 1)));
+t("SEASON_EPOCH makes T1 start 24/08/2026 UTC", () => {
+  assert.strictEqual(m.SEASON_EPOCH, Date.UTC(2026, 6, 27));
+  assert.strictEqual(m.currentSeasonId(Date.UTC(2026, 7, 24)), 1);
+});
 t("SEASON_MS = 28 dias", () => assert.strictEqual(m.SEASON_MS, 28 * 86400000));
 t("currentSeasonId hoje = 0", () => assert.strictEqual(m.currentSeasonId(NOW), 0));
 t("daysLeftIn hoje = 17", () => assert.strictEqual(m.daysLeftIn(NOW), 17));

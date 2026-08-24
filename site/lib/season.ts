@@ -1,6 +1,8 @@
 // Temporadas globais de 28 dias por calendário — MESMA fórmula do app TOKENTOWN.
 // Toda temporada começa/termina no mesmo instante pra todo mundo (UTC).
-export const SEASON_EPOCH = Date.UTC(2026, 6, 1); // 01/07/2026 00:00 UTC
+// T0 was the private pre-launch window. T1 is the public launch and starts
+// 24/08/2026 00:00 UTC, so the underlying 28-day epoch begins one season prior.
+export const SEASON_EPOCH = Date.UTC(2026, 6, 27); // T1 = 24/08/2026 00:00 UTC
 export const SEASON_MS = 28 * 86400000; // 28 dias
 // T0 was the private launch/test season. Public navigation begins at T1.
 // The data remains stored so removing the label never destroys history.

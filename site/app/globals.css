@@ -2265,7 +2265,7 @@ tr.champ td.user .crown {
 .sponsor-log-empty { display: flex; height: 174px; align-items: center; justify-content: center; flex-direction: column; gap: 5px; padding: 20px; color: var(--faint); text-align: center; }
 .sponsor-log-empty b { color: var(--mute); font-size: 9px; }
 .sponsor-log-empty span { font-size: 7px; }
-.sponsor-booking-row { display: grid; grid-template-columns: minmax(225px, .8fr) minmax(0, 1fr) minmax(260px, .9fr); align-items: end; gap: 14px; padding-top: 2px; }
+.sponsor-booking-row { display: grid; grid-template-columns: minmax(280px, .85fr) minmax(280px, 1fr); align-items: end; gap: 18px; padding-top: 2px; }
 .sponsor-plan-picker, .sponsor-modal-plans { min-width: 0; border: 0; }
 .sponsor-plan-picker legend, .sponsor-modal-plans legend { margin-bottom: 7px; color: var(--faint); font-size: 7px; font-weight: 900; letter-spacing: .13em; text-transform: uppercase; }
 .sponsor-plan-picker { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
@@ -2275,9 +2275,6 @@ tr.champ td.user .crown {
 .sponsor-plan-picker button.selected { border-color: var(--teal); color: var(--ink); background: rgba(108,229,238,.07); box-shadow: inset 0 -2px rgba(108,229,238,.17); }
 .sponsor-plan-picker button span { font-size: 7px; white-space: nowrap; }
 .sponsor-plan-picker button strong { color: var(--gold); font-size: 13px; }
-.sponsor-review-note { display: flex; min-width: 0; flex-direction: column; gap: 4px; padding-bottom: 4px; }
-.sponsor-review-note b { color: var(--ink); font-size: 8.5px; }
-.sponsor-review-note span { color: var(--mute); font-size: 7px; line-height: 1.45; }
 .sponsor-booking-row .sponsor-launch { grid-template-columns: minmax(0, 1fr) auto; min-width: 0; padding: 11px 12px; }
 .sponsor-booking-row .sponsor-launch-copy strong { font-size: 10.5px; }
 .sponsor-booking-row .sponsor-launch-price b { font-size: 15px; }
@@ -2357,7 +2354,6 @@ tr.champ td.user .crown {
   .sponsor-preview { grid-template-columns: 1fr; }
   .sponsor-preview-sky { border-right: 0; border-bottom: 1px solid #345e7e; }
   .sponsor-booking-row { grid-template-columns: 1fr; }
-  .sponsor-review-note { padding: 2px 0; }
   .sponsor-flight-details, .sponsor-showcase-foot { grid-template-columns: 1fr; gap: 16px; }
   .sponsor-how { grid-template-columns: 1fr; }
   .sponsor-metrics { text-align: left; }

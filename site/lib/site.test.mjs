@@ -236,11 +236,13 @@ test("sponsor block uses the real city, three plans and a public flight log", ()
   assert.match(dock, /className="sponsor-real-city"/);
   assert.match(page, /renderer:\s*"classic"/);
   assert.match(dock, /SPONSOR BOARD/);
-  assert.match(dock, /Pay once, then we review/);
-  assert.match(dock, /Rejected sites are refunded/);
+  assert.doesNotMatch(dock, /Pay once, then we review/);
+  assert.doesNotMatch(dock, /Approved sites start at the next open slot/);
   assert.match(dock, /sponsor-preview-airship/);
   assert.match(dock, /Active ad: visit/);
   assert.match(dock, /ACTIVE AD/);
+  assert.match(dock, /sponsor\?\.name \|\| "NORTOWN"/);
+  assert.doesNotMatch(dock, /YOUR NAME/);
   assert.match(dock, /rel=\{sponsor \? "sponsored noopener noreferrer"/);
   assert.match(css, /sponsor-preview-flight-slow 28s/);
   assert.match(css, /\.sponsor-plan-picker\s*\{/);
