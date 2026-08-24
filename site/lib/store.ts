@@ -1176,6 +1176,79 @@ export async function deleteUser(input: { username: string; key: string }): Prom
 }
 
 // ---------------------------------------------------------------------------
+// ADMIN RENAME — moves the authenticated identity and the two seasons that can
+// still exist in the product (current + previous). The destination is written
+// completely before the source is removed, so an interrupted migration never
+// destroys the only copy of a profile.
+// ---------------------------------------------------------------------------
+export type RenameUserResult =
+  | {
+      ok: true;
+      status: 200;
+      applied: boolean;
+      from: string;
+      to: string;
+      seasons: Array<{ season: number; profile: boolean; snapshots: number; ranked: boolean }>;
+    }
+  | { ok: false; status: 400 | 404 | 409; error: string };
+
+export async function renameUser(
+  input: { from: string; to: string; dryRun?: boolean }
+): Promise<RenameUserResult> {
+  const from = sanitizeUsername(input.from);
+  const to = sanitizeUsername(input.to);
+  if (!from || !to || from === to)
+    return { ok: false, status: 400, error: "invalid source or destination username" };
+
+  const db = kv();
+  const sourceAuth = await db.hget(K_USERS, from);
+  if (!sourceAuth) return { ok: false, status: 404, error: "source username not found" };
+  if (await db.hget(K_USERS, to))
+    return { ok: false, status: 409, error: "destination username is already reserved" };
+
+  const cur = currentSeasonId();
+  const plan: Array<{
+    season: number;
+    user: Record<string, string | number> | null;
+    snaps: Record<string, string | number> | null;
+    score: number | null;
+  }> = [];
+  for (const season of [cur, cur - 1]) {
+    if (season < 0) continue;
+    const user = await db.hgetall(kUser(season, from));
+    const snaps = await db.hgetall(kSnap(season, from));
+    const ranked = (await db.ztop(kRank(season), 10000)).find((item) => item.member === from);
+    plan.push({ season, user, snaps, score: ranked?.score ?? null });
+  }
+  const seasons = plan.map((item) => ({
+    season: item.season,
+    profile: !!item.user,
+    snapshots: Object.keys(item.snaps ?? {}).length,
+    ranked: item.score !== null,
+  }));
+  if (input.dryRun) return { ok: true, status: 200, applied: false, from, to, seasons };
+
+  // Copy first. If Redis becomes unavailable midway, the original remains the
+  // authoritative copy and the operation can be inspected before retrying.
+  await db.hset(K_USERS, { [to]: sourceAuth });
+  for (const item of plan) {
+    if (item.user) await db.hset(kUser(item.season, to), item.user);
+    if (item.snaps) await db.hset(kSnap(item.season, to), item.snaps);
+    if (item.score !== null) await db.zadd(kRank(item.season), item.score, to);
+  }
+
+  for (const item of plan) {
+    await db.zrem(kRank(item.season), from);
+    await db.del(kUser(item.season, from));
+    await db.del(kSnap(item.season, from));
+  }
+  await db.hdel(K_USERS, from);
+  await db.del(kRate(from));
+  await db.del(kRate(to));
+  return { ok: true, status: 200, applied: true, from, to, seasons };
+}
+
+// ---------------------------------------------------------------------------
 // LEADERBOARD — top 100. window "season" (padrão) = tokens/custo absolutos da
 // temporada; window "7d" = ganho dos últimos 7 dias (re-ordenado por esse ganho).
 // ---------------------------------------------------------------------------

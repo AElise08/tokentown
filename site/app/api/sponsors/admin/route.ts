@@ -3,6 +3,7 @@ import {
   getSponsorCampaign,
   listSponsorCampaigns,
   pauseSponsorCampaign,
+  renameUser,
   reserveSponsorAdminAttempt,
   resumeSponsorCampaign,
   setSponsorStatus,
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
   const contentLength = Number(req.headers.get("content-length") || 0);
   if (contentLength > 2048)
     return Response.json({ ok: false, error: "request too large" }, { status: 413 });
-  let body: { id?: string; action?: string };
+  let body: { id?: string; action?: string; from?: string; to?: string; dryRun?: boolean };
   try {
     const raw = await req.text();
     if (raw.length > 2048)
@@ -49,6 +50,14 @@ export async function POST(req: Request) {
     return Response.json({ ok: false, error: "invalid JSON" }, { status: 400 });
   }
   const id = String(body.id || "");
+  if (body.action === "rename-user") {
+    const result = await renameUser({
+      from: String(body.from || ""),
+      to: String(body.to || ""),
+      dryRun: body.dryRun === true,
+    });
+    return Response.json(result, { status: result.status });
+  }
   if (body.action === "approve") {
     const campaign = await approveSponsorCampaign(id);
     return campaign

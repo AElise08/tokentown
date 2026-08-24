@@ -6,6 +6,7 @@ import {
   __resetStoreForTests,
   submitReport,
   deleteUser,
+  renameUser,
   getUserWithRank,
   getLeaderboard,
   getUserSnaps,
@@ -413,6 +414,63 @@ test("deleteUser: username inexistente -> 404", async () => {
   const d = await deleteUser({ username: "nobody-here", key: "k".repeat(16) });
   assert.equal(d.ok, false);
   assert.equal(d.status, 404);
+});
+
+test("renameUser: dry-run preserves data, then moves identity, rank and snapshots", async () => {
+  __resetStoreForTests();
+  const seasonId = currentSeasonId();
+  const key = "rename-key-1234";
+  const submitted = await submitReport({
+    username: "mel",
+    key,
+    seasonId,
+    tokens: 12345,
+    cost: 67,
+    residents: 8,
+    buildings: 9,
+    profile: { cityName: "Meltown", motto: "northbound", accent: "teal" },
+    dailyTokens: { [utcDayKey()]: 12345 },
+  });
+  assert.equal(submitted.ok, true);
+
+  const preview = await renameUser({ from: "mel", to: "aside", dryRun: true });
+  assert.equal(preview.ok, true);
+  assert.equal(preview.applied, false);
+  assert.equal((await getUserWithRank(seasonId, "mel"))?.tokens, 12345);
+  assert.equal(await getUserWithRank(seasonId, "aside"), null);
+
+  const moved = await renameUser({ from: "mel", to: "aside" });
+  assert.equal(moved.ok, true);
+  assert.equal(moved.applied, true);
+  assert.equal(await getUserWithRank(seasonId, "mel"), null);
+  const aside = await getUserWithRank(seasonId, "aside");
+  assert.equal(aside?.tokens, 12345);
+  assert.equal(aside?.profile?.cityName, "Meltown");
+  assert.ok((await getUserSnaps(seasonId, "aside")).length > 0);
+  assert.ok(!(await getLeaderboard(seasonId)).some((entry) => entry.username === "mel"));
+  assert.ok((await getLeaderboard(seasonId)).some((entry) => entry.username === "aside"));
+
+  clearRate("aside");
+  const accepted = await submitReport({
+    username: "aside",
+    key,
+    seasonId,
+    tokens: 12346,
+    cost: 67,
+    residents: 8,
+    buildings: 9,
+  });
+  assert.equal(accepted.ok, true);
+  const oldName = await submitReport({
+    username: "mel",
+    key: "different-key",
+    seasonId,
+    tokens: 1,
+    cost: 0,
+    residents: 0,
+    buildings: 0,
+  });
+  assert.equal(oldName.ok, true, "the old username is released after migration");
 });
 
 test("site metrics count aggregate visitors separately from pageviews", async () => {
