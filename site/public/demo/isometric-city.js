@@ -140,11 +140,27 @@
     function updateGrowthPreview(now) {
       if (!previewGrowth) return;
       if (previewStarted == null) previewStarted = now;
-      var phase = (now - previewStarted) % 22000;
-      var progress = phase <= 2000 ? 0 : phase >= 18000 ? 1 : (phase - 2000) / 16000;
-      progress = progress * progress * (3 - 2 * progress);
-      var nextBuildings = Math.floor(previewFrom + (previewTo - previewFrom) * progress);
-      if (Math.abs(nextBuildings - previewRendered) >= 50 || nextBuildings === previewFrom || nextBuildings === previewTo) {
+      var phase;
+      var nextBuildings;
+      if (previewFrom === 0) {
+        // Make the birth of a town readable: the first 100 buildings arrive
+        // one by one in 2.5s, then the skyline and outer districts accelerate.
+        phase = (now - previewStarted) % 9500;
+        if (phase <= 500) nextBuildings = 0;
+        else if (phase <= 3000) nextBuildings = Math.floor(((phase - 500) / 2500) * Math.min(100, previewTo));
+        else if (phase < 8000 && previewTo > 100) {
+          var earlyProgress = (phase - 3000) / 5000;
+          earlyProgress = earlyProgress * earlyProgress * (3 - 2 * earlyProgress);
+          nextBuildings = Math.floor(100 + (previewTo - 100) * earlyProgress);
+        } else nextBuildings = previewTo;
+      } else {
+        phase = (now - previewStarted) % 10000;
+        var progress = phase <= 600 ? 0 : phase >= 8600 ? 1 : (phase - 600) / 8000;
+        progress = progress * progress * (3 - 2 * progress);
+        nextBuildings = Math.floor(previewFrom + (previewTo - previewFrom) * progress);
+      }
+      var redrawStep = previewRendered < 100 || nextBuildings < 100 ? 1 : 50;
+      if (Math.abs(nextBuildings - previewRendered) >= redrawStep || nextBuildings === previewFrom || nextBuildings === previewTo) {
         still = renderCity(nextBuildings);
         previewRendered = nextBuildings;
         if (previewBadge) previewBadge.textContent = "growth preview · " + formatBuildings(nextBuildings) + " buildings";

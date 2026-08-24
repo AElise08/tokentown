@@ -157,6 +157,8 @@ test("profile exposes an isolated accelerated city-growth preview", () => {
   assert.match(game, /query\.get\('growthPreview'\) === '1'/);
   assert.match(iso, /function updateGrowthPreview\(now\)/);
   assert.match(iso, /previewFrom \+ \(previewTo - previewFrom\) \* progress/);
+  assert.match(iso, /previewRendered < 100 \|\| nextBuildings < 100 \? 1 : 50/);
+  assert.match(iso, /first 100 buildings arrive/);
 });
 
 test("site exposes a dedicated privacy page and links it from the board", () => {
