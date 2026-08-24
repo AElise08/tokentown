@@ -3,7 +3,7 @@ import { getPublicSponsorHistory, getPublicSponsorLineup, getSiteMetrics, getSpo
 import { sponsorSalesEnabled } from "@/lib/stripe";
 import { currentSeasonId, seasonRange, daysRemaining, isFinale, FIRST_PUBLIC_SEASON_ID } from "@/lib/season";
 import { formatCount, formatCost, formatAgo, formatDate } from "@/lib/format";
-import { cityFeatures, cityComposition, cityMarcoLabels, citySvg } from "@/lib/city";
+import { cityFeatures, cityComposition, cityMarcoLabels } from "@/lib/city";
 import { cityTitle, accentHex } from "@/lib/profile";
 import { setupView, weekHeatmap, pct } from "@/lib/setup-view";
 import LiveRefresh from "./LiveRefresh";
@@ -159,6 +159,10 @@ export default async function UserPage({
   const railDemoParams = new URLSearchParams(demoParams);
   railDemoParams.set("renderer", "classic");
   const railDemoSrc = `/demo/index.html?${railDemoParams.toString()}`;
+  const sponsorPreviewParams = new URLSearchParams(railDemoParams);
+  sponsorPreviewParams.delete("sponsor");
+  sponsorPreviewParams.delete("sponsorUrl");
+  const sponsorPreviewCitySrc = `/demo/index.html?${sponsorPreviewParams.toString()}`;
   if (sp?.preview === "growth") {
     demoParams.set("growthPreview", "1");
     demoParams.set("growthTo", String(entry.buildings + Math.max(12_000, Math.round(entry.buildings * 1.5))));
@@ -484,7 +488,7 @@ export default async function UserPage({
         metrics={siteMetrics}
         salesEnabled={salesEnabled}
         nextAvailableAt={sponsorAvailability.startsAt}
-        previewCitySvg={citySvg({ username: u, tokens: entry.tokens, residents: entry.residents, buildings: entry.buildings, city: entry.city, accent }, "full")}
+        previewCitySrc={sponsorPreviewCitySrc}
       />
 
       <p className="foot">

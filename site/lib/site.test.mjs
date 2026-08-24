@@ -148,6 +148,16 @@ test("profile keeps the isometric main view and synchronized pixel mini", () => 
   assert.match(profile, /profileDemoSrc/);
   assert.match(profile, /railDemoParams\.set\("renderer",\s*"classic"\)/);
   assert.match(profile, /const railDemoSrc = `\/demo\/index\.html\?/);
+  assert.match(profile, /sponsorPreviewParams\.delete\("sponsor"\)/);
+  assert.match(profile, /previewCitySrc=\{sponsorPreviewCitySrc\}/);
+});
+
+test("classic pixel profiles grow from empty and keep the newest visible buildings", () => {
+  const game = read("public/demo/game.js");
+  assert.match(game, /profileVisible = Math\.min\(target, 36\)/);
+  assert.match(game, /profileStart = Math\.max\(0, target - profileVisible\)/);
+  assert.match(game, /for\(var pi=profileStart; pi<target/);
+  assert.match(game, /A zero-building profile stays honestly empty/);
 });
 
 test("profile exposes an isolated accelerated city-growth preview", () => {
@@ -220,12 +230,18 @@ test("sponsor CTA sits before Why the app and the board paginates at 100 cities"
 test("sponsor block uses the real city, three plans and a public flight log", () => {
   const dock = read("app/SponsorDock.tsx");
   const css = read("app/globals.css");
+  const page = read("app/page.tsx");
   assert.match(dock, /SPONSOR_PLANS/);
-  assert.match(dock, /previewCitySvg/);
+  assert.match(dock, /previewCitySrc/);
+  assert.match(dock, /className="sponsor-real-city"/);
+  assert.match(page, /renderer:\s*"classic"/);
   assert.match(dock, /SPONSOR BOARD/);
   assert.match(dock, /Pay once, then we review/);
   assert.match(dock, /Rejected sites are refunded/);
   assert.match(dock, /sponsor-preview-airship/);
+  assert.match(dock, /Active ad: visit/);
+  assert.match(dock, /ACTIVE AD/);
+  assert.match(dock, /rel=\{sponsor \? "sponsored noopener noreferrer"/);
   assert.match(css, /sponsor-preview-flight-slow 28s/);
   assert.match(css, /\.sponsor-plan-picker\s*\{/);
 });

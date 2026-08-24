@@ -38,7 +38,7 @@ export default function SponsorDock({
   metrics,
   salesEnabled,
   nextAvailableAt,
-  previewCitySvg,
+  previewCitySrc,
 }: {
   sponsor: PublicSponsor | null;
   lineup: PublicSponsorSlot[];
@@ -46,7 +46,7 @@ export default function SponsorDock({
   metrics: SiteMetrics;
   salesEnabled: boolean;
   nextAvailableAt: number;
-  previewCitySvg: string;
+  previewCitySrc: string;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [nowMs, setNowMs] = useState<number | null>(null);
@@ -136,7 +136,7 @@ export default function SponsorDock({
         <div className="lineup-gap"><span aria-hidden="true">☾</span> 30 min runway reset between flights</div>
       </aside>
 
-      <aside className="sponsor-dock" aria-label="NORTOWN sponsor">
+      <aside className="sponsor-dock" id="sponsor" aria-label="NORTOWN sponsor">
         <header className="sponsor-showcase-head">
           <div>
             <div className="sponsor-cap"><span aria-hidden="true" /> NORTOWN AIR · sponsored</div>
@@ -149,10 +149,18 @@ export default function SponsorDock({
         <div className="sponsor-preview" aria-label="Live sponsored flight preview and sponsor board">
           <div className="sponsor-preview-sky">
             <div className="sponsor-preview-label"><span>LIVE PLACEMENT PREVIEW</span><small>the real NORTOWN city</small></div>
-            <div className="sponsor-real-city" aria-hidden="true" dangerouslySetInnerHTML={{ __html: previewCitySvg }} />
-            <div className="sponsor-preview-airship" aria-hidden="true">
-              <i className="preview-tail" /><span>{sponsor?.name || "YOUR SITE"}</span><i className="preview-gondola" />
-            </div>
+            <iframe className="sponsor-real-city" src={previewCitySrc} title="NORTOWN pixel city sponsor preview" loading="lazy" tabIndex={-1} />
+            <a
+              className="sponsor-preview-airship"
+              href={sponsor?.url || "#sponsor-booking"}
+              target={sponsor ? "_blank" : undefined}
+              rel={sponsor ? "sponsored noopener noreferrer" : undefined}
+              aria-label={sponsor ? `Active ad: visit ${sponsor.name}` : "Book your sponsored flight"}
+            >
+              <i className="preview-tail" aria-hidden="true" />
+              <span><b>{sponsor?.name || "YOUR NAME"}</b><small>{sponsor ? "ACTIVE AD" : "YOUR AD"}</small></span>
+              <i className="preview-gondola" aria-hidden="true" />
+            </a>
           </div>
           <section className="sponsor-flight-log" aria-label="Sites that have sponsored NORTOWN">
             <div className="sponsor-preview-label"><span>SPONSOR BOARD</span><small>past &amp; queued flights</small></div>
@@ -173,7 +181,7 @@ export default function SponsorDock({
           </section>
         </div>
 
-        <div className="sponsor-booking-row">
+        <div className="sponsor-booking-row" id="sponsor-booking">
           <fieldset className="sponsor-plan-picker">
             <legend>Choose your flight</legend>
             {(Object.values(SPONSOR_PLANS) as Array<(typeof SPONSOR_PLANS)[SponsorPlanId]>).map((item) => (

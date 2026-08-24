@@ -285,13 +285,28 @@
   function rebuildCity(){
     city = []; frontier = 2; builtNormals = 0;
     var target = profileMode ? profileTargetBuildings : 2 + Math.floor(tokens()/tokPerBuild());
-    var materialized = profileMode ? Math.min(target, 36) : Math.max(0, target - 26);
     var guard = 0;
-    while((builtNormals < materialized || frontier < W*0.55) && guard < 44){
-      var b = genNormal(builtNormals); b.wx = frontier; b.rise = 1; city.push(b);
-      frontier += b.gap; builtNormals++; guard++;
+    if(profileMode){
+      // A profile used to draw buildings 0..35 forever, so a city above 36
+      // buildings looked frozen even while its total kept climbing. Materialize
+      // the newest visible slice instead: every report introduces the newest
+      // deterministic building at the right edge and lets the oldest one leave.
+      // A zero-building profile stays honestly empty.
+      var profileVisible = Math.min(target, 36);
+      var profileStart = Math.max(0, target - profileVisible);
+      for(var pi=profileStart; pi<target && guard<44; pi++){
+        var pb = genNormal(pi); pb.wx = frontier; pb.rise = 1; city.push(pb);
+        frontier += pb.gap; guard++;
+      }
+      builtNormals = target;
+    } else {
+      var materialized = Math.max(0, target - 26);
+      while((builtNormals < materialized || frontier < W*0.55) && guard < 44){
+        var b = genNormal(builtNormals); b.wx = frontier; b.rise = 1; city.push(b);
+        frontier += b.gap; builtNormals++; guard++;
+      }
+      builtNormals = Math.max(builtNormals, target);
     }
-    builtNormals = profileMode ? target : Math.max(builtNormals, target);
     // recoloca as ÚLTIMAS especiais na orla (as antigas já rolaram pra história da cidade).
     var recent = store.specials.slice(-4);
     for(var i=0;i<recent.length;i++){ var s = genSpecial(recent[i]); s.wx = frontier; s.rise = 1;

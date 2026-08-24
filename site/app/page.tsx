@@ -57,6 +57,24 @@ export default async function Page({
     window === "7d"
       ? await getLeaderboard(season, { window: "7d", limit: BOARD_MAX_CITIES })
       : seasonRanking;
+  const previewEntry = seasonRanking[0];
+  const previewCity = previewEntry?.city;
+  const sponsorPreviewParams = new URLSearchParams({
+    mode: "profile",
+    renderer: "classic",
+    username: previewEntry?.username || "nortown",
+    tokens: String(previewEntry?.seasonTokens || 2_400_000),
+    buildings: String(previewEntry?.buildings || 1280),
+    pop: String(previewCity?.pop || previewEntry?.residents || 44),
+    seed: String(previewCity?.seed || 0),
+    era: String(previewCity?.era || 0),
+    types: previewCity ? Object.entries(previewCity.types).map(([slug, count]) => `${slug}:${count}`).join(",") : "",
+    specials: previewCity ? Object.entries(previewCity.types).flatMap(([slug, count]) => Array.from({ length: Math.min(count, 4) }, () => slug)).join(",") : "",
+    marcos: previewCity?.marcos.join(",") || "",
+    season: String(season),
+    flightEpoch: String(now),
+  });
+  const sponsorPreviewCitySrc = `/demo/index.html?${sponsorPreviewParams.toString()}`;
   const parsedPage = Number.parseInt(sp?.page || "1", 10);
   const requestedPage = Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
   const pageCount = Math.max(1, Math.ceil(fullRanking.length / BOARD_PAGE_SIZE));
@@ -359,7 +377,7 @@ export default async function Page({
         metrics={siteMetrics}
         salesEnabled={salesEnabled}
         nextAvailableAt={sponsorAvailability.startsAt}
-        previewCitySvg={HERO_CITY}
+        previewCitySrc={sponsorPreviewCitySrc}
       />
 
       {/* WHY THE APP — the pitch comes AFTER the board: it's not another tokenmaxxing counter. */}
