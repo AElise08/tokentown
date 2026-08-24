@@ -216,3 +216,14 @@ test("sponsor CTA sits before Why the app and the board paginates at 100 cities"
   assert.ok(page.indexOf("<SponsorDock") < page.indexOf("WHY THE APP"));
   assert.match(css, /\.board-pagination\s*\{/);
 });
+
+test("sponsor block explains the complete $2 flight before opening checkout", () => {
+  const dock = read("app/SponsorDock.tsx");
+  const css = read("app/globals.css");
+  assert.match(dock, /Book for \$2/);
+  assert.match(dock, /We review it/);
+  assert.match(dock, /Fly for 24 hours/);
+  assert.match(dock, /city airship and departures board/);
+  assert.match(dock, /payment is refunded/);
+  assert.match(css, /\.sponsor-how\s*\{/);
+});

@@ -129,12 +129,12 @@ export default function SponsorDock({
             </a>
           ) : (
             <div className="sponsor-empty">
-              <strong>{salesEnabled ? "put your site in the city sky" : "flights opening soon"}</strong>
-              <span>{salesEnabled ? `next departure estimated ${availabilityTime(nextAvailableAt)}` : "the city is ready; checkout is not live yet"}</span>
+              <strong>{salesEnabled ? "put your site in every city sky" : "sponsored flights are preparing for takeoff"}</strong>
+              <span>{salesEnabled ? "your name and one-line message fly on the airship and stay on the departures board" : "see how the placement works below; checkout is not live yet"}</span>
             </div>
           )}
           <div className="sponsor-metrics">
-            {formatCount(liveMetrics.visitors)} sessions · {formatCount(liveMetrics.pageviews)} pageviews
+            current audience · {formatCount(liveMetrics.visitors)} sessions · {formatCount(liveMetrics.pageviews)} pageviews
           </div>
         </div>
         <button className="sponsor-launch" type="button" disabled={!salesEnabled} onClick={openCheckout}>
@@ -150,6 +150,21 @@ export default function SponsorDock({
           </span>
         </button>
         {notice && <div className="sponsor-notice" role="status">{notice}</div>}
+        <ol className="sponsor-how" aria-label="How sponsored flights work">
+          <li>
+            <span>01</span>
+            <div><b>Book for $2</b><small>Add your site name, one short line and destination, then pay securely with Stripe.</small></div>
+          </li>
+          <li>
+            <span>02</span>
+            <div><b>We review it</b><small>Every flight is checked before takeoff. If it is rejected, the payment is refunded.</small></div>
+          </li>
+          <li>
+            <span>03</span>
+            <div><b>Fly for 24 hours</b><small>Your site appears on the city airship and departures board, followed by a 30-minute runway reset.</small></div>
+          </li>
+        </ol>
+        <p className="sponsor-terms-note">One site at a time · no traffic guarantee · placements are labeled as sponsored.</p>
       </aside>
 
       <dialog

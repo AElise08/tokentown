@@ -2175,6 +2175,22 @@ tr.champ td.user .crown {
 .sponsor-launch-price b { color: #07111f; font-size: 16px; line-height: 1; }
 .sponsor-launch-price small { color: #315b79; font-size: 15px; line-height: 1; }
 .sponsor-notice, .sponsor-error { grid-column: 1 / -1; margin-top: 2px; color: var(--amber); font-size: 8px; line-height: 1.4; }
+.sponsor-how {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  margin: 0;
+  padding: 14px 0 0;
+  border-top: 1px solid rgba(68, 118, 156, .55);
+  list-style: none;
+}
+.sponsor-how li { display: grid; grid-template-columns: 25px minmax(0, 1fr); gap: 8px; min-width: 0; padding: 10px; border: 1px solid #294b66; border-radius: 8px; background: rgba(5, 16, 28, .38); }
+.sponsor-how li > span { display: grid; width: 25px; height: 25px; place-items: center; border: 1px solid #3e6c8f; border-radius: 50%; color: var(--teal); background: rgba(108,229,238,.05); font-size: 7px; font-weight: 900; }
+.sponsor-how li > div { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+.sponsor-how b { color: var(--ink); font-size: 9px; line-height: 1.2; }
+.sponsor-how small { color: var(--mute); font-size: 7.5px; line-height: 1.45; }
+.sponsor-terms-note { grid-column: 1 / -1; margin: -7px 0 0; color: var(--faint); font-size: 7.5px; line-height: 1.4; text-align: center; }
 
 .sponsor-dialog {
   position: fixed;
@@ -2239,6 +2255,7 @@ tr.champ td.user .crown {
   .board-page-controls { justify-content: space-between; }
   .sponsor-dock { grid-template-columns: 1fr; gap: 11px; }
   .sponsor-launch { width: 100%; min-width: 0; }
+  .sponsor-how { grid-template-columns: 1fr; }
   .sponsor-dialog { width: calc(100vw - 16px); max-height: calc(100dvh - 16px); }
   .sponsor-dialog form { gap: 12px; padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
   .sponsor-fields { grid-template-columns: 1fr; }
