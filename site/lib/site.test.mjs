@@ -187,10 +187,21 @@ test("sponsored flights stay site-only and do not track per-ad impressions or cl
   const game = read("public/demo/isometric-city.js");
   const privacy = read("app/privacy/page.tsx");
   assert.match(page, /<SponsorDock[\s\S]*sponsor=\{sponsor\}[\s\S]*lineup=\{sponsorLineup\}[\s\S]*salesEnabled=\{salesEnabled\}/);
-  assert.match(dock, /put your site in the sky · \$2/);
+  assert.match(dock, /launch your site/);
   assert.match(dock, /departures/);
-  assert.match(dock, /individual ad impressions and clicks are not tracked/);
+  assert.match(dock, /Individual ad impressions and clicks are not tracked/);
   assert.match(game, /sponsorName/);
   assert.match(privacy, /does not create browsing profiles or track individual/);
   assert.doesNotMatch(dock, /\/api\/sponsors\/(impression|click)/);
+});
+
+test("sponsor checkout is centered and the $2 / 24h CTA has clear hierarchy", () => {
+  const dock = read("app/SponsorDock.tsx");
+  const css = read("app/globals.css");
+  assert.match(dock, /aria-labelledby="sponsor-dialog-title"/);
+  assert.match(dock, /next flight open/);
+  assert.match(dock, /continue to Stripe · \$2/);
+  assert.match(css, /\.sponsor-dialog\s*\{[\s\S]*?position:\s*fixed;[\s\S]*?inset:\s*0;[\s\S]*?margin:\s*auto;/);
+  assert.match(css, /\.sponsor-launch-copy/);
+  assert.match(css, /\.sponsor-flight-plan/);
 });

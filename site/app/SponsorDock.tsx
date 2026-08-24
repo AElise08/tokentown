@@ -92,7 +92,7 @@ export default function SponsorDock({
             <b><i aria-hidden="true" /> departures</b>
           </span>
           <button type="button" disabled={!salesEnabled} onClick={openCheckout}>
-            {salesEnabled ? "fly · $2" : "soon"}
+            {salesEnabled ? "$2 · 24h" : "soon"}
           </button>
         </div>
         <ol>
@@ -138,34 +138,54 @@ export default function SponsorDock({
           </div>
         </div>
         <button className="sponsor-launch" type="button" disabled={!salesEnabled} onClick={openCheckout}>
-          {salesEnabled ? "put your site in the sky · $2" : "sponsored flights · soon"}
+          <span className="sponsor-launch-beacon" aria-hidden="true" />
+          <span className="sponsor-launch-copy">
+            <small>{salesEnabled ? "next flight open" : "sponsored flights"}</small>
+            <strong>{salesEnabled ? "launch your site" : "opening soon"}</strong>
+            <em>{salesEnabled ? "24 hours across NORTOWN" : "checkout is not live yet"}</em>
+          </span>
+          <span className="sponsor-launch-price">
+            <b>{salesEnabled ? "$2" : "—"}</b>
+            <small aria-hidden="true">→</small>
+          </span>
         </button>
         {notice && <div className="sponsor-notice" role="status">{notice}</div>}
       </aside>
 
-      <dialog className="sponsor-dialog" ref={dialog} onClick={(e) => {
+      <dialog
+        className="sponsor-dialog"
+        ref={dialog}
+        aria-labelledby="sponsor-dialog-title"
+        aria-describedby="sponsor-dialog-description"
+        onClick={(e) => {
         if (e.target === dialog.current) dialog.current?.close();
       }}>
         <form onSubmit={submit}>
           <div className="sponsor-dialog-head">
-            <div><span>✦</span> launch a sponsored flight</div>
+            <div>
+              <small>NORTOWN AIR</small>
+              <h2 id="sponsor-dialog-title"><span aria-hidden="true">✦</span> Put your site in the sky</h2>
+            </div>
             <button type="button" aria-label="Close" onClick={() => dialog.current?.close()}>×</button>
           </div>
-          <p>Your name flies inside NORTOWN&apos;s cities and appears on the departures board for 24 hours after approval.</p>
-          <label>Site name <input name="name" required maxLength={18} placeholder="Linear" /></label>
-          <label>Short line <input name="tagline" required maxLength={60} placeholder="Issue tracking built for speed" /></label>
-          <label>Destination <input name="url" required type="url" pattern="https://.*" placeholder="https://linear.app/" /></label>
-          <label>Receipt email <input name="email" required type="email" placeholder="you@company.com" /></label>
-          <label className="sponsor-consent">
-            <input name="accepted" type="checkbox" required /> <span>I own or represent this site and accept the <a href="/privacy#sponsored-flights" target="_blank">flight terms</a>. No adult, gambling, deceptive, illegal or malicious content.</span>
-          </label>
-          <div className="sponsor-price">
-            <span>estimated departure {availabilityTime(nextAvailableAt)} · 24h flight</span>
-            <strong>$2.00 USD</strong>
+          <p id="sponsor-dialog-description">A 24-hour sponsored flight across every city and the departures board, after approval.</p>
+          <div className="sponsor-fields">
+            <label>Site name <input name="name" required maxLength={18} placeholder="Linear" autoFocus /></label>
+            <label>Receipt email <input name="email" required type="email" placeholder="you@company.com" /></label>
+            <label className="wide">One-line message <input name="tagline" required maxLength={60} placeholder="Issue tracking built for speed" /></label>
+            <label className="wide">Destination URL <input name="url" required type="url" pattern="https://.*" placeholder="https://linear.app/" /></label>
           </div>
+          <div className="sponsor-flight-plan" aria-label="Flight details">
+            <div><span>Next takeoff</span><strong>{availabilityTime(nextAvailableAt)}</strong></div>
+            <div><span>Duration</span><strong>24 hours</strong></div>
+            <div><span>Total</span><strong>$2 USD</strong></div>
+          </div>
+          <label className="sponsor-consent">
+            <input name="accepted" type="checkbox" required /> <span>I own or represent this site and accept the <a href="/privacy#sponsored-flights" target="_blank">flight terms</a>.</span>
+          </label>
           {error && <div className="sponsor-error" role="alert">{error}</div>}
-          <button className="sponsor-pay" disabled={busy}>{busy ? "opening checkout…" : "continue to secure checkout"}</button>
-          <small>No traffic guarantee. Rejected campaigns are refunded. Site-wide session and pageview totals are public; individual ad impressions and clicks are not tracked.</small>
+          <button className="sponsor-pay" disabled={busy}>{busy ? "opening Stripe…" : "continue to Stripe · $2"}</button>
+          <small>Reviewed before takeoff. Rejected submissions are refunded. No traffic guarantee. Individual ad impressions and clicks are not tracked.</small>
         </form>
       </dialog>
     </>
