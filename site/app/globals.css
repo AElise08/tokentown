@@ -267,6 +267,43 @@ h1 .sub {
   font-size: 11px;
   color: var(--mute);
 }
+.site-visitors {
+  display: grid;
+  min-width: 176px;
+  padding: 2px 24px;
+  border-right: 1px solid var(--edge);
+  border-left: 1px solid var(--edge);
+  text-align: center;
+}
+.site-visitors-cap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--faint);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+.site-visitors-cap i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 7px rgba(108, 229, 238, .56);
+}
+.site-visitors strong {
+  margin: 2px 0 1px;
+  color: var(--ink);
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.site-visitors-note {
+  color: var(--faint);
+  font-size: 8px;
+}
 .days {
   text-align: right;
 }
@@ -1247,6 +1284,18 @@ td.city {
   }
   .days {
     text-align: left;
+  }
+  .site-visitors {
+    justify-items: start;
+    padding: 11px 0;
+    border-right: 0;
+    border-left: 0;
+    border-top: 1px solid var(--edge);
+    border-bottom: 1px solid var(--edge);
+    text-align: left;
+  }
+  .site-visitors-cap {
+    justify-content: flex-start;
   }
   .stat.big .v {
     font-size: 28px;

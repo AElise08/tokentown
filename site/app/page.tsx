@@ -1,4 +1,4 @@
-import { getLeaderboard, type WindowKind } from "@/lib/store";
+import { getLeaderboard, getSiteMetrics, type WindowKind } from "@/lib/store";
 import { currentSeasonId, daysRemaining, seasonRange, projectAnnualCost, isFinale, FIRST_PUBLIC_SEASON_ID } from "@/lib/season";
 import { formatCount, formatCost, formatAgo, formatAnnualCost, formatDate } from "@/lib/format";
 import { citySvg } from "@/lib/city";
@@ -6,6 +6,7 @@ import { accentHex } from "@/lib/profile";
 import LiveBoard from "./LiveBoard";
 import ProfileSearch from "./ProfileSearch";
 import SiteViewTracker from "./SiteViewTracker";
+import VisitorCounter from "./VisitorCounter";
 
 export const dynamic = "force-dynamic";
 const BOARD_PAGE_SIZE = 100;
@@ -36,8 +37,12 @@ export default async function Page({
 
   const now = Date.now();
   const demoSrc = "/demo/index.html";
-  // we always fetch the season ranking (for the headline); only refetch for 7d.
-  const seasonRanking = await getLeaderboard(season, { window: "season", limit: BOARD_MAX_CITIES });
+  // We always fetch the season ranking (for the headline) and the persistent
+  // visitor counter; only refetch the ranking for the optional 7-day view.
+  const [seasonRanking, siteMetrics] = await Promise.all([
+    getLeaderboard(season, { window: "season", limit: BOARD_MAX_CITIES }),
+    getSiteMetrics(),
+  ]);
   const fullRanking =
     window === "7d"
       ? await getLeaderboard(season, { window: "7d", limit: BOARD_MAX_CITIES })
@@ -138,6 +143,7 @@ export default async function Page({
             {formatDate(range.start)} — {formatDate(range.end)} · 28 days (UTC)
           </span>
         </div>
+        <VisitorCounter initial={siteMetrics.visitors} />
         {isCurrent ? (
           <div className="days">
             <div className="n">{days}</div>

@@ -167,6 +167,18 @@ test("site exposes a dedicated privacy page and links it from the board", () => 
   assert.match(privacy, /github\.com\/AElise08\/tokentown/);
 });
 
+test("the homepage shows the persistent visitor counter and refreshes it after tracking", () => {
+  const page = read("app/page.tsx");
+  const counter = read("app/VisitorCounter.tsx");
+  const tracker = read("app/SiteViewTracker.tsx");
+  assert.match(page, /getSiteMetrics\(\)/);
+  assert.match(page, /<VisitorCounter initial=\{siteMetrics\.visitors\}/);
+  assert.match(counter, /visitors since launch/);
+  assert.match(counter, /approx\. browser sessions/);
+  assert.match(counter, /tokentown:metrics/);
+  assert.match(tracker, /new CustomEvent\("tokentown:metrics"/);
+});
+
 test("closed season albums expose only the final 28-day totals", () => {
   const page = read("app/page.tsx");
   const api = read("app/api/placar/route.ts");
