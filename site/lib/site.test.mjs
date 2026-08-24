@@ -103,12 +103,14 @@ test("isometric profiles vary structure by deterministic city family", () => {
   assert.match(iso, /city-layout-7|Macro-family/);
 });
 
-test("profile uses the pixel skyline as its only city view", () => {
+test("profile keeps the isometric main view and synchronized pixel mini", () => {
   const profile = read("app/u/[username]/page.tsx");
   assert.match(profile, /citySvg\(/);
-  assert.match(profile, /className="citybig profile-pixel"/);
   assert.match(profile, /className="rail-pixel-city"/);
-  assert.doesNotMatch(profile, /profile-iso-card|iso-original|profileDemoSrc/);
+  assert.match(profile, /renderer:\s*"iso-original"/);
+  assert.match(profile, /flightEpoch:\s*String\(now\)/);
+  assert.match(profile, /profileDemoSrc/);
+  assert.match(profile, /same city|pixelCityMini/);
 });
 
 test("site exposes a dedicated privacy page and links it from the board", () => {

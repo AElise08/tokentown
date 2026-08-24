@@ -127,18 +127,6 @@ export default async function UserPage({
   const pop = entry.city ? entry.city.pop : entry.residents;
   const composition = entry.city ? cityComposition(entry.city) : [];
 
-  const pixelCity = citySvg(
-    {
-      username: u,
-      tokens: entry.tokens,
-      residents: pop,
-      buildings: entry.buildings,
-      city: entry.city,
-      accent,
-    },
-    "full",
-    finale
-  );
   const pixelCityMini = citySvg(
     {
       username: u,
@@ -151,6 +139,36 @@ export default async function UserPage({
     "mini",
     finale
   );
+
+  const demoParams = new URLSearchParams({
+    mode: "profile",
+    username: u,
+    tokens: String(entry.tokens),
+    buildings: String(entry.buildings),
+    pop: String(pop),
+    seed: String(entry.city?.seed ?? 0),
+    era: String(entry.city?.era ?? 0),
+    types: entry.city
+      ? Object.entries(entry.city.types).map(([slug, count]) => `${slug}:${count}`).join(",")
+      : "",
+    season: String(season),
+    renderer: "iso-original",
+    flightEpoch: String(now),
+  });
+  if (entry.city) {
+    demoParams.set("marcos", entry.city.marcos.join(","));
+    demoParams.set(
+      "specials",
+      Object.entries(entry.city.types)
+        .flatMap(([slug, count]) => Array.from({ length: Math.min(count, 4) }, () => slug))
+        .join(",")
+    );
+  }
+  if (sponsor) {
+    demoParams.set("sponsor", sponsor.name);
+    demoParams.set("sponsorUrl", sponsor.url);
+  }
+  const profileDemoSrc = `/demo/index.html?${demoParams.toString()}`;
 
   // landmarks: from the real city (app vocabulary) or derived from the numbers (fallback).
   let marcos: string[];
@@ -251,13 +269,8 @@ export default async function UserPage({
         </a>
       </header>
 
-      <div
-        id="profile-city"
-        className="citybig profile-pixel"
-        role="img"
-        aria-label={`pixel city of ${u}`}
-        dangerouslySetInnerHTML={{ __html: pixelCity }}
-      >
+      <div id="profile-city" className="citybig profile-game" role="img" aria-label={`isometric city of ${u}`}>
+        <iframe src={profileDemoSrc} title={`live isometric city of ${u}`} loading="eager" />
       </div>
 
       {marcos.length > 0 && (

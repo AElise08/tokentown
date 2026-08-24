@@ -927,14 +927,6 @@ td.city {
   height: 100%;
   border: 0;
 }
-.citybig.profile-pixel {
-  background: #141230;
-}
-.citybig.profile-pixel .tt-city {
-  width: 100%;
-  height: auto;
-  display: block;
-}
 
 /* Profile composition: compact identity rail on the left, live city in the
    center, and the setup panel below it. */
