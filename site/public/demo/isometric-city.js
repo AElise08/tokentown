@@ -278,6 +278,8 @@
     // one permanent upgrade to a stable lot. Upgrades rotate through all lots,
     // so the city keeps rising well beyond 10k without reshuffling its identity.
     var growthSteps = Math.floor(Math.max(0, buildingCount - 60) / 100);
+    var growthProgress = (Math.max(0, buildingCount - 60) % 100) / 100;
+    var activeGrowthRank = growthSteps % all.length;
     var towerUpgrades = Math.min(10, Math.floor(growthSteps / all.length));
     groups.towerTop = Math.max(8, groups.towerTop - towerUpgrades * 2);
     selected.forEach(function (source, index) {
@@ -292,11 +294,6 @@
       b.h += b.depth === 1 ? family % 5 : b.depth === 2 ? (family + 2) % 4 : 0;
       b.h = Math.round(b.h * (0.86 + era * 0.035));
       b.w = Math.max(14, b.w + Math.floor(local() * 7) - 3);
-      var lotUpgrades = growthSteps > source.growthRank
-        ? 1 + Math.floor((growthSteps - 1 - source.growthRank) / all.length)
-        : 0;
-      b.h += Math.min(lotUpgrades, 18) * 2;
-      b.w += Math.min(3, Math.floor(lotUpgrades / 5));
       // Macro-family changes the actual district silhouette, not just color.
       // These transformations are deliberately large enough to remain visible
       // after the 320x180 backing canvas is scaled inside the profile card.
@@ -333,12 +330,26 @@
         b.type = ["office", "brick", "apartment", "residential-tower", "shop"][index % 5];
       }
       b.x = clamp(Math.round(b.x), 24, 270);
-      b.w = clamp(Math.round(b.w), 12, 34);
-      b.h = clamp(Math.round(b.h), 14, b.depth === 2 ? 58 : 82);
       b.roof = b.type === "shop" ? "awning" : ["flat", "parapet", "antenna", "tank", "chimney"][Math.floor(local() * 5)];
       b.variant = Math.floor(local() * 4);
       b.seed = hashSeed(seed + ":windows:" + b.id);
       applySpecial(b);
+      var lotUpgrades = growthSteps > source.growthRank
+        ? 1 + Math.floor((growthSteps - 1 - source.growthRank) / all.length)
+        : 0;
+      if (b.type !== "park") {
+        // Four pixels per completed stage makes each finished extension readable
+        // at profile size. The partial stage becomes the active construction.
+        b.h += Math.min(lotUpgrades, 14) * 4;
+        b.w += Math.min(4, Math.floor(lotUpgrades / 4));
+        if (source.growthRank === activeGrowthRank && growthProgress > 0) {
+          b.h += Math.floor(growthProgress * 4);
+          b.underConstruction = true;
+          b.constructionProgress = growthProgress;
+        }
+      }
+      b.w = clamp(Math.round(b.w), 12, 38);
+      b.h = clamp(Math.round(b.h), b.type === "park" ? 8 : 14, b.depth === 2 ? 78 : 112);
       groups[b.depth === 0 ? "background" : b.depth === 1 ? "middle" : "foreground"].push(b);
     });
 
@@ -462,6 +473,21 @@
     line(ctx, p.edge, [[b.x - 3, top + 2], [b.x + b.w, top - 1], [b.x + b.w + side + 4, top + 2]], 1);
     drawFacade(ctx, b, p, activity, top);
     drawRoofEquipment(ctx, b, p, top);
+    if (b.underConstruction) drawConstruction(ctx, b, top);
+  }
+
+  function drawConstruction(ctx, b, top) {
+    var mastX = b.x + b.w - 2;
+    var craneTop = Math.max(5, top - 10);
+    // Scaffolding and a tiny crane make the current 0..100-building cycle
+    // visible. When it completes, this disappears and the added floors remain.
+    line(ctx, "#8b6b68", [[b.x - 2, b.base - 3], [b.x - 2, top + 1]], 1);
+    for (var y = b.base - 7; y > top + 2; y -= 7) {
+      line(ctx, "#5f5666", [[b.x - 2, y], [b.x + 2, y]], 1);
+    }
+    line(ctx, "#a27a62", [[mastX, top + 2], [mastX, craneTop]], 1);
+    line(ctx, "#a27a62", [[mastX - 6, craneTop], [mastX + 8, craneTop]], 1);
+    fill(ctx, COLORS.gold, mastX + 7, craneTop, 1, 1);
   }
 
   function drawPark(ctx, b) {

@@ -111,12 +111,16 @@ test("isometric city keeps growing beyond the old 9,999-building ceiling", () =>
   const input = { seed: 2422228418, era: 12, types: {}, marcos: [] };
   const oldCeiling = plan({ ...input, buildings: 9_999 });
   const current = plan({ ...input, buildings: 10_588 });
+  const laterInCycle = plan({ ...input, buildings: 10_638 });
   const future = plan({ ...input, buildings: 22_000 });
   const count = (city) => city.outer.length + city.background.length + city.middle.length + city.foreground.length;
   const height = (city) => city.outer.concat(city.background, city.middle, city.foreground)
     .reduce((sum, building) => sum + building.h, 0);
 
   assert.ok(count(current) > count(oldCeiling), "crossing 10k unlocks another visible district lot");
+  assert.ok(height(laterInCycle) > height(current), "the active construction rises inside each 100-building cycle");
+  assert.ok(current.background.concat(current.middle, current.foreground).some((building) => building.underConstruction),
+    "the active expansion is marked as under construction");
   assert.ok(count(future) > count(current), "later milestones keep adding visible lots");
   assert.ok(height(future) > height(current), "the existing skyline also rises over time");
   assert.deepEqual(plan({ ...input, buildings: 10_588 }), current, "growth remains deterministic");
