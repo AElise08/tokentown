@@ -21,9 +21,6 @@
   // snapshot from one person's city. The normal demo remains unchanged.
   var query = new URLSearchParams(window.location.search);
   var profileMode = query.get('mode') === 'profile';
-  var sponsorName = String(query.get('sponsor') || '').replace(/[<>]/g,'').trim().slice(0,18);
-  var sponsorUrl = '';
-  try { var sponsorParsed = new URL(query.get('sponsorUrl') || ''); if(sponsorParsed.protocol === 'https:') sponsorUrl = sponsorParsed.toString(); } catch(e) {}
   if(profileMode) document.body.classList.add('profile-mode');
   function hashSeed(s){ var h=2166136261; s=String(s||'anon');
     for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
@@ -60,9 +57,6 @@
     types: qCounts('types'),
     specials: qList('specials'),
     marcos: qList('marcos'),
-    sponsorName: sponsorName,
-    sponsorUrl: sponsorUrl,
-    flightEpoch: Math.max(0, qNum('flightEpoch', Date.now())),
     previewGrowth: query.get('growthPreview') === '1',
     previewTo: Math.max(0, Math.floor(qNum('growthTo', 0)))
   } : null;
@@ -941,46 +935,12 @@
     if(night) R(dir>0? x+len-1 : x, y+2, 1, 1, '#ffcf7a'); // farol
   }
 
-  // ---- DIRIGÍVEL raro: a cada 30-60min cruza o céu devagar; letreiro "TOKENTOWN" piscando ----
-  var blimp = null, blimpNextAt = sponsorName ? 1200 : 1800000;
-  function updateBlimp(dt){
-    if(reduce) return;
-    if(!blimp && t >= blimpNextAt){ var dir = Math.random()<0.5?1:-1;
-      blimp = { x: dir>0? -90 : W+90, y: 16+Math.random()*16, dir:dir, sp:0.28+Math.random()*0.12 }; }
-    if(blimp){ blimp.x += blimp.dir*blimp.sp*(dt*0.06);
-      if(blimp.x < -100 || blimp.x > W+100){ blimp=null; blimpNextAt = t + 1800000; } } // every flight leaves 30 quiet minutes
-  }
-  function drawBlimp(night){
-    if(!blimp) return; var x=blimp.x|0, y=blimp.y|0;
-    var body = night? '#6a5f7a' : '#8a7f96';
-    // The old envelope was only 22px wide while the word is much longer;
-    // give the airship enough room so the brand stays inside the silhouette.
-    var bw = 88;
-    R(x, y, bw, 12, body); R(x+7, y-1, bw-14, 1, mix(body,'#fff',0.15));
-    R(x-1, y+4, 1, 4, body); R(x+bw, y+4, 1, 4, body);     // envelope (bico e cauda)
-    R(x+30, y+12, 18, 3, mix(body,'#000',0.3));            // gôndola
-    var lit = night ? '#ffe6a8' : '#f2b47a';               // letreiro fixo e legível
-    ctx.globalAlpha = night?1:0.95;
-    R(x+8, y+2, bw-16, 8, '#40354f');
-    ctx.font='bold 6px monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
-    ctx.fillStyle = lit; ctx.fillText(sponsorName || 'NORTOWN', x+bw/2, y+2);
-    if(night){ ctx.globalAlpha=0.18; R(x, y, bw, 12, '#ffe6a8'); }
-    ctx.globalAlpha=1; ctx.textBaseline='alphabetic';
-  }
-
-  cv.addEventListener('click', function(event){
-    if(!sponsorUrl || !blimp) return;
-    var rect=cv.getBoundingClientRect(), x=(event.clientX-rect.left)*W/rect.width, y=(event.clientY-rect.top)*H/rect.height;
-    if(x>=blimp.x && x<=blimp.x+88 && y>=blimp.y-1 && y<=blimp.y+16)
-      window.open(sponsorUrl,'_blank','noopener,noreferrer');
-  });
-
   function draw(dt){
     t += dt;
     var now = clockFn(); curHour = hourOf(now);
     var wthr = updateWeather(now); snowCap = wthr.snow > 0;
     var n = hourToNight(curHour);
-    updatePeds(curHour, dt); updateCats(curHour, dt); updateTrain(dt); updateBlimp(dt);
+    updatePeds(curHour, dt); updateCats(curHour, dt); updateTrain(dt);
 
     if(seasonId!=null){
       // gera prédios a partir dos tokens — sem teto; salto grande (retomada) -> snap.
@@ -1015,8 +975,6 @@
       ctx.globalAlpha=0.5-n*0.25; var cc=mix('#e0b0a8','#3a3358',n);
       if(wthr.rain>0) cc=mix(cc,'#2a2a38',0.5*wthr.rain); // nuvens escurecem um tom na chuva
       R(cl.x,cl.y,cl.w,3,cc); R(cl.x+3,cl.y-2,cl.w-8,3,cc); R(cl.x+6,cl.y+2,cl.w-4,2,cc); ctx.globalAlpha=1; }
-    // DIRIGÍVEL raro cruzando o céu, atrás do skyline
-    drawBlimp(n>0.4);
     // silhueta distante (parallax)
     drawBackline(n);
     // prédios da frente (normais + especiais)

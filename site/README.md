@@ -30,20 +30,6 @@ npm run test:lib       # lib test suite
 Without Upstash configured, the app falls back to **in-memory** storage (data is lost on restart).
 For production, add the Upstash Redis vars to `.env.local` (see `.env.example`).
 
-### Sponsored flights
-
-The website supports automatically activated sponsored flights: **$2/1 day, $3/3 days or $10/10 days**
-inside the cities, on the departures board and in the sponsor board. Each campaign receives its purchased duration,
-followed by a 30-minute sponsor-free interval. There is no advertiser page and no auction; checkout opens from
-an inline modal. Configure Stripe and the private safety/admin key using `.env.example`. Without
-Stripe, local development can use `SPONSOR_DEMO_MODE=1`. Production sales also require
-`SPONSOR_SALES_ENABLED=1`; keep it disabled until Stripe, its signed webhook and automatic scheduling have
-been tested. Set `STRIPE_SPONSOR_PRICE_ID_1D`, `STRIPE_SPONSOR_PRICE_ID_3D` and
-`STRIPE_SPONSOR_PRICE_ID_10D` to the matching one-time Prices in the same Stripe
-environment; Checkout falls back to inline price data when a plan-specific ID is absent.
-Only aggregate browser sessions/pageviews
-are counted; individual sponsor impressions and clicks are deliberately not tracked.
-
 ### Get your city
 
 - **`npx tokentown schedule`** — macOS/Linux/Windows: saves a background reporter for Claude Code, Codex and OpenCode; no open terminal.

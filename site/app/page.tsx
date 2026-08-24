@@ -1,5 +1,4 @@
-import { getLeaderboard, getPublicSponsorHistory, getPublicSponsorLineup, getSiteMetrics, getSponsorAvailability, type WindowKind } from "@/lib/store";
-import { sponsorSalesEnabled } from "@/lib/stripe";
+import { getLeaderboard, type WindowKind } from "@/lib/store";
 import { currentSeasonId, daysRemaining, seasonRange, projectAnnualCost, isFinale, FIRST_PUBLIC_SEASON_ID } from "@/lib/season";
 import { formatCount, formatCost, formatAgo, formatAnnualCost, formatDate } from "@/lib/format";
 import { citySvg } from "@/lib/city";
@@ -7,7 +6,6 @@ import { accentHex } from "@/lib/profile";
 import LiveBoard from "./LiveBoard";
 import ProfileSearch from "./ProfileSearch";
 import SiteViewTracker from "./SiteViewTracker";
-import SponsorDock from "./SponsorDock";
 
 export const dynamic = "force-dynamic";
 const BOARD_PAGE_SIZE = 100;
@@ -37,44 +35,13 @@ export default async function Page({
   const window: WindowKind = isCurrent && sp?.window === "7d" ? "7d" : "season";
 
   const now = Date.now();
-  const [sponsorLineup, sponsorHistory, siteMetrics, sponsorAvailability] = await Promise.all([
-    getPublicSponsorLineup(now),
-    getPublicSponsorHistory(now),
-    getSiteMetrics(),
-    getSponsorAvailability(now),
-  ]);
-  const salesEnabled = sponsorSalesEnabled();
-  const sponsor = sponsorLineup.find((item) => item.status === "active") ?? null;
-  const demoQuery = new URLSearchParams();
-  if (sponsor) {
-    demoQuery.set("sponsor", sponsor.name);
-    demoQuery.set("sponsorUrl", sponsor.url);
-  }
-  const demoSrc = demoQuery.size ? `/demo/index.html?${demoQuery}` : "/demo/index.html";
+  const demoSrc = "/demo/index.html";
   // we always fetch the season ranking (for the headline); only refetch for 7d.
   const seasonRanking = await getLeaderboard(season, { window: "season", limit: BOARD_MAX_CITIES });
   const fullRanking =
     window === "7d"
       ? await getLeaderboard(season, { window: "7d", limit: BOARD_MAX_CITIES })
       : seasonRanking;
-  const previewEntry = seasonRanking[0];
-  const previewCity = previewEntry?.city;
-  const sponsorPreviewParams = new URLSearchParams({
-    mode: "profile",
-    renderer: "classic",
-    username: previewEntry?.username || "nortown",
-    tokens: String(previewEntry?.seasonTokens || 2_400_000),
-    buildings: String(previewEntry?.buildings || 1280),
-    pop: String(previewCity?.pop || previewEntry?.residents || 44),
-    seed: String(previewCity?.seed || 0),
-    era: String(previewCity?.era || 0),
-    types: previewCity ? Object.entries(previewCity.types).map(([slug, count]) => `${slug}:${count}`).join(",") : "",
-    specials: previewCity ? Object.entries(previewCity.types).flatMap(([slug, count]) => Array.from({ length: Math.min(count, 4) }, () => slug)).join(",") : "",
-    marcos: previewCity?.marcos.join(",") || "",
-    season: String(season),
-    flightEpoch: String(now),
-  });
-  const sponsorPreviewCitySrc = `/demo/index.html?${sponsorPreviewParams.toString()}`;
   const parsedPage = Number.parseInt(sp?.page || "1", 10);
   const requestedPage = Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
   const pageCount = Math.max(1, Math.ceil(fullRanking.length / BOARD_PAGE_SIZE));
@@ -154,13 +121,6 @@ export default async function Page({
             </div>
             <div className="mock-city">
               <div aria-hidden="true" dangerouslySetInnerHTML={{ __html: HERO_CITY }} />
-              {sponsor && (
-                <a className="hero-city-flight" href={sponsor.url} target="_blank" rel="sponsored noopener noreferrer" aria-label={`Sponsored flight: ${sponsor.name}`}>
-                  <span className="airship-tail" aria-hidden="true" />
-                  <span className="airship-envelope"><strong>{sponsor.name}</strong></span>
-                  <span className="airship-gondola" aria-hidden="true" />
-                </a>
-              )}
             </div>
             <div className="mock-cap">grows in the corner while you code</div>
           </div>
@@ -369,16 +329,6 @@ export default async function Page({
           </div>
         </nav>
       )}
-
-      <SponsorDock
-        sponsor={sponsor}
-        lineup={sponsorLineup}
-        history={sponsorHistory}
-        metrics={siteMetrics}
-        salesEnabled={salesEnabled}
-        nextAvailableAt={sponsorAvailability.startsAt}
-        previewCitySrc={sponsorPreviewCitySrc}
-      />
 
       {/* WHY THE APP — the pitch comes AFTER the board: it's not another tokenmaxxing counter. */}
       <section className="why" id="why">

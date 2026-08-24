@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { getPublicSponsorHistory, getPublicSponsorLineup, getSiteMetrics, getSponsorAvailability, getUserWithRank, getUserSnaps } from "@/lib/store";
-import { sponsorSalesEnabled } from "@/lib/stripe";
+import { getUserWithRank, getUserSnaps } from "@/lib/store";
 import { currentSeasonId, seasonRange, daysRemaining, isFinale, FIRST_PUBLIC_SEASON_ID } from "@/lib/season";
 import { formatCount, formatCost, formatAgo, formatDate } from "@/lib/format";
 import { cityFeatures, cityComposition, cityMarcoLabels } from "@/lib/city";
@@ -8,7 +7,6 @@ import { cityTitle, accentHex } from "@/lib/profile";
 import { setupView, weekHeatmap, pct } from "@/lib/setup-view";
 import LiveRefresh from "./LiveRefresh";
 import SiteViewTracker from "../../SiteViewTracker";
-import SponsorDock from "../../SponsorDock";
 
 // donut geometry — ring circumference for the model-mix (stroke-dasharray).
 const DONUT_R = 34;
@@ -86,14 +84,6 @@ export default async function UserPage({
   }
 
   const now = Date.now();
-  const [sponsorLineup, sponsorHistory, siteMetrics, sponsorAvailability] = await Promise.all([
-    getPublicSponsorLineup(now),
-    getPublicSponsorHistory(now),
-    getSiteMetrics(),
-    getSponsorAvailability(now),
-  ]);
-  const salesEnabled = sponsorSalesEnabled();
-  const sponsor = sponsorLineup.find((item) => item.status === "active") ?? null;
   const days = daysRemaining(now);
   // FINALE: only on the CURRENT season and the last night -> the city sets off fireworks.
   const finale = isCurrent && isFinale(now);
@@ -141,7 +131,6 @@ export default async function UserPage({
       : "",
     season: String(season),
     renderer: "iso-original",
-    flightEpoch: String(now),
   });
   if (entry.city) {
     demoParams.set("marcos", entry.city.marcos.join(","));
@@ -152,17 +141,9 @@ export default async function UserPage({
         .join(",")
     );
   }
-  if (sponsor) {
-    demoParams.set("sponsor", sponsor.name);
-    demoParams.set("sponsorUrl", sponsor.url);
-  }
   const railDemoParams = new URLSearchParams(demoParams);
   railDemoParams.set("renderer", "classic");
   const railDemoSrc = `/demo/index.html?${railDemoParams.toString()}`;
-  const sponsorPreviewParams = new URLSearchParams(railDemoParams);
-  sponsorPreviewParams.delete("sponsor");
-  sponsorPreviewParams.delete("sponsorUrl");
-  const sponsorPreviewCitySrc = `/demo/index.html?${sponsorPreviewParams.toString()}`;
   if (sp?.preview === "growth") {
     demoParams.set("growthPreview", "1");
     demoParams.set("growthTo", String(entry.buildings + Math.max(12_000, Math.round(entry.buildings * 1.5))));
@@ -480,16 +461,6 @@ export default async function UserPage({
           <LiveRefresh renderedAt={now} />
         </p>
       )}
-
-      <SponsorDock
-        sponsor={sponsor}
-        lineup={sponsorLineup}
-        history={sponsorHistory}
-        metrics={siteMetrics}
-        salesEnabled={salesEnabled}
-        nextAvailableAt={sponsorAvailability.startsAt}
-        previewCitySrc={sponsorPreviewCitySrc}
-      />
 
       <p className="foot">
         {isCurrent ? (

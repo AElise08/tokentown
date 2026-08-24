@@ -89,12 +89,6 @@
 
     var seed = (Number(data && data.seed) || hashSeed(data && data.username)) >>> 0;
     var buildings = clamp(Math.floor(Number(data && data.buildings) || 0), 0, 5000000);
-    var sponsorName = String((data && data.sponsorName) || "").replace(/[<>]/g, "").trim().slice(0, 18);
-    var sponsorUrl = "";
-    try {
-      var sponsorParsed = new URL(String((data && data.sponsorUrl) || ""));
-      if (sponsorParsed.protocol === "https:") sponsorUrl = sponsorParsed.toString();
-    } catch (e) {}
     var activity = clamp((Number(data && data.tokens) || 0) / 12000000, 0.25, 1);
     function renderCity(buildingCount) {
       var random = rng(seed);
@@ -167,31 +161,10 @@
       }
     }
 
-    var airshipFlight = 26000;
-    var airshipCycle = airshipFlight + 30 * 60 * 1000;
-    var flightEpoch = Number(data && data.flightEpoch) || Date.now();
-    var activeAirship = null;
-    canvas.addEventListener("click", function (event) {
-      if (!sponsorUrl || !activeAirship) return;
-      var rect = canvas.getBoundingClientRect();
-      var x = ((event.clientX - rect.left) * W) / rect.width;
-      var y = ((event.clientY - rect.top) * H) / rect.height;
-      if (x >= activeAirship.x && x <= activeAirship.x + activeAirship.w && y >= activeAirship.y && y <= activeAirship.y + activeAirship.h)
-        window.open(sponsorUrl, "_blank", "noopener,noreferrer");
-    });
     function frame(now) {
       updateGrowthPreview(now);
       ctx.clearRect(0, 0, W, H);
       ctx.drawImage(still, 0, 0);
-      // Both the rail thumbnail and the large city receive the same epoch, so
-      // their sponsored airship occupies the same normalized position.
-      var phase = sponsorName ? Math.max(0, Date.now() - flightEpoch) % airshipCycle : Date.now() % airshipCycle;
-      if (phase < airshipFlight) {
-        var x = -98 + phase * 0.019;
-        drawBlimp(ctx, x, 43, sponsorName || "NORTOWN");
-        activeAirship = { x: x, y: 42, w: 88, h: 16 };
-        if (sponsorUrl) canvas.style.cursor = "pointer";
-      } else { activeAirship = null; canvas.style.cursor = "default"; }
       window.requestAnimationFrame(frame);
     }
     window.requestAnimationFrame(frame);
@@ -206,23 +179,6 @@
       var y = 9 + Math.floor(random() * 80);
       fill(ctx, i % 6 === 0 ? "#aeb8ca" : "#15152d", x, y, i % 5 === 0 ? 2 : 1, 1);
     }
-  }
-
-  function drawBlimp(ctx, x, y, label) {
-    var width = 88;
-    var body = "#52425e";
-    fill(ctx, body, x, y, width, 11);
-    fill(ctx, "#6c5066", x + 5, y - 1, width - 10, 1);
-    fill(ctx, "#3d314e", x + 7, y + 2, width - 14, 8);
-    fill(ctx, "#6b5265", x - 1, y + 4, 1, 4);
-    fill(ctx, "#6b5265", x + width, y + 4, 1, 4);
-    fill(ctx, "#302840", x + 28, y + 11, 16, 3);
-    ctx.font = "bold 6px monospace";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "top";
-    ctx.fillStyle = COLORS.gold;
-    ctx.fillText(label || "NORTOWN", px(x + width / 2), px(y + 3));
-    ctx.textBaseline = "alphabetic";
   }
 
   var CITY_TEMPLATES = [
