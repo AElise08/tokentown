@@ -927,10 +927,6 @@ td.city {
   height: 100%;
   border: 0;
 }
-.profile-city-stack {
-  display: grid;
-  gap: 12px;
-}
 .citybig.profile-pixel {
   background: #141230;
 }
@@ -938,44 +934,6 @@ td.city {
   width: 100%;
   height: auto;
   display: block;
-}
-.profile-iso-card {
-  display: grid;
-  grid-template-columns: minmax(150px, 0.32fr) minmax(0, 1fr);
-  min-height: 116px;
-  border: 1px solid var(--edge);
-  border-radius: 10px;
-  overflow: hidden;
-  background: #0a0710;
-}
-.profile-iso-label {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 6px;
-  padding: 18px;
-  border-right: 1px solid var(--edge);
-  color: var(--teal);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.profile-iso-label small {
-  color: var(--faint);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  text-transform: none;
-}
-.profile-iso-frame {
-  min-height: 116px;
-}
-.profile-iso-frame iframe {
-  display: block;
-  width: 100%;
-  height: 116px;
-  border: 0;
 }
 
 /* Profile composition: compact identity rail on the left, live city in the
@@ -1050,6 +1008,15 @@ td.city {
   width: 100%;
   height: 126px;
   border: 0;
+}
+.rail-pixel-city {
+  line-height: 0;
+  background: #141230;
+}
+.rail-pixel-city .tt-city {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 .rail-user {
   padding: 10px 10px 1px;
@@ -1148,9 +1115,6 @@ td.city {
 .profile-main .citybig.profile-game {
   height: clamp(225px, 23vw, 300px);
   border-radius: 11px;
-}
-.profile-main .profile-iso-card {
-  grid-template-columns: minmax(130px, 0.28fr) minmax(0, 1fr);
 }
 .profile-main .built {
   border-radius: 11px;

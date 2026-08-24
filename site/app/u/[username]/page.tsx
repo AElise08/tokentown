@@ -139,41 +139,18 @@ export default async function UserPage({
     "full",
     finale
   );
-
-  // The profile uses the same canvas renderer as the live demo. Only the
-  // person's snapshot is passed in; game.js remains the single visual source.
-  const demoParams = new URLSearchParams({
-    mode: "profile",
-    username: u,
-    tokens: String(entry.tokens),
-    buildings: String(entry.buildings),
-    pop: String(pop),
-    seed: String(entry.city?.seed ?? 0),
-    era: String(entry.city?.era ?? 0),
-    types: entry.city
-      ? Object.entries(entry.city.types).map(([slug, count]) => `${slug}:${count}`).join(",")
-      : "",
-    season: String(season),
-    renderer: "iso-original",
-    flightEpoch: String(now),
-  });
-  if (entry.city) {
-    demoParams.set("marcos", entry.city.marcos.join(","));
-    demoParams.set(
-      "specials",
-      Object.entries(entry.city.types)
-        .flatMap(([slug, count]) => Array.from({ length: Math.min(count, 4) }, () => slug))
-        .join(",")
-    );
-  }
-  if (sponsor) {
-    demoParams.set("sponsor", sponsor.name);
-    demoParams.set("sponsorUrl", sponsor.url);
-  }
-  const profileDemoSrc = `/demo/index.html?${demoParams.toString()}`;
-  // The rail is a true miniature of the main city: same renderer, snapshot,
-  // seed and flight epoch. It no longer invents a second skyline.
-  const railDemoSrc = profileDemoSrc;
+  const pixelCityMini = citySvg(
+    {
+      username: u,
+      tokens: entry.tokens,
+      residents: pop,
+      buildings: entry.buildings,
+      city: entry.city,
+      accent,
+    },
+    "mini",
+    finale
+  );
 
   // landmarks: from the real city (app vocabulary) or derived from the numbers (fallback).
   let marcos: string[];
@@ -201,7 +178,12 @@ export default async function UserPage({
           <div className="rail-tagline">where prompts become skyline™</div>
 
           <div className="rail-city-card">
-            <iframe src={railDemoSrc} title={`thumbnail city of ${u}`} loading="lazy" />
+            <div
+              className="rail-pixel-city"
+              role="img"
+              aria-label={`pixel city of ${u}`}
+              dangerouslySetInnerHTML={{ __html: pixelCityMini }}
+            />
             <div className="rail-user"><span className="rail-led" /> {u}</div>
             <div className="rail-meta">T{season} · {isCurrent ? "ACTIVE BUILD" : "SEASON CLOSED"}</div>
           </div>
@@ -269,22 +251,13 @@ export default async function UserPage({
         </a>
       </header>
 
-      <div id="profile-city" className="profile-city-stack">
-        <div
-          className="citybig profile-pixel"
-          role="img"
-          aria-label={`pixel city of ${u}`}
-          dangerouslySetInnerHTML={{ __html: pixelCity }}
-        />
-        <div className="profile-iso-card">
-          <div className="profile-iso-label">
-            <span>live isometric view</span>
-            <small>same city · same flight path</small>
-          </div>
-          <div className="profile-iso-frame">
-            <iframe src={profileDemoSrc} title={`live isometric city of ${u}`} loading="eager" />
-          </div>
-        </div>
+      <div
+        id="profile-city"
+        className="citybig profile-pixel"
+        role="img"
+        aria-label={`pixel city of ${u}`}
+        dangerouslySetInnerHTML={{ __html: pixelCity }}
+      >
       </div>
 
       {marcos.length > 0 && (
