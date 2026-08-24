@@ -7,6 +7,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { runInNewContext } from "node:vm";
 
 const root = new URL("../", import.meta.url); // repo root (this file lives in lib/)
 const read = (rel) => readFileSync(fileURLToPath(new URL(rel, root)), "utf8");
@@ -101,6 +102,24 @@ test("isometric profiles vary structure by deterministic city family", () => {
   assert.match(iso, /family === 6[\s\S]*twin clusters/);
   assert.match(iso, /towerKind\s*=\s*\(family \|\| 0\) % 4/);
   assert.match(iso, /city-layout-7|Macro-family/);
+});
+
+test("isometric city keeps growing beyond the old 9,999-building ceiling", () => {
+  const context = { window: {} };
+  runInNewContext(read("public/demo/isometric-city.js"), context);
+  const plan = context.window.TokentownIsoCity.plan;
+  const input = { seed: 2422228418, era: 12, types: {}, marcos: [] };
+  const oldCeiling = plan({ ...input, buildings: 9_999 });
+  const current = plan({ ...input, buildings: 10_588 });
+  const future = plan({ ...input, buildings: 22_000 });
+  const count = (city) => city.outer.length + city.background.length + city.middle.length + city.foreground.length;
+  const height = (city) => city.outer.concat(city.background, city.middle, city.foreground)
+    .reduce((sum, building) => sum + building.h, 0);
+
+  assert.ok(count(current) > count(oldCeiling), "crossing 10k unlocks another visible district lot");
+  assert.ok(count(future) > count(current), "later milestones keep adding visible lots");
+  assert.ok(height(future) > height(current), "the existing skyline also rises over time");
+  assert.deepEqual(plan({ ...input, buildings: 10_588 }), current, "growth remains deterministic");
 });
 
 test("profile keeps the isometric main view and synchronized pixel mini", () => {

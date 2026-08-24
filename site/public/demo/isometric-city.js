@@ -89,7 +89,7 @@
 
     var seed = (Number(data && data.seed) || hashSeed(data && data.username)) >>> 0;
     var random = rng(seed);
-    var buildings = clamp(Math.floor(Number(data && data.buildings) || 0), 0, 9999);
+    var buildings = clamp(Math.floor(Number(data && data.buildings) || 0), 0, 5000000);
     var sponsorName = String((data && data.sponsorName) || "").replace(/[<>]/g, "").trim().slice(0, 18);
     var sponsorUrl = "";
     try {
@@ -116,6 +116,7 @@
     drawSky(stillCtx, random);
     drawPlatform(stillCtx, plan);
     drawStreetSurface(stillCtx, plan);
+    for (var o = 0; o < plan.outer.length; o++) drawBuilding(stillCtx, plan.outer[o], activity);
     for (var i = 0; i < plan.background.length; i++) drawBuilding(stillCtx, plan.background[i], activity);
     for (var j = 0; j < plan.middle.length; j++) drawBuilding(stillCtx, plan.middle[j], activity);
     drawLandmark(stillCtx, activity, plan.family, plan.towerX, plan.towerTop);
@@ -201,7 +202,7 @@
 
   function cityPlan(data) {
     var seed = (Number(data && data.seed) || hashSeed(data && data.username)) >>> 0;
-    var buildingCount = clamp(Math.floor(Number(data && data.buildings) || 0), 0, 9999);
+    var buildingCount = clamp(Math.floor(Number(data && data.buildings) || 0), 0, 5000000);
     var era = clamp(Math.floor(Number(data && data.era) || 0), 0, 12);
     var types = data && data.types ? data.types : {};
     var marcos = data && Array.isArray(data.marcos) ? data.marcos : [];
@@ -234,6 +235,7 @@
       var br = hashSeed(seed + ":slot:" + b.id);
       return ar === br ? 0 : ar < br ? -1 : 1;
     });
+    ranked.forEach(function (building, rank) { building.growthRank = rank; });
     var selected = ranked.slice(0, desired);
     // Never let a sparse city lose one of its three depth layers.
     [0, 1, 2].forEach(function (depth) {
@@ -260,6 +262,7 @@
     }
 
     var groups = {
+      outer: [],
       background: [],
       middle: [],
       foreground: [],
@@ -271,6 +274,12 @@
       roadStyle: hashSeed(seed + ":roads") % 4,
       treeStyle: hashSeed(seed + ":trees") % 4
     };
+    // Once the authored lots are occupied, every 100 reported buildings adds
+    // one permanent upgrade to a stable lot. Upgrades rotate through all lots,
+    // so the city keeps rising well beyond 10k without reshuffling its identity.
+    var growthSteps = Math.floor(Math.max(0, buildingCount - 60) / 100);
+    var towerUpgrades = Math.min(10, Math.floor(growthSteps / all.length));
+    groups.towerTop = Math.max(8, groups.towerTop - towerUpgrades * 2);
     selected.forEach(function (source, index) {
       var b = Object.assign({}, source);
       var local = rng(hashSeed(seed + ":layout:" + b.id));
@@ -283,6 +292,11 @@
       b.h += b.depth === 1 ? family % 5 : b.depth === 2 ? (family + 2) % 4 : 0;
       b.h = Math.round(b.h * (0.86 + era * 0.035));
       b.w = Math.max(14, b.w + Math.floor(local() * 7) - 3);
+      var lotUpgrades = growthSteps > source.growthRank
+        ? 1 + Math.floor((growthSteps - 1 - source.growthRank) / all.length)
+        : 0;
+      b.h += Math.min(lotUpgrades, 18) * 2;
+      b.w += Math.min(3, Math.floor(lotUpgrades / 5));
       // Macro-family changes the actual district silhouette, not just color.
       // These transformations are deliberately large enough to remain visible
       // after the 320x180 backing canvas is scaled inside the profile card.
@@ -327,6 +341,41 @@
       applySpecial(b);
       groups[b.depth === 0 ? "background" : b.depth === 1 ? "middle" : "foreground"].push(b);
     });
+
+    // A far district makes major growth milestones readable as new buildings,
+    // rather than height alone. Slots unlock monotonically and never disappear.
+    var outerThresholds = [120, 240, 500, 900, 1500, 2500, 4000, 6500, 10000, 15000, 22000, 32000];
+    var outerSpecs = [
+      [26, 9, 18], [39, 10, 25], [54, 8, 16], [111, 9, 23],
+      [126, 8, 29], [139, 9, 20], [174, 8, 25], [189, 9, 18],
+      [264, 9, 17], [277, 10, 26], [290, 8, 20], [101, 7, 31]
+    ];
+    var outerOrder = outerSpecs.map(function (spec, index) {
+      return { spec: spec, index: index, order: hashSeed(seed + ":outer:" + index) };
+    }).sort(function (a, b) { return a.order - b.order; });
+    for (var oi = 0; oi < outerOrder.length; oi++) {
+      if (buildingCount < outerThresholds[oi]) break;
+      var outerSource = outerOrder[oi];
+      var os = outerSource.spec;
+      var outerLocal = rng(hashSeed(seed + ":outer-layout:" + outerSource.index));
+      var outerX = mirror ? 320 - os[0] - os[1] : os[0];
+      var outerBuilding = {
+        id: "out-" + outerSource.index,
+        x: clamp(Math.round(outerX), 20, 294),
+        w: os[1],
+        h: os[2] + Math.min(12, Math.floor(buildingCount / Math.max(1, outerThresholds[oi] * 3))),
+        type: ["office", "brick", "apartment", "residential"][outerSource.index % 4],
+        depth: 0,
+        base: 135,
+        cityStyle: style,
+        cityFamily: family,
+        roof: ["flat", "antenna", "parapet"][Math.floor(outerLocal() * 3)],
+        variant: Math.floor(outerLocal() * 4),
+        seed: hashSeed(seed + ":outer-windows:" + outerSource.index)
+      };
+      groups.outer.push(outerBuilding);
+    }
+    groups.outer.sort(function (a, b) { return a.x - b.x; });
     return groups;
   }
 
@@ -590,5 +639,5 @@
     line(ctx, COLORS.edge2, [[70, 164], [160, 177], [250, 164]], 2);
   }
 
-  window.TokentownIsoCity = { mount: mount };
+  window.TokentownIsoCity = { mount: mount, plan: cityPlan };
 })();
