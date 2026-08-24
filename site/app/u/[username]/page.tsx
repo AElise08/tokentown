@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { getPublicSponsorLineup, getSiteMetrics, getSponsorAvailability, getUserWithRank, getUserSnaps } from "@/lib/store";
+import { getPublicSponsorHistory, getPublicSponsorLineup, getSiteMetrics, getSponsorAvailability, getUserWithRank, getUserSnaps } from "@/lib/store";
 import { sponsorSalesEnabled } from "@/lib/stripe";
-import { currentSeasonId, seasonRange, daysRemaining, isFinale } from "@/lib/season";
+import { currentSeasonId, seasonRange, daysRemaining, isFinale, FIRST_PUBLIC_SEASON_ID } from "@/lib/season";
 import { formatCount, formatCost, formatAgo, formatDate } from "@/lib/format";
-import { cityFeatures, cityComposition, cityMarcoLabels } from "@/lib/city";
+import { cityFeatures, cityComposition, cityMarcoLabels, citySvg } from "@/lib/city";
 import { cityTitle, accentHex } from "@/lib/profile";
 import { setupView, weekHeatmap, pct } from "@/lib/setup-view";
 import LiveRefresh from "./LiveRefresh";
@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
 function resolveSeason(raw: string | undefined): number {
   const cur = currentSeasonId();
   const parsed = raw != null ? parseInt(raw, 10) : cur;
-  return Number.isInteger(parsed) && parsed >= 0 && parsed <= cur ? parsed : cur;
+  return Number.isInteger(parsed) && parsed >= FIRST_PUBLIC_SEASON_ID && parsed <= cur ? parsed : cur;
 }
 
 export async function generateMetadata({
@@ -86,8 +86,9 @@ export default async function UserPage({
   }
 
   const now = Date.now();
-  const [sponsorLineup, siteMetrics, sponsorAvailability] = await Promise.all([
+  const [sponsorLineup, sponsorHistory, siteMetrics, sponsorAvailability] = await Promise.all([
     getPublicSponsorLineup(now),
+    getPublicSponsorHistory(now),
     getSiteMetrics(),
     getSponsorAvailability(now),
   ]);
@@ -479,9 +480,11 @@ export default async function UserPage({
       <SponsorDock
         sponsor={sponsor}
         lineup={sponsorLineup}
+        history={sponsorHistory}
         metrics={siteMetrics}
         salesEnabled={salesEnabled}
         nextAvailableAt={sponsorAvailability.startsAt}
+        previewCitySvg={citySvg({ username: u, tokens: entry.tokens, residents: entry.residents, buildings: entry.buildings, city: entry.city, accent }, "full")}
       />
 
       <p className="foot">

@@ -2,6 +2,9 @@
 // Toda temporada começa/termina no mesmo instante pra todo mundo (UTC).
 export const SEASON_EPOCH = Date.UTC(2026, 6, 1); // 01/07/2026 00:00 UTC
 export const SEASON_MS = 28 * 86400000; // 28 dias
+// T0 was the private launch/test season. Public navigation begins at T1.
+// The data remains stored so removing the label never destroys history.
+export const FIRST_PUBLIC_SEASON_ID = 1;
 
 export function currentSeasonId(now: number = Date.now()): number {
   return Math.floor((now - SEASON_EPOCH) / SEASON_MS);

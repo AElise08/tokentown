@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import type { PublicSponsor, PublicSponsorSlot } from "@/lib/sponsor";
+import { SPONSOR_PLANS, type PublicSponsor, type PublicSponsorHistory, type PublicSponsorSlot, type SponsorPlanId } from "@/lib/sponsor";
 import type { SiteMetrics } from "@/lib/store";
 import { formatCount } from "@/lib/format";
 
@@ -21,18 +21,32 @@ function availabilityTime(startsAt: number): string {
   return `${iso.slice(5, 10)} at ${iso.slice(11, 16)} UTC`;
 }
 
+function availabilityLabel(startsAt: number, nowMs: number | null): string {
+  if (!nowMs) return availabilityTime(startsAt);
+  const start = new Date(startsAt);
+  const now = new Date(nowMs);
+  const today = start.getUTCFullYear() === now.getUTCFullYear()
+    && start.getUTCMonth() === now.getUTCMonth()
+    && start.getUTCDate() === now.getUTCDate();
+  return today ? `today · ${start.toISOString().slice(11, 16)} UTC` : availabilityTime(startsAt);
+}
+
 export default function SponsorDock({
   sponsor,
   lineup,
+  history,
   metrics,
   salesEnabled,
   nextAvailableAt,
+  previewCitySvg,
 }: {
   sponsor: PublicSponsor | null;
   lineup: PublicSponsorSlot[];
+  history: PublicSponsorHistory[];
   metrics: SiteMetrics;
   salesEnabled: boolean;
   nextAvailableAt: number;
+  previewCitySvg: string;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [nowMs, setNowMs] = useState<number | null>(null);
@@ -40,6 +54,8 @@ export default function SponsorDock({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [selectedPlan, setSelectedPlan] = useState<SponsorPlanId>("day");
+  const plan = SPONSOR_PLANS[selectedPlan];
   const openCheckout = () => {
     if (salesEnabled) dialog.current?.showModal();
   };
@@ -92,7 +108,7 @@ export default function SponsorDock({
             <b><i aria-hidden="true" /> departures</b>
           </span>
           <button type="button" disabled={!salesEnabled} onClick={openCheckout}>
-            {salesEnabled ? "$2 · 24h" : "soon"}
+            {salesEnabled ? "from $2" : "soon"}
           </button>
         </div>
         <ol>
@@ -117,54 +133,70 @@ export default function SponsorDock({
             </li>
           )}
         </ol>
-        <div className="lineup-gap"><span aria-hidden="true">☾</span> 30 min runway reset between 24h flights</div>
+        <div className="lineup-gap"><span aria-hidden="true">☾</span> 30 min runway reset between flights</div>
       </aside>
 
       <aside className="sponsor-dock" aria-label="NORTOWN sponsor">
-        <div className="sponsor-bottom-copy">
-          <div className="sponsor-cap">{sponsor ? "now flying" : salesEnabled ? "next sponsored flight" : "sponsored flights"}</div>
-          {sponsor ? (
-            <a className="sponsor-live" href={sponsor.url} target="_blank" rel="sponsored noopener noreferrer">
-              <strong>{sponsor.name}</strong><span>{sponsor.tagline}</span>
-            </a>
-          ) : (
-            <div className="sponsor-empty">
-              <strong>{salesEnabled ? "put your site in every city sky" : "sponsored flights are preparing for takeoff"}</strong>
-              <span>{salesEnabled ? "your name and one-line message fly on the airship and stay on the departures board" : "see how the placement works below; checkout is not live yet"}</span>
-            </div>
-          )}
-          <div className="sponsor-metrics">
-            current audience · {formatCount(liveMetrics.visitors)} sessions · {formatCount(liveMetrics.pageviews)} pageviews
+        <header className="sponsor-showcase-head">
+          <div>
+            <div className="sponsor-cap"><span aria-hidden="true" /> NORTOWN AIR · sponsored</div>
+            <h2>Fly your name over the city.</h2>
+            <p>Your site joins the world itself: a clickable airship crosses the pixel cities and your name enters the public sponsor board.</p>
           </div>
+          <div className="sponsor-metrics">{formatCount(liveMetrics.visitors)} sessions · {formatCount(liveMetrics.pageviews)} pageviews</div>
+        </header>
+
+        <div className="sponsor-preview" aria-label="Live sponsored flight preview and sponsor board">
+          <div className="sponsor-preview-sky">
+            <div className="sponsor-preview-label"><span>LIVE PLACEMENT PREVIEW</span><small>the real NORTOWN city</small></div>
+            <div className="sponsor-real-city" aria-hidden="true" dangerouslySetInnerHTML={{ __html: previewCitySvg }} />
+            <div className="sponsor-preview-airship" aria-hidden="true">
+              <i className="preview-tail" /><span>{sponsor?.name || "YOUR SITE"}</span><i className="preview-gondola" />
+            </div>
+          </div>
+          <section className="sponsor-flight-log" aria-label="Sites that have sponsored NORTOWN">
+            <div className="sponsor-preview-label"><span>SPONSOR BOARD</span><small>past &amp; queued flights</small></div>
+            {history.length ? (
+              <ol>
+                {history.map((item, index) => (
+                  <li key={item.id}>
+                    <span>{String(index + 1).padStart(2, "0")}</span>
+                    <a href={item.url} target="_blank" rel="sponsored noopener noreferrer">{item.name}</a>
+                    <small>{SPONSOR_PLANS[item.planId].label}</small>
+                    <em className={item.status}>{item.status === "completed" ? "landed" : item.status}</em>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <div className="sponsor-log-empty"><b>No flights logged yet.</b><span>The first approved sponsor takes position 01.</span></div>
+            )}
+          </section>
         </div>
-        <button className="sponsor-launch" type="button" disabled={!salesEnabled} onClick={openCheckout}>
-          <span className="sponsor-launch-beacon" aria-hidden="true" />
-          <span className="sponsor-launch-copy">
-            <small>{salesEnabled ? "next flight open" : "sponsored flights"}</small>
-            <strong>{salesEnabled ? "launch your site" : "opening soon"}</strong>
-            <em>{salesEnabled ? "24 hours across NORTOWN" : "checkout is not live yet"}</em>
-          </span>
-          <span className="sponsor-launch-price">
-            <b>{salesEnabled ? "$2" : "—"}</b>
-            <small aria-hidden="true">→</small>
-          </span>
-        </button>
+
+        <div className="sponsor-booking-row">
+          <fieldset className="sponsor-plan-picker">
+            <legend>Choose your flight</legend>
+            {(Object.values(SPONSOR_PLANS) as Array<(typeof SPONSOR_PLANS)[SponsorPlanId]>).map((item) => (
+              <button key={item.id} type="button" className={selectedPlan === item.id ? "selected" : ""} onClick={() => setSelectedPlan(item.id)}>
+                <span>{item.label}</span><strong>${item.priceCents / 100}</strong>
+              </button>
+            ))}
+          </fieldset>
+          <div className="sponsor-review-note">
+            <b>Pay once, then we review.</b>
+            <span>Approved sites start at the next open slot. Rejected sites are refunded. There is a 30-minute pause between flights.</span>
+          </div>
+          <button className="sponsor-launch" type="button" disabled={!salesEnabled} onClick={openCheckout}>
+            <span className="sponsor-launch-copy">
+              <small>{salesEnabled ? `starts ${availabilityLabel(nextAvailableAt, nowMs)}` : "sponsored flights"}</small>
+              <strong>{salesEnabled ? `book ${plan.label}` : "opening soon"}</strong>
+              <em>{salesEnabled ? "airship + sponsor board" : "checkout is not live yet"}</em>
+            </span>
+            <span className="sponsor-launch-price"><b>{salesEnabled ? `$${plan.priceCents / 100}` : "—"}</b><small aria-hidden="true">→</small></span>
+          </button>
+        </div>
         {notice && <div className="sponsor-notice" role="status">{notice}</div>}
-        <ol className="sponsor-how" aria-label="How sponsored flights work">
-          <li>
-            <span>01</span>
-            <div><b>Book for $2</b><small>Add your site name, one short line and destination, then pay securely with Stripe.</small></div>
-          </li>
-          <li>
-            <span>02</span>
-            <div><b>We review it</b><small>Every flight is checked before takeoff. If it is rejected, the payment is refunded.</small></div>
-          </li>
-          <li>
-            <span>03</span>
-            <div><b>Fly for 24 hours</b><small>Your site appears on the city airship and departures board, followed by a 30-minute runway reset.</small></div>
-          </li>
-        </ol>
-        <p className="sponsor-terms-note">One site at a time · no traffic guarantee · placements are labeled as sponsored.</p>
+        <p className="sponsor-terms-note">No traffic guarantee · labeled as sponsored · individual ad impressions and clicks are not tracked.</p>
       </aside>
 
       <dialog
@@ -183,7 +215,16 @@ export default function SponsorDock({
             </div>
             <button type="button" aria-label="Close" onClick={() => dialog.current?.close()}>×</button>
           </div>
-          <p id="sponsor-dialog-description">A 24-hour sponsored flight across every city and the departures board, after approval.</p>
+          <p id="sponsor-dialog-description">A {plan.label} sponsored flight across every city and the public sponsor board, after approval.</p>
+          <fieldset className="sponsor-modal-plans">
+            <legend>Flight plan</legend>
+            {(Object.values(SPONSOR_PLANS) as Array<(typeof SPONSOR_PLANS)[SponsorPlanId]>).map((item) => (
+              <label key={item.id} className={selectedPlan === item.id ? "selected" : ""}>
+                <input type="radio" name="planId" value={item.id} checked={selectedPlan === item.id} onChange={() => setSelectedPlan(item.id)} />
+                <span>{item.label}</span><strong>${item.priceCents / 100}</strong>
+              </label>
+            ))}
+          </fieldset>
           <div className="sponsor-fields">
             <label>Site name <input name="name" required maxLength={18} placeholder="Linear" autoFocus /></label>
             <label>Receipt email <input name="email" required type="email" placeholder="you@company.com" /></label>
@@ -192,14 +233,14 @@ export default function SponsorDock({
           </div>
           <div className="sponsor-flight-plan" aria-label="Flight details">
             <div><span>Next takeoff</span><strong>{availabilityTime(nextAvailableAt)}</strong></div>
-            <div><span>Duration</span><strong>24 hours</strong></div>
-            <div><span>Total</span><strong>$2 USD</strong></div>
+            <div><span>Duration</span><strong>{plan.label}</strong></div>
+            <div><span>Total</span><strong>${plan.priceCents / 100} USD</strong></div>
           </div>
           <label className="sponsor-consent">
             <input name="accepted" type="checkbox" required /> <span>I own or represent this site and accept the <a href="/privacy#sponsored-flights" target="_blank">flight terms</a>.</span>
           </label>
           {error && <div className="sponsor-error" role="alert">{error}</div>}
-          <button className="sponsor-pay" disabled={busy}>{busy ? "opening Stripe…" : "continue to Stripe · $2"}</button>
+          <button className="sponsor-pay" disabled={busy}>{busy ? "opening Stripe…" : `continue to Stripe · $${plan.priceCents / 100}`}</button>
           <small>Reviewed before takeoff. Rejected submissions are refunded. No traffic guarantee. Individual ad impressions and clicks are not tracked.</small>
         </form>
       </dialog>

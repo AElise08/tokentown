@@ -18,6 +18,7 @@ import {
   effectiveSponsorStatus,
   nextSponsorWindow,
   sanitizeSponsorDraft,
+  sponsorPlan,
   SPONSOR_DRAFT_RETENTION_MS,
   SPONSOR_DURATION_MS,
   SPONSOR_GAP_MS,
@@ -25,6 +26,7 @@ import {
   toPublicSponsor,
   type PublicSponsor,
   type PublicSponsorSlot,
+  type PublicSponsorHistory,
   type SponsorCampaign,
 } from "./sponsor";
 
@@ -621,7 +623,14 @@ function parseSponsorCampaign(raw: string | number | undefined): SponsorCampaign
   if (typeof raw !== "string") return null;
   try {
     const c = JSON.parse(raw) as SponsorCampaign;
-    return c && typeof c.id === "string" && sanitizeSponsorDraft(c) ? c : null;
+    if (!c || typeof c.id !== "string" || !sanitizeSponsorDraft(c)) return null;
+    const plan = sponsorPlan(c.planId);
+    return {
+      ...c,
+      planId: plan.id,
+      priceCents: Number.isFinite(c.priceCents) ? c.priceCents : plan.priceCents,
+      durationMs: Number.isFinite(c.durationMs) ? c.durationMs : plan.durationMs,
+    };
   } catch {
     return null;
   }
@@ -677,9 +686,12 @@ export async function getSponsorCampaign(id: string): Promise<SponsorCampaign | 
 export async function createSponsorCampaign(raw: unknown): Promise<SponsorCampaign | null> {
   const draft = sanitizeSponsorDraft(raw);
   if (!draft) return null;
+  const plan = sponsorPlan(draft.planId);
   const campaign: SponsorCampaign = {
     id: randomUUID(),
     ...draft,
+    priceCents: plan.priceCents,
+    durationMs: plan.durationMs,
     status: "draft",
     createdAt: Date.now(),
   };
@@ -718,12 +730,16 @@ export async function markSponsorPaid(input: {
   checkoutSessionId: string;
   paymentIntentId?: string;
   email?: string;
+  planId?: string;
+  amountTotal?: number;
 }): Promise<SponsorCampaign | null> {
   const c = await getSponsorCampaign(input.id);
   if (!c) return null;
   // Stripe can retry webhooks: an already-paid/approved campaign is a no-op.
   if (c.status !== "draft") return c;
   if (c.checkoutSessionId && c.checkoutSessionId !== input.checkoutSessionId) return null;
+  if (input.planId && input.planId !== c.planId) return null;
+  if (input.amountTotal != null && input.amountTotal !== c.priceCents) return null;
   const next: SponsorCampaign = {
     ...c,
     status: "paid",
@@ -760,7 +776,7 @@ export async function approveSponsorCampaign(id: string, now = Date.now()): Prom
         (a.paidAt || a.createdAt) - (b.paidAt || b.createdAt) || a.id.localeCompare(b.id)
       );
     if (queue[0]?.id !== id) return null;
-    const window = nextSponsorWindow(all.filter((x) => x.id !== id), now);
+    const window = nextSponsorWindow(all.filter((x) => x.id !== id), now, c.durationMs);
     const next: SponsorCampaign = {
       ...c,
       status: "scheduled",
@@ -776,9 +792,13 @@ export async function approveSponsorCampaign(id: string, now = Date.now()): Prom
 export async function getSponsorAvailability(now = Date.now()): Promise<{ startsAt: number; waiting: number }> {
   const campaigns = await listSponsorCampaigns(now);
   const base = nextSponsorWindow(campaigns, now);
-  const waiting = campaigns.filter((campaign) => campaign.status === "paid").length;
+  const paid = campaigns
+    .filter((campaign) => campaign.status === "paid")
+    .sort((a, b) => (a.paidAt || a.createdAt) - (b.paidAt || b.createdAt));
+  const waiting = paid.length;
+  const queuedMs = paid.reduce((sum, campaign) => sum + campaign.durationMs + SPONSOR_GAP_MS, 0);
   return {
-    startsAt: base.startsAt + waiting * (SPONSOR_DURATION_MS + SPONSOR_GAP_MS),
+    startsAt: base.startsAt + queuedMs,
     waiting,
   };
 }
@@ -790,7 +810,7 @@ export async function pauseSponsorCampaign(id: string, now = Date.now()): Promis
   if (status !== "paid" && status !== "scheduled" && status !== "active") return null;
   const remainingMs = status === "active" && campaign.endsAt
     ? Math.max(60_000, campaign.endsAt - now)
-    : SPONSOR_DURATION_MS;
+    : campaign.durationMs;
   const next: SponsorCampaign = { ...campaign, status: "paused", pausedAt: now, remainingMs };
   await saveSponsorCampaign(next);
   return next;
@@ -803,7 +823,7 @@ export async function resumeSponsorCampaign(id: string, now = Date.now()): Promi
     const all = await listSponsorCampaigns(now);
     if (all.some((item) => item.status === "paid")) return null;
     const window = nextSponsorWindow(all.filter((item) => item.id !== id), now);
-    const duration = Math.max(60_000, Math.min(campaign.remainingMs || SPONSOR_DURATION_MS, SPONSOR_DURATION_MS));
+    const duration = Math.max(60_000, Math.min(campaign.remainingMs || campaign.durationMs, campaign.durationMs));
     const next: SponsorCampaign = {
       ...campaign,
       status: "scheduled",
@@ -845,8 +865,22 @@ export async function getPublicSponsorLineup(now = Date.now(), limit = 4): Promi
     .sort((a, b) => (a.campaign.startsAt || 0) - (b.campaign.startsAt || 0))
     .slice(0, Math.max(1, Math.min(limit, 8)))
     .map(({ campaign, status }) => {
-      const { id, name, tagline, url, startsAt, endsAt } = campaign;
-      return { id, name, tagline, url, startsAt, endsAt, status };
+      const { id, name, tagline, url, startsAt, endsAt, planId, priceCents, durationMs } = campaign;
+      return { id, name, tagline, url, startsAt, endsAt, planId, priceCents, durationMs, status };
+    });
+}
+
+export async function getPublicSponsorHistory(now = Date.now(), limit = 8): Promise<PublicSponsorHistory[]> {
+  const campaigns = await listSponsorCampaigns(now);
+  return campaigns
+    .map((campaign) => ({ campaign, status: effectiveSponsorStatus(campaign, now) }))
+    .filter((item): item is { campaign: SponsorCampaign; status: "active" | "scheduled" | "completed" } =>
+      item.status === "active" || item.status === "scheduled" || item.status === "completed")
+    .sort((a, b) => (b.campaign.startsAt || 0) - (a.campaign.startsAt || 0))
+    .slice(0, Math.max(1, Math.min(limit, 20)))
+    .map(({ campaign, status }) => {
+      const { id, name, tagline, url, startsAt, endsAt, planId, priceCents, durationMs } = campaign;
+      return { id, name, tagline, url, startsAt, endsAt, planId, priceCents, durationMs, status };
     });
 }
 

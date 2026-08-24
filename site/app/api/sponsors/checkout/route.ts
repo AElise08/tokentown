@@ -1,4 +1,4 @@
-import { sanitizeSponsorDraft, SPONSOR_PRICE_CENTS } from "@/lib/sponsor";
+import { sanitizeSponsorDraft, sponsorPlan } from "@/lib/sponsor";
 import {
   attachSponsorCheckout,
   createSponsorCampaign,
@@ -48,20 +48,21 @@ export async function POST(req: Request) {
   }
 
   try {
-    const fixedPrice = sponsorPriceId();
+    const plan = sponsorPlan(campaign.planId);
+    const fixedPrice = sponsorPriceId(plan.id);
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       customer_email: campaign.email,
       client_reference_id: campaign.id,
-      metadata: { campaignId: campaign.id },
+      metadata: { campaignId: campaign.id, sponsorPlan: plan.id },
       line_items: [
         fixedPrice ? { quantity: 1, price: fixedPrice } : {
           quantity: 1,
           price_data: {
             currency: "usd",
-            unit_amount: SPONSOR_PRICE_CENTS,
+            unit_amount: plan.priceCents,
             product_data: {
-              name: "NORTOWN sponsored flight · 24 hours",
+              name: `NORTOWN sponsored flight · ${plan.label}`,
               description: `${campaign.name} — ${campaign.tagline}`,
             },
           },

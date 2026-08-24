@@ -187,7 +187,7 @@ test("sponsored flights stay site-only and do not track per-ad impressions or cl
   const game = read("public/demo/isometric-city.js");
   const privacy = read("app/privacy/page.tsx");
   assert.match(page, /<SponsorDock[\s\S]*sponsor=\{sponsor\}[\s\S]*lineup=\{sponsorLineup\}[\s\S]*salesEnabled=\{salesEnabled\}/);
-  assert.match(dock, /launch your site/);
+  assert.match(dock, /Fly your name over the city/);
   assert.match(dock, /departures/);
   assert.match(dock, /Individual ad impressions and clicks are not tracked/);
   assert.match(game, /sponsorName/);
@@ -195,12 +195,12 @@ test("sponsored flights stay site-only and do not track per-ad impressions or cl
   assert.doesNotMatch(dock, /\/api\/sponsors\/(impression|click)/);
 });
 
-test("sponsor checkout is centered and the $2 / 24h CTA has clear hierarchy", () => {
+test("sponsor checkout is centered and the selected plan drives the CTA", () => {
   const dock = read("app/SponsorDock.tsx");
   const css = read("app/globals.css");
   assert.match(dock, /aria-labelledby="sponsor-dialog-title"/);
-  assert.match(dock, /next flight open/);
-  assert.match(dock, /continue to Stripe · \$2/);
+  assert.match(dock, /starts \$\{availabilityLabel/);
+  assert.match(dock, /continue to Stripe · \$\$\{plan\.priceCents \/ 100\}/);
   assert.match(css, /\.sponsor-dialog\s*\{[\s\S]*?position:\s*fixed;[\s\S]*?inset:\s*0;[\s\S]*?margin:\s*auto;/);
   assert.match(css, /\.sponsor-launch-copy/);
   assert.match(css, /\.sponsor-flight-plan/);
@@ -217,13 +217,27 @@ test("sponsor CTA sits before Why the app and the board paginates at 100 cities"
   assert.match(css, /\.board-pagination\s*\{/);
 });
 
-test("sponsor block explains the complete $2 flight before opening checkout", () => {
+test("sponsor block uses the real city, three plans and a public flight log", () => {
   const dock = read("app/SponsorDock.tsx");
   const css = read("app/globals.css");
-  assert.match(dock, /Book for \$2/);
-  assert.match(dock, /We review it/);
-  assert.match(dock, /Fly for 24 hours/);
-  assert.match(dock, /city airship and departures board/);
-  assert.match(dock, /payment is refunded/);
-  assert.match(css, /\.sponsor-how\s*\{/);
+  assert.match(dock, /SPONSOR_PLANS/);
+  assert.match(dock, /previewCitySvg/);
+  assert.match(dock, /SPONSOR BOARD/);
+  assert.match(dock, /Pay once, then we review/);
+  assert.match(dock, /Rejected sites are refunded/);
+  assert.match(dock, /sponsor-preview-airship/);
+  assert.match(css, /sponsor-preview-flight-slow 28s/);
+  assert.match(css, /\.sponsor-plan-picker\s*\{/);
+});
+
+test("public season navigation starts at T1 and never exposes the private T0", () => {
+  const season = read("lib/season.ts");
+  const page = read("app/page.tsx");
+  const profile = read("app/u/[username]/page.tsx");
+  const api = read("app/api/placar/route.ts");
+  assert.match(season, /FIRST_PUBLIC_SEASON_ID\s*=\s*1/);
+  assert.match(page, /s >= FIRST_PUBLIC_SEASON_ID/);
+  assert.match(page, /parsed >= FIRST_PUBLIC_SEASON_ID/);
+  assert.match(profile, /parsed >= FIRST_PUBLIC_SEASON_ID/);
+  assert.match(api, /season < FIRST_PUBLIC_SEASON_ID/);
 });

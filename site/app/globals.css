@@ -2124,27 +2124,84 @@ tr.champ td.user .crown {
 .sponsor-dock {
   position: relative;
   z-index: 10;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
   width: 100%;
-  padding: 16px 18px;
+  padding: clamp(18px, 3vw, 28px);
+  overflow: hidden;
   color: var(--ink);
   background:
-    radial-gradient(circle at 86% 0%, rgba(108, 229, 238, .13), transparent 34%),
-    linear-gradient(180deg, rgba(17, 39, 60, .98), rgba(9, 23, 38, .98));
+    radial-gradient(circle at 92% 4%, rgba(108, 229, 238, .14), transparent 31%),
+    linear-gradient(145deg, rgba(17, 39, 60, .99), rgba(7, 20, 34, .99));
   border: 1px solid #44769c;
-  border-radius: 12px;
+  border-radius: 15px;
   box-shadow: 0 18px 42px rgba(0, 0, 0, .3), 0 0 28px rgba(67, 137, 201, .08), inset 0 1px rgba(255, 255, 255, .08);
   font-family: var(--mono);
 }
-.sponsor-cap { color: var(--amber-dk); font-size: 8px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
-.sponsor-live, .sponsor-empty { display: flex; flex-direction: column; gap: 4px; margin: 6px 0; color: inherit; text-decoration: none; }
-.sponsor-live:hover strong { color: var(--gold); }
-.sponsor-live strong, .sponsor-empty strong { color: var(--gold); font-size: 13px; overflow-wrap: anywhere; }
-.sponsor-live > span:last-child, .sponsor-empty span { color: var(--mute); font-size: 9px; line-height: 1.45; }
-.sponsor-metrics { color: var(--faint); font-size: 7.5px; line-height: 1.4; }
+.sponsor-showcase-head { display: grid; grid-template-columns: minmax(0, 1fr) 154px; align-items: end; gap: 28px; }
+.sponsor-showcase-head > div:first-child { max-width: 610px; }
+.sponsor-cap { display: flex; align-items: center; gap: 7px; color: var(--teal); font-size: 8px; font-weight: 900; letter-spacing: .18em; text-transform: uppercase; }
+.sponsor-cap > span { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 10px rgba(108,229,238,.7); }
+.sponsor-showcase-head h2 { margin-top: 9px; color: var(--gold); font: italic 700 clamp(25px, 4.4vw, 38px)/1.05 var(--serif); letter-spacing: -.02em; }
+.sponsor-showcase-head p { max-width: 64ch; margin-top: 10px; color: var(--mute); font-size: 10.5px; line-height: 1.65; }
+.sponsor-ticket { display: flex; min-height: 116px; flex-direction: column; justify-content: center; padding: 14px 16px; border: 1px dashed #5685a8; border-radius: 10px; background: rgba(5,16,28,.52); box-shadow: inset 0 0 0 4px rgba(86,133,168,.05); }
+.sponsor-ticket small { color: var(--faint); font-size: 7px; font-weight: 900; letter-spacing: .17em; text-transform: uppercase; }
+.sponsor-ticket strong { margin: 3px 0 1px; color: var(--gold); font: 700 32px/1 var(--serif); }
+.sponsor-ticket span { color: var(--mute); font-size: 7.5px; }
+
+.sponsor-preview { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(230px, .75fr); min-height: 248px; overflow: hidden; border: 1px solid #345e7e; border-radius: 11px; background: #071321; box-shadow: 0 13px 30px rgba(0,0,0,.22); }
+.sponsor-preview-label { position: relative; z-index: 4; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-bottom: 1px solid rgba(63,105,137,.65); background: rgba(7,19,33,.7); }
+.sponsor-preview-label span { color: var(--gold); font-size: 8px; font-weight: 900; letter-spacing: .12em; }
+.sponsor-preview-label small { color: var(--faint); font-size: 7px; }
+.sponsor-preview-sky { position: relative; min-height: 248px; overflow: hidden; border-right: 1px solid #345e7e; background: linear-gradient(180deg, #152b46 0%, #15263e 47%, #1d2f46 72%, #0a1727 72%); }
+.sponsor-preview-sky::after { content: ""; position: absolute; z-index: 1; right: 9%; top: 58px; width: 42px; height: 42px; border-radius: 50%; background: #d5edff; box-shadow: 0 0 0 10px rgba(213,237,255,.06), 0 0 28px rgba(213,237,255,.2); opacity: .76; }
+.sponsor-preview-sky > p, .sponsor-preview-departures > p { position: absolute; z-index: 5; right: 14px; bottom: 9px; left: 14px; color: #7891a7; font-size: 7px; line-height: 1.35; }
+.sponsor-preview-stars i { position: absolute; z-index: 1; width: 2px; height: 2px; border-radius: 50%; background: #c9e5fa; opacity: .8; }
+.sponsor-preview-stars i:nth-child(1) { left: 9%; top: 72px; }
+.sponsor-preview-stars i:nth-child(2) { left: 27%; top: 98px; }
+.sponsor-preview-stars i:nth-child(3) { left: 52%; top: 65px; }
+.sponsor-preview-stars i:nth-child(4) { left: 70%; top: 104px; }
+.sponsor-preview-stars i:nth-child(5) { left: 88%; top: 78px; }
+.sponsor-preview-airship { position: absolute; z-index: 3; top: 86px; left: -155px; width: 142px; height: 55px; animation: sponsor-preview-flight 9s linear infinite; }
+.sponsor-preview-airship > span { position: absolute; inset: 0 7px 12px; display: grid; place-items: center; overflow: hidden; padding: 0 20px; border: 1px solid #82bde8; border-radius: 52% 48% 50% 50% / 58% 58% 42% 42%; color: #07111f; background: linear-gradient(180deg, #dff3ff, #81bde8 74%, #4c86ae); box-shadow: inset 0 -5px rgba(15,39,57,.15), 0 7px 18px rgba(0,0,0,.22); font-size: 8px; font-weight: 950; letter-spacing: .08em; text-overflow: ellipsis; white-space: nowrap; }
+.preview-tail { position: absolute; z-index: -1; top: 13px; left: 0; width: 22px; height: 24px; clip-path: polygon(0 0, 100% 34%, 100% 66%, 0 100%, 22% 50%); background: #6ca5cf; }
+.preview-gondola { position: absolute; bottom: 5px; left: 58px; width: 31px; height: 9px; border: 1px solid #4d83aa; border-radius: 2px 2px 5px 5px; background: #15334b; }
+@keyframes sponsor-preview-flight { from { transform: translateX(0); } to { transform: translateX(730px); } }
+.sponsor-preview-buildings { position: absolute; z-index: 2; right: 0; bottom: 27px; left: 0; display: flex; align-items: flex-end; justify-content: space-around; padding: 0 14px; border-bottom: 3px solid #162b40; }
+.sponsor-preview-buildings i { position: relative; display: block; width: 9%; height: 61px; border: 1px solid #365570; border-bottom: 0; background: repeating-linear-gradient(0deg, transparent 0 8px, rgba(255,220,137,.82) 8px 11px), #172b42; box-shadow: inset 4px 0 rgba(255,255,255,.025); }
+.sponsor-preview-buildings i:nth-child(2) { height: 91px; }
+.sponsor-preview-buildings i:nth-child(3) { height: 48px; }
+.sponsor-preview-buildings i:nth-child(4) { height: 76px; }
+.sponsor-preview-buildings i:nth-child(5) { height: 111px; }
+.sponsor-preview-buildings i:nth-child(6) { height: 67px; }
+.sponsor-preview-buildings i:nth-child(7) { height: 88px; }
+.sponsor-preview-buildings i:nth-child(8) { height: 53px; }
+.sponsor-preview-departures { position: relative; min-height: 248px; background: repeating-linear-gradient(0deg, rgba(255,255,255,.014) 0 1px, transparent 1px 5px), #091725; }
+.preview-board-head { display: flex; align-items: center; gap: 7px; margin: 17px 14px 9px; padding-bottom: 9px; border-bottom: 1px solid #294961; color: var(--gold); font-size: 8px; font-weight: 900; letter-spacing: .12em; }
+.preview-board-head i { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 7px rgba(108,229,238,.75); }
+.preview-board-head b { margin-left: auto; color: var(--faint); font-size: 6px; }
+.preview-board-row { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 3px 8px; margin: 0 14px 7px; padding: 9px; border: 1px solid #243f56; border-radius: 4px; background: rgba(3,12,22,.35); }
+.preview-board-row.live { border-color: rgba(108,229,238,.42); background: rgba(108,229,238,.06); }
+.preview-board-row small { grid-row: 1 / 3; align-self: center; color: var(--teal); font-size: 6px; font-weight: 900; }
+.preview-board-row strong { overflow: hidden; color: var(--ink); font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.preview-board-row span { color: var(--faint); font-size: 6px; }
+
+.sponsor-flight-details { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 22px; padding-top: 2px; }
+.sponsor-details-copy h3 { margin-top: 8px; color: var(--gold); font: 700 20px/1.12 var(--serif); }
+.sponsor-how { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; margin: 0; padding: 0; list-style: none; counter-reset: flight-step; }
+.sponsor-how li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 9px; min-width: 0; padding: 0; border: 0; background: transparent; }
+.sponsor-how li > span { display: grid; width: 28px; height: 28px; place-items: center; border: 1px solid #3e6c8f; border-radius: 50%; color: var(--teal); background: rgba(108,229,238,.05); font-size: 7px; font-weight: 900; }
+.sponsor-how li > div { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+.sponsor-how b { color: var(--ink); font-size: 9px; line-height: 1.2; }
+.sponsor-how small { color: var(--mute); font-size: 7.5px; line-height: 1.5; }
+.sponsor-showcase-foot { display: grid; grid-template-columns: minmax(0, 1fr) minmax(310px, auto); align-items: end; gap: 20px; padding-top: 17px; border-top: 1px solid rgba(68,118,156,.58); }
+.sponsor-included { display: flex; flex-wrap: wrap; gap: 8px 13px; color: var(--mute); font-size: 8px; }
+.sponsor-included strong { flex-basis: 100%; color: var(--gold); font-size: 9px; }
+.sponsor-included span { white-space: nowrap; }
+.sponsor-included i { color: var(--teal); font-style: normal; }
+.sponsor-action-wrap { display: flex; flex-direction: column; gap: 7px; }
+.sponsor-metrics { color: var(--faint); font-size: 7px; line-height: 1.4; text-align: right; }
 .sponsor-launch {
   display: grid;
   grid-template-columns: 8px minmax(0, 1fr) auto;
@@ -2174,23 +2231,54 @@ tr.champ td.user .crown {
 .sponsor-launch-price { display: flex; align-items: center; gap: 8px; padding-left: 12px; border-left: 1px dashed rgba(7,17,31,.25); }
 .sponsor-launch-price b { color: #07111f; font-size: 16px; line-height: 1; }
 .sponsor-launch-price small { color: #315b79; font-size: 15px; line-height: 1; }
-.sponsor-notice, .sponsor-error { grid-column: 1 / -1; margin-top: 2px; color: var(--amber); font-size: 8px; line-height: 1.4; }
-.sponsor-how {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 9px;
-  margin: 0;
-  padding: 14px 0 0;
-  border-top: 1px solid rgba(68, 118, 156, .55);
-  list-style: none;
-}
-.sponsor-how li { display: grid; grid-template-columns: 25px minmax(0, 1fr); gap: 8px; min-width: 0; padding: 10px; border: 1px solid #294b66; border-radius: 8px; background: rgba(5, 16, 28, .38); }
-.sponsor-how li > span { display: grid; width: 25px; height: 25px; place-items: center; border: 1px solid #3e6c8f; border-radius: 50%; color: var(--teal); background: rgba(108,229,238,.05); font-size: 7px; font-weight: 900; }
-.sponsor-how li > div { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
-.sponsor-how b { color: var(--ink); font-size: 9px; line-height: 1.2; }
-.sponsor-how small { color: var(--mute); font-size: 7.5px; line-height: 1.45; }
-.sponsor-terms-note { grid-column: 1 / -1; margin: -7px 0 0; color: var(--faint); font-size: 7.5px; line-height: 1.4; text-align: center; }
+.sponsor-notice, .sponsor-error { margin-top: 2px; color: var(--amber); font-size: 8px; line-height: 1.4; }
+.sponsor-terms-note { margin: -8px 0 0; color: var(--faint); font-size: 7px; line-height: 1.4; text-align: center; }
+
+/* Compact sponsor terminal: uses the same pixel city as the leaderboard. */
+.sponsor-dock { gap: 14px; padding: 18px; border-radius: 11px; background: linear-gradient(180deg, rgba(15,29,45,.98), rgba(8,21,35,.98)); }
+.sponsor-showcase-head { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 18px; }
+.sponsor-showcase-head h2 { margin-top: 6px; font-size: clamp(21px, 3.2vw, 29px); }
+.sponsor-showcase-head p { max-width: 72ch; margin-top: 6px; font-size: 9px; line-height: 1.55; }
+.sponsor-showcase-head .sponsor-metrics { align-self: start; padding-top: 4px; white-space: nowrap; }
+.sponsor-preview { grid-template-columns: minmax(0, 1.45fr) minmax(250px, .75fr); min-height: 224px; border-radius: 7px; box-shadow: none; }
+.sponsor-preview-sky { min-height: 224px; background: #0b1728; }
+.sponsor-preview-sky::after { content: none; }
+.sponsor-preview-label { padding: 9px 11px; background: #091625; }
+.sponsor-preview-label span { font-size: 7.5px; }
+.sponsor-real-city { position: absolute; z-index: 1; right: 0; bottom: 0; left: 0; line-height: 0; }
+.sponsor-real-city .tt-city { display: block; width: 100%; height: auto; }
+.sponsor-preview-airship { top: 70px; left: -155px; width: 142px; height: 55px; animation: sponsor-preview-flight-slow 28s linear infinite; }
+@keyframes sponsor-preview-flight-slow { from { transform: translateX(0); } to { transform: translateX(850px); } }
+.sponsor-flight-log { min-height: 224px; overflow: hidden; background: repeating-linear-gradient(0deg, rgba(255,255,255,.014) 0 1px, transparent 1px 5px), #091725; }
+.sponsor-flight-log ol { display: grid; margin: 0; padding: 8px 10px; list-style: none; }
+.sponsor-flight-log li { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 3px 7px; align-items: center; min-height: 36px; padding: 6px 2px; border-bottom: 1px solid #203b52; }
+.sponsor-flight-log li > span { grid-row: 1 / 3; color: var(--faint); font-size: 7px; }
+.sponsor-flight-log a { overflow: hidden; color: var(--ink); font-size: 9px; font-weight: 800; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+.sponsor-flight-log a:hover { color: var(--gold); }
+.sponsor-flight-log li > small { color: var(--faint); font-size: 6.5px; }
+.sponsor-flight-log em { grid-column: 3; grid-row: 1 / 3; color: var(--faint); font-size: 6px; font-style: normal; letter-spacing: .08em; text-transform: uppercase; }
+.sponsor-flight-log em.active { color: var(--teal); }
+.sponsor-flight-log em.scheduled { color: var(--amber); }
+.sponsor-log-empty { display: flex; height: 174px; align-items: center; justify-content: center; flex-direction: column; gap: 5px; padding: 20px; color: var(--faint); text-align: center; }
+.sponsor-log-empty b { color: var(--mute); font-size: 9px; }
+.sponsor-log-empty span { font-size: 7px; }
+.sponsor-booking-row { display: grid; grid-template-columns: minmax(225px, .8fr) minmax(0, 1fr) minmax(260px, .9fr); align-items: end; gap: 14px; padding-top: 2px; }
+.sponsor-plan-picker, .sponsor-modal-plans { min-width: 0; border: 0; }
+.sponsor-plan-picker legend, .sponsor-modal-plans legend { margin-bottom: 7px; color: var(--faint); font-size: 7px; font-weight: 900; letter-spacing: .13em; text-transform: uppercase; }
+.sponsor-plan-picker { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+.sponsor-plan-picker legend { grid-column: 1 / -1; }
+.sponsor-plan-picker button { display: flex; min-width: 0; flex-direction: column; gap: 2px; padding: 8px 9px; border: 1px solid #294b66; border-radius: 5px; color: var(--mute); background: #091725; font-family: var(--mono); text-align: left; cursor: pointer; }
+.sponsor-plan-picker button:hover { border-color: #5685a8; }
+.sponsor-plan-picker button.selected { border-color: var(--teal); color: var(--ink); background: rgba(108,229,238,.07); box-shadow: inset 0 -2px rgba(108,229,238,.17); }
+.sponsor-plan-picker button span { font-size: 7px; white-space: nowrap; }
+.sponsor-plan-picker button strong { color: var(--gold); font-size: 13px; }
+.sponsor-review-note { display: flex; min-width: 0; flex-direction: column; gap: 4px; padding-bottom: 4px; }
+.sponsor-review-note b { color: var(--ink); font-size: 8.5px; }
+.sponsor-review-note span { color: var(--mute); font-size: 7px; line-height: 1.45; }
+.sponsor-booking-row .sponsor-launch { grid-template-columns: minmax(0, 1fr) auto; min-width: 0; padding: 11px 12px; }
+.sponsor-booking-row .sponsor-launch-copy strong { font-size: 10.5px; }
+.sponsor-booking-row .sponsor-launch-price b { font-size: 15px; }
+.sponsor-terms-note { margin: -5px 0 0; }
 
 .sponsor-dialog {
   position: fixed;
@@ -2218,6 +2306,13 @@ tr.champ td.user .crown {
 .sponsor-dialog-head button { display: grid; flex: 0 0 44px; width: 44px; height: 44px; margin: -10px -10px 0 0; place-items: center; border: 0; border-radius: 8px; color: var(--mute); background: transparent; font-size: 28px; line-height: 1; cursor: pointer; }
 .sponsor-dialog-head button:hover { color: var(--ink); background: rgba(255,255,255,.05); }
 .sponsor-dialog p, .sponsor-dialog form > small { color: var(--mute); font-size: 10.5px; line-height: 1.55; }
+.sponsor-modal-plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.sponsor-modal-plans legend { grid-column: 1 / -1; }
+.sponsor-dialog .sponsor-modal-plans label { position: relative; display: grid; grid-template-columns: 1fr auto; gap: 3px 8px; padding: 10px; border: 1px solid #29465f; border-radius: 7px; color: var(--mute); background: #071321; cursor: pointer; }
+.sponsor-dialog .sponsor-modal-plans label.selected { border-color: var(--teal); color: var(--ink); background: rgba(108,229,238,.06); }
+.sponsor-modal-plans input { position: absolute; width: 1px; min-height: 1px; opacity: 0; }
+.sponsor-modal-plans span { font-size: 8px; }
+.sponsor-modal-plans strong { color: var(--gold); font-size: 11px; }
 .sponsor-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .sponsor-dialog label { display: flex; flex-direction: column; gap: 5px; color: var(--amber-dk); font-size: 8px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
 .sponsor-fields .wide { grid-column: 1 / -1; }
@@ -2253,9 +2348,17 @@ tr.champ td.user .crown {
 @media (max-width: 560px) {
   .board-pagination { align-items: stretch; flex-direction: column; margin-top: -8px; }
   .board-page-controls { justify-content: space-between; }
-  .sponsor-dock { grid-template-columns: 1fr; gap: 11px; }
-  .sponsor-launch { width: 100%; min-width: 0; }
+  .sponsor-dock { gap: 16px; }
+  .sponsor-showcase-head { grid-template-columns: 1fr; gap: 14px; }
+  .sponsor-ticket { min-height: 0; }
+  .sponsor-preview { grid-template-columns: 1fr; }
+  .sponsor-preview-sky { border-right: 0; border-bottom: 1px solid #345e7e; }
+  .sponsor-booking-row { grid-template-columns: 1fr; }
+  .sponsor-review-note { padding: 2px 0; }
+  .sponsor-flight-details, .sponsor-showcase-foot { grid-template-columns: 1fr; gap: 16px; }
   .sponsor-how { grid-template-columns: 1fr; }
+  .sponsor-metrics { text-align: left; }
+  .sponsor-launch { width: 100%; min-width: 0; }
   .sponsor-dialog { width: calc(100vw - 16px); max-height: calc(100dvh - 16px); }
   .sponsor-dialog form { gap: 12px; padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
   .sponsor-fields { grid-template-columns: 1fr; }
@@ -2264,6 +2367,7 @@ tr.champ td.user .crown {
   .sponsor-flight-plan { grid-template-columns: 1fr 1fr; }
   .sponsor-flight-plan div:first-child { grid-column: 1 / -1; border-bottom: 1px dashed #29465f; }
   .sponsor-flight-plan div:nth-child(2) { border-left: 0; }
+  .sponsor-modal-plans { grid-template-columns: 1fr; }
 }
 @media (max-width: 1363px) {
   .sponsor-lineup { position: relative; inset: auto; width: 100%; }
@@ -2274,4 +2378,5 @@ tr.champ td.user .crown {
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-city-flight { left: auto; right: 8px; opacity: 1; animation: none; }
+  .sponsor-preview-airship { left: 50%; transform: translateX(-50%); animation: none; }
 }

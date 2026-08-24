@@ -20,6 +20,7 @@ import {
   approveSponsorCampaign,
   getActiveSponsor,
   getPublicSponsorLineup,
+  getPublicSponsorHistory,
   listSponsorCampaigns,
   cleanupSponsorCampaigns,
   reserveSponsorCheckout,
@@ -512,15 +513,20 @@ test("sponsor payment is idempotent and approval schedules a 24-hour flight", as
   assert.equal((await listSponsorCampaigns(now + 1))[0].email, "hello@example.com");
 
   const c2 = await createSponsorCampaign({
-    name: "Vercel", tagline: "Ship the web", url: "https://vercel.com/", email: "hi@example.com",
+    name: "Vercel", tagline: "Ship the web", url: "https://vercel.com/", email: "hi@example.com", planId: "three",
   });
   await attachSponsorCheckout(c2.id, "cs_test_2");
   await markSponsorPaid({ id: c2.id, checkoutSessionId: "cs_test_2" });
   const approved2 = await approveSponsorCampaign(c2.id, now + 100);
   assert.equal(approved2.startsAt, approved.endsAt + 30 * 60 * 1000);
+  assert.equal(approved2.endsAt - approved2.startsAt, 3 * DAY_MS);
   const lineup = await getPublicSponsorLineup(now + 200);
   assert.deepEqual(lineup.map((item) => [item.name, item.status]), [["Linear", "active"], ["Vercel", "scheduled"]]);
+  assert.equal(lineup[1].planId, "three");
   assert.ok(!("email" in lineup[0]), "public lineup must not expose receipt emails");
+  const history = await getPublicSponsorHistory(now + 200);
+  assert.deepEqual(history.map((item) => item.name), ["Vercel", "Linear"]);
+  assert.ok(history.every((item) => !("email" in item)), "public history must not expose receipt emails");
 });
 
 test("sponsor checkout is rate-limited by a private email hash", async () => {

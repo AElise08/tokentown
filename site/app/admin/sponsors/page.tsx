@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { SponsorCampaign } from "@/lib/sponsor";
+import { SPONSOR_PLANS, type SponsorCampaign } from "@/lib/sponsor";
 
 export default function SponsorAdminPage() {
   const [key, setKey] = useState("");
@@ -45,7 +45,7 @@ export default function SponsorAdminPage() {
             <div><b>{c.name}</b><span className={`admin-status ${c.status}`}>{c.status}</span></div>
             <p>{c.tagline}</p>
             <a href={c.url} target="_blank" rel="noopener noreferrer">{c.url}</a>
-            <small>{c.email} · created {new Date(c.createdAt).toLocaleString()}</small>
+            <small>{c.email} · {SPONSOR_PLANS[c.planId].label} / ${(c.priceCents / 100).toFixed(2)} USD · created {new Date(c.createdAt).toLocaleString()}</small>
             {c.startsAt && <small>{new Date(c.startsAt).toLocaleString()} → {new Date(c.endsAt!).toLocaleString()}</small>}
             <div className="admin-actions">
               {c.status === "paid" && <button onClick={() => act(c.id, "approve")}>Approve & schedule</button>}

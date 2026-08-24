@@ -37,6 +37,8 @@ export async function POST(req: Request) {
         checkoutSessionId: session.id,
         paymentIntentId,
         email: session.customer_details?.email || undefined,
+        planId: session.metadata?.sponsorPlan,
+        amountTotal: session.amount_total ?? undefined,
       });
     }
   }

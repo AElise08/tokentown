@@ -32,14 +32,15 @@ For production, add the Upstash Redis vars to `.env.local` (see `.env.example`).
 
 ### Sponsored flights
 
-The website supports manually reviewed, fixed-price sponsored flights: **$2 USD for 24 hours**
-inside the cities, on the departures board and in the bottom sponsor strip. Each campaign receives 24 hours,
+The website supports manually reviewed sponsored flights: **$2/1 day, $3/3 days or $10/10 days**
+inside the cities, on the departures board and in the sponsor board. Each campaign receives its purchased duration,
 followed by a 30-minute sponsor-free interval. There is no advertiser page and no auction; checkout opens from
 an inline modal. Configure Stripe and the private moderation key using `.env.example`. Without
 Stripe, local development can use `SPONSOR_DEMO_MODE=1`. Production sales also require
 `SPONSOR_SALES_ENABLED=1`; keep it disabled until Stripe, its signed webhook and moderation have
-been tested. Set `STRIPE_SPONSOR_PRICE_ID` to the fixed one-time $2 Price created in the matching
-Stripe environment; Checkout falls back to inline price data only when this optional value is absent.
+been tested. Set `STRIPE_SPONSOR_PRICE_ID_1D`, `STRIPE_SPONSOR_PRICE_ID_3D` and
+`STRIPE_SPONSOR_PRICE_ID_10D` to the matching one-time Prices in the same Stripe
+environment; Checkout falls back to inline price data when a plan-specific ID is absent.
 Only aggregate browser sessions/pageviews
 are counted; individual sponsor impressions and clicks are deliberately not tracked.
 

@@ -1,5 +1,5 @@
 import { getLeaderboard } from "@/lib/store";
-import { currentSeasonId } from "@/lib/season";
+import { currentSeasonId, FIRST_PUBLIC_SEASON_ID } from "@/lib/season";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,7 +9,7 @@ export async function GET(req: Request) {
   const raw = url.searchParams.get("season");
   const cur = currentSeasonId();
   let season = raw == null ? cur : parseInt(raw, 10);
-  if (!Number.isInteger(season) || season < 0) season = cur;
+  if (!Number.isInteger(season) || season < FIRST_PUBLIC_SEASON_ID || season > cur) season = cur;
 
   // janela: "7d" (ganho dos últimos 7 dias) ou "season" (padrão, temporada).
   // Closed seasons are immutable albums. A 7-day window relative to today's

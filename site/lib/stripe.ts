@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { DEFAULT_SPONSOR_PLAN_ID, type SponsorPlanId } from "./sponsor";
 
 let cached: Stripe | null = null;
 
@@ -19,8 +20,13 @@ export function getStripe(): Stripe | null {
   return cached;
 }
 
-export function sponsorPriceId(): string | null {
-  const value = process.env.STRIPE_SPONSOR_PRICE_ID?.trim();
+export function sponsorPriceId(planId: SponsorPlanId = DEFAULT_SPONSOR_PLAN_ID): string | null {
+  const envName = planId === "day"
+    ? "STRIPE_SPONSOR_PRICE_ID_1D"
+    : planId === "three"
+      ? "STRIPE_SPONSOR_PRICE_ID_3D"
+      : "STRIPE_SPONSOR_PRICE_ID_10D";
+  const value = (process.env[envName] || (planId === "day" ? process.env.STRIPE_SPONSOR_PRICE_ID : ""))?.trim();
   return value && /^price_[A-Za-z0-9]+$/.test(value) ? value : null;
 }
 

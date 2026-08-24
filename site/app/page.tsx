@@ -1,6 +1,6 @@
-import { getLeaderboard, getPublicSponsorLineup, getSiteMetrics, getSponsorAvailability, type WindowKind } from "@/lib/store";
+import { getLeaderboard, getPublicSponsorHistory, getPublicSponsorLineup, getSiteMetrics, getSponsorAvailability, type WindowKind } from "@/lib/store";
 import { sponsorSalesEnabled } from "@/lib/stripe";
-import { currentSeasonId, daysRemaining, seasonRange, projectAnnualCost, isFinale } from "@/lib/season";
+import { currentSeasonId, daysRemaining, seasonRange, projectAnnualCost, isFinale, FIRST_PUBLIC_SEASON_ID } from "@/lib/season";
 import { formatCount, formatCost, formatAgo, formatAnnualCost, formatDate } from "@/lib/format";
 import { citySvg } from "@/lib/city";
 import { accentHex } from "@/lib/profile";
@@ -28,7 +28,7 @@ export default async function Page({
   const sp = await searchParams;
   const cur = currentSeasonId();
   const parsed = sp?.season != null ? parseInt(sp.season, 10) : cur;
-  const season = Number.isInteger(parsed) && parsed >= 0 && parsed <= cur ? parsed : cur;
+  const season = Number.isInteger(parsed) && parsed >= FIRST_PUBLIC_SEASON_ID && parsed <= cur ? parsed : cur;
   const isCurrent = season === cur;
 
   // "7d" only makes sense while the season is active. A closed album is a
@@ -37,8 +37,9 @@ export default async function Page({
   const window: WindowKind = isCurrent && sp?.window === "7d" ? "7d" : "season";
 
   const now = Date.now();
-  const [sponsorLineup, siteMetrics, sponsorAvailability] = await Promise.all([
+  const [sponsorLineup, sponsorHistory, siteMetrics, sponsorAvailability] = await Promise.all([
     getPublicSponsorLineup(now),
+    getPublicSponsorHistory(now),
     getSiteMetrics(),
     getSponsorAvailability(now),
   ]);
@@ -97,7 +98,7 @@ export default async function Page({
 
   // seasons for the picker (newest first), at most 12 chips.
   const seasonIds: number[] = [];
-  for (let s = cur; s >= 0 && seasonIds.length < 12; s--) seasonIds.push(s);
+  for (let s = cur; s >= FIRST_PUBLIC_SEASON_ID && seasonIds.length < 12; s--) seasonIds.push(s);
 
   return (
     <main className="wrap">
@@ -354,9 +355,11 @@ export default async function Page({
       <SponsorDock
         sponsor={sponsor}
         lineup={sponsorLineup}
+        history={sponsorHistory}
         metrics={siteMetrics}
         salesEnabled={salesEnabled}
         nextAvailableAt={sponsorAvailability.startsAt}
+        previewCitySvg={HERO_CITY}
       />
 
       {/* WHY THE APP — the pitch comes AFTER the board: it's not another tokenmaxxing counter. */}

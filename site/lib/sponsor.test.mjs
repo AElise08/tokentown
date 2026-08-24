@@ -14,8 +14,16 @@ test("sponsor draft accepts safe HTTPS fields and strips markup", () => {
     name: "<Linear>", tagline: "Build <fast>\nwith issues", url: "https://linear.app/", email: "HELLO@EXAMPLE.COM",
   });
   assert.deepEqual(d, {
-    name: "Linear", tagline: "Build fast with issues", url: "https://linear.app/", email: "hello@example.com",
+    name: "Linear", tagline: "Build fast with issues", url: "https://linear.app/", email: "hello@example.com", planId: "day",
   });
+});
+
+test("sponsor draft accepts only known plans and defaults old buyers to one day", () => {
+  const base = { name: "X", tagline: "Y", url: "https://x.dev", email: "a@b.com" };
+  assert.equal(sanitizeSponsorDraft({ ...base, planId: "three" })?.planId, "three");
+  assert.equal(sanitizeSponsorDraft({ ...base, planId: "ten" })?.planId, "ten");
+  assert.equal(sanitizeSponsorDraft({ ...base, planId: "fake" })?.planId, "day");
+  assert.equal(sanitizeSponsorDraft(base)?.planId, "day");
 });
 
 test("sponsor draft rejects non-HTTPS URLs, credentials and bad emails", () => {
