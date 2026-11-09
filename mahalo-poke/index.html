@@ -3,264 +3,295 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mahalo Poke · Belém</title>
-<meta name="description" content="Mahalo Poke Belém — poke havaiano fresquinho com toque amazônico. Monte seu bowl e peça pelo WhatsApp.">
-<meta property="og:title" content="Mahalo Poke · Belém">
-<meta property="og:description" content="Poke havaiano com alma paraense. Monte seu bowl e peça pelo WhatsApp.">
-<meta name="theme-color" content="#0E5E5A">
+<title>Mahalo Poke</title>
+<meta name="description" content="Mahalo Poke — poke havaiano fresco, colorido e do seu jeito. Monte seu bowl e peça pelo WhatsApp.">
+<meta property="og:title" content="Mahalo Poke">
+<meta property="og:description" content="Poke havaiano fresco, colorido e do seu jeito.">
+<meta property="og:image" content="https://images.pexels.com/photos/15913488/pexels-photo-15913488.jpeg?auto=compress&cs=tinysrgb&w=1200">
+<meta name="theme-color" content="#FF5A1F">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Permanent+Marker&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --sea:#0E5E5A; --sea-deep:#083F3D; --lagoon:#2BB3A3; --foam:#E7F6F2;
-  --coral:#FF6B4A; --mango:#FFB547; --hibiscus:#E8457A; --sand:#FFF7EC;
-  --ink:#1B2A2A; --muted:#5C6F6D; --card:#FFFFFF; --line:#EADFCF;
-  --radius:22px; --shadow:0 14px 40px -18px rgba(8,63,61,.35);
+  --sand:#FFF1D6; --ink:#141414; --blue:#1E45FF; --orange:#FF5A1F;
+  --pink:#FF7EB6; --yellow:#FFE14D; --mint:#3FE0B5; --white:#fff;
+  --b:3px solid var(--ink); --hard:6px 6px 0 var(--ink); --hard-s:4px 4px 0 var(--ink);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:"DM Sans",system-ui,sans-serif;background:var(--sand);color:var(--ink);line-height:1.55;overflow-x:hidden}
-img,svg{display:block;max-width:100%}
+body{font-family:"Space Grotesk",system-ui,sans-serif;background:var(--sand);color:var(--ink);line-height:1.5;overflow-x:clip}
+html{overflow-x:clip}
+img{display:block;max-width:100%}
 a{color:inherit}
-h1,h2,h3{font-family:"Fraunces",Georgia,serif;line-height:1.05;letter-spacing:-.01em}
-.wrap{width:min(1160px,100% - 32px);margin-inline:auto}
-.btn{display:inline-flex;align-items:center;gap:.55em;padding:.95em 1.5em;border-radius:999px;font-weight:700;text-decoration:none;border:0;cursor:pointer;font:inherit;font-weight:700;transition:transform .2s,box-shadow .2s,background .2s}
-.btn:hover{transform:translateY(-2px)}
-.btn-coral{background:var(--coral);color:#fff;box-shadow:0 10px 24px -10px var(--coral)}
-.btn-ghost{background:rgba(255,255,255,.14);color:#fff;border:1.5px solid rgba(255,255,255,.45)}
-.btn-dark{background:var(--sea);color:#fff}
-.eyebrow{display:inline-block;font-size:.8rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--coral)}
-section{padding:96px 0}
+.wrap{width:min(1200px,100% - 32px);margin-inline:auto}
+.display{font-family:"Anton",Impact,sans-serif;text-transform:uppercase;line-height:.92;letter-spacing:.01em;font-weight:400}
+.hand{font-family:"Permanent Marker",cursive}
+.btn{display:inline-flex;align-items:center;gap:.5em;padding:.9em 1.4em;border:var(--b);border-radius:999px;font:inherit;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.92rem;text-decoration:none;cursor:pointer;box-shadow:var(--hard-s);transition:transform .15s,box-shadow .15s;background:var(--white);color:var(--ink)}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink)}
+.btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}
+.btn-o{background:var(--orange);color:#fff}
+.btn-y{background:var(--yellow)}
+.btn-b{background:var(--blue);color:#fff}
+.sticker{position:absolute;z-index:3;font-family:"Permanent Marker",cursive;border:var(--b);box-shadow:var(--hard-s);padding:.45em .9em;border-radius:12px;white-space:nowrap}
+section{padding:96px 0;position:relative}
+.kicker{display:inline-block;font-family:"Permanent Marker";font-size:1.15rem;background:var(--ink);color:var(--yellow);padding:.15em .7em;transform:rotate(-2deg);margin-bottom:14px}
 
 /* NAV */
-.nav{position:fixed;inset:0 0 auto;z-index:50;transition:background .3s,box-shadow .3s}
-.nav.solid{background:rgba(8,63,61,.92);backdrop-filter:blur(10px);box-shadow:0 6px 20px -12px rgba(0,0,0,.5)}
-.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:72px}
-.logo{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-family:"Fraunces",serif;font-weight:800;font-size:1.35rem}
-.logo small{display:block;font-family:"DM Sans";font-weight:500;font-size:.68rem;letter-spacing:.2em;opacity:.8;text-transform:uppercase}
-.nav ul{display:flex;gap:28px;list-style:none}
-.nav ul a{color:#fff;text-decoration:none;font-weight:500;opacity:.9}
-.nav ul a:hover{opacity:1;color:var(--mango)}
-.nav .btn{padding:.7em 1.2em}
-.menu-toggle{display:none;background:none;border:0;color:#fff;cursor:pointer}
+.nav{position:sticky;top:0;z-index:50;background:var(--sand);border-bottom:var(--b)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:70px;gap:16px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo .mark{width:44px;height:44px;border-radius:50%;border:var(--b);background:var(--orange);display:grid;place-items:center;box-shadow:3px 3px 0 var(--ink)}
+.logo .word{font-family:"Anton";font-size:1.7rem;text-transform:uppercase;line-height:1}
+.logo .word span{color:var(--orange)}
+.nav ul{display:flex;gap:6px;list-style:none}
+.nav ul a{display:block;padding:.45em .9em;border-radius:999px;text-decoration:none;font-weight:700;text-transform:uppercase;font-size:.85rem;letter-spacing:.05em;border:2px solid transparent}
+.nav ul a:hover{border-color:var(--ink);background:var(--yellow)}
+.menu-toggle{display:none;background:var(--yellow);border:var(--b);border-radius:10px;width:44px;height:44px;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
 
 /* HERO */
-.hero{position:relative;min-height:100svh;display:flex;align-items:center;background:radial-gradient(120% 90% at 85% 10%,#16807A 0%,var(--sea) 45%,var(--sea-deep) 100%);color:#fff;overflow:hidden;padding:120px 0 140px}
-.hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center}
-.hero h1{font-size:clamp(2.8rem,6.4vw,5.4rem);font-weight:800}
-.hero h1 em{font-style:italic;color:var(--mango)}
-.hero p.lead{font-size:1.18rem;max-width:30em;margin:22px 0 32px;opacity:.92}
+.hero{padding:56px 0 90px;overflow:hidden}
+.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+.hero h1{font-size:clamp(4.2rem,11vw,9.6rem)}
+.hero h1 .l2{color:var(--orange);-webkit-text-stroke:3px var(--ink);display:block}
+.hero h1 .l3{display:inline-block;background:var(--blue);color:#fff;padding:0 .12em;transform:rotate(-2deg);border:var(--b);box-shadow:var(--hard);margin-top:.08em}
+.hero p.lead{font-size:1.2rem;max-width:28em;margin:26px 0 30px;font-weight:500}
 .hero .cta{display:flex;gap:14px;flex-wrap:wrap}
-.hero .badges{display:flex;gap:22px;margin-top:40px;flex-wrap:wrap}
-.hero .badges div{font-size:.9rem;opacity:.9}
-.hero .badges b{display:block;font-family:"Fraunces";font-size:1.6rem;color:var(--mango)}
-.bowl-hero{position:relative;aspect-ratio:1;width:100%;max-width:520px;justify-self:center}
-.bowl-hero svg{width:100%;height:100%;filter:drop-shadow(0 40px 50px rgba(0,0,0,.35));animation:float 6s ease-in-out infinite}
-@keyframes float{50%{transform:translateY(-14px) rotate(-1.5deg)}}
-.sticker{position:absolute;background:var(--mango);color:var(--sea-deep);font-family:"Fraunces";font-weight:800;border-radius:50%;width:118px;height:118px;display:grid;place-items:center;text-align:center;font-size:.95rem;line-height:1.1;transform:rotate(-12deg);box-shadow:var(--shadow);top:4%;right:2%;z-index:2}
-.sticker span{font-size:1.7rem;display:block}
-.leaf{position:absolute;opacity:.18;pointer-events:none}
-.wave{position:absolute;left:0;right:0;bottom:-1px;line-height:0}
-.wave svg{width:100%;height:90px}
+.hero-pics{position:relative;height:560px}
+.pic{position:absolute;border:var(--b);box-shadow:var(--hard);background:#fff;padding:10px 10px 44px;overflow:visible}
+.pic img{width:100%;height:100%;object-fit:cover;border:2px solid var(--ink)}
+.pic figcaption{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-family:"Permanent Marker";font-size:1.15rem}
+.pic.a{width:68%;height:72%;right:2%;top:0;transform:rotate(4deg)}
+.pic.b{width:52%;height:52%;left:0;bottom:0;transform:rotate(-6deg)}
+.hero .s1{background:var(--yellow);top:2%;left:4%;transform:rotate(-10deg);font-size:1.3rem}
+.hero .s2{background:var(--mint);bottom:6%;right:0;transform:rotate(8deg);font-size:1.1rem}
+.sun{position:absolute;width:150px;height:150px;border-radius:50%;background:var(--pink);border:var(--b);display:grid;place-items:center;text-align:center;font-family:"Anton";text-transform:uppercase;line-height:1;font-size:1.25rem;right:-14px;top:-34px;transform:rotate(12deg);z-index:4;box-shadow:var(--hard-s);animation:spin 18s linear infinite}
+@keyframes spin{to{transform:rotate(372deg)}}
 
-/* MARQUEE */
-.marquee{background:var(--coral);color:#fff;overflow:hidden;padding:14px 0;font-family:"Fraunces";font-weight:600;font-size:1.25rem}
-.marquee .track{display:flex;gap:40px;white-space:nowrap;animation:scroll 28s linear infinite;width:max-content}
+/* TICKER */
+.ticker{background:var(--ink);color:var(--sand);border-block:var(--b);overflow:hidden;padding:16px 0;transform:rotate(-1.5deg);margin:0 -20px;position:relative;z-index:5}
+.ticker.alt{background:var(--yellow);color:var(--ink);transform:rotate(1.2deg)}
+.ticker .track{display:flex;gap:36px;white-space:nowrap;width:max-content;animation:scroll 30s linear infinite;font-family:"Anton";font-size:1.9rem;text-transform:uppercase}
+.ticker .track i{font-style:normal;color:var(--orange)}
+.ticker.alt .track i{color:var(--blue)}
 @keyframes scroll{to{transform:translateX(-50%)}}
 
-/* ABOUT */
-.about .wrap{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
-.about h2{font-size:clamp(2.2rem,4.4vw,3.4rem);margin:12px 0 20px;color:var(--sea-deep)}
-.about p{color:var(--muted);font-size:1.08rem;margin-bottom:14px}
-.pillars{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.pillar{background:var(--card);border-radius:var(--radius);padding:26px;box-shadow:var(--shadow);border:1px solid var(--line)}
-.pillar:nth-child(2){transform:translateY(28px)}
-.pillar:nth-child(4){transform:translateY(28px)}
-.pillar .ico{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:1.5rem;margin-bottom:14px}
-.pillar h3{font-size:1.2rem;margin-bottom:6px;color:var(--sea-deep)}
-.pillar p{font-size:.95rem;color:var(--muted)}
+/* VIBE */
+.vibe .wrap{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.vibe h2{font-size:clamp(3rem,6vw,5.2rem)}
+.vibe h2 em{font-style:normal;color:var(--blue)}
+.vibe p{font-size:1.1rem;margin-top:18px;max-width:32em}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fact{border:var(--b);border-radius:18px;padding:22px;box-shadow:var(--hard)}
+.fact:nth-child(1){background:var(--yellow);transform:rotate(-2deg)}
+.fact:nth-child(2){background:var(--mint);transform:rotate(1.5deg) translateY(18px)}
+.fact:nth-child(3){background:var(--pink);transform:rotate(1deg)}
+.fact:nth-child(4){background:var(--blue);color:#fff;transform:rotate(-1.5deg) translateY(18px)}
+.fact b{display:block;font-family:"Anton";font-size:2.6rem;line-height:1;text-transform:uppercase}
+.fact span{font-weight:700;text-transform:uppercase;font-size:.85rem;letter-spacing:.05em}
 
 /* MENU */
-.menu{background:var(--foam)}
-.sec-head{text-align:center;max-width:640px;margin:0 auto 44px}
-.sec-head h2{font-size:clamp(2.2rem,4.4vw,3.4rem);margin:10px 0 14px;color:var(--sea-deep)}
-.sec-head p{color:var(--muted)}
-.tabs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:36px}
-.tab{background:#fff;border:1.5px solid var(--line);color:var(--sea-deep);padding:.7em 1.3em;border-radius:999px;font:inherit;font-weight:700;cursor:pointer;transition:all .2s}
-.tab[aria-selected="true"]{background:var(--sea);border-color:var(--sea);color:#fff}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:22px}
-.item{background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;transition:transform .25s}
-.item:hover{transform:translateY(-6px)}
-.item .art{aspect-ratio:4/3;display:grid;place-items:center;position:relative}
-.item .art svg{width:72%}
-.item .tag{position:absolute;top:14px;left:14px;background:#fff;color:var(--sea-deep);font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.35em .8em;border-radius:999px}
-.item .body{padding:20px 22px 22px;display:flex;flex-direction:column;flex:1}
-.item h3{font-size:1.3rem;color:var(--sea-deep)}
-.item p{color:var(--muted);font-size:.93rem;margin:8px 0 16px;flex:1}
-.item .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.price{font-family:"Fraunces";font-weight:800;font-size:1.35rem;color:var(--coral)}
-.price small{font-family:"DM Sans";font-size:.75rem;color:var(--muted);font-weight:500}
-.add{width:44px;height:44px;border-radius:50%;border:0;background:var(--sea);color:#fff;font-size:1.5rem;cursor:pointer;transition:transform .2s,background .2s}
-.add:hover{background:var(--coral);transform:rotate(90deg)}
-.note{text-align:center;color:var(--muted);font-size:.85rem;margin-top:28px}
+.menu{background:var(--blue);color:#fff;border-block:var(--b)}
+.menu::before{content:"";position:absolute;inset:0;background:radial-gradient(rgba(255,255,255,.12) 2px,transparent 2.5px) 0 0/22px 22px;pointer-events:none}
+.head{display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap;margin-bottom:40px;position:relative}
+.head h2{font-size:clamp(3rem,7vw,6rem)}
+.menu .kicker{background:var(--yellow);color:var(--ink)}
+.tabs{display:flex;gap:10px;flex-wrap:wrap}
+.tab{border:var(--b);background:#fff;color:var(--ink);padding:.6em 1.1em;border-radius:999px;font:inherit;font-weight:700;text-transform:uppercase;font-size:.85rem;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
+.tab[aria-selected="true"]{background:var(--orange);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:26px;position:relative}
+.card{background:#fff;color:var(--ink);border:var(--b);border-radius:20px;overflow:hidden;box-shadow:var(--hard);display:flex;flex-direction:column;transition:transform .2s}
+.card:hover{transform:rotate(-1deg) translateY(-4px)}
+.card .ph{aspect-ratio:4/3;border-bottom:var(--b);position:relative;overflow:hidden}
+.card .ph img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.card:hover .ph img{transform:scale(1.06)}
+.card .tag{position:absolute;top:12px;left:12px;font-family:"Permanent Marker";background:var(--yellow);border:2px solid var(--ink);padding:.15em .6em;border-radius:8px;transform:rotate(-4deg);font-size:.95rem}
+.card .bd{padding:18px 20px 20px;display:flex;flex-direction:column;flex:1}
+.card h3{font-family:"Anton";text-transform:uppercase;font-size:1.65rem;line-height:1;font-weight:400}
+.card p{font-size:.93rem;margin:8px 0 16px;flex:1;color:#3d3d3d}
+.row{display:flex;align-items:center;justify-content:space-between}
+.price{font-family:"Anton";font-size:1.6rem;background:var(--mint);border:2px solid var(--ink);padding:0 .35em;border-radius:8px}
+.add{width:46px;height:46px;border-radius:50%;border:var(--b);background:var(--orange);color:#fff;font-size:1.6rem;font-weight:700;cursor:pointer;box-shadow:3px 3px 0 var(--ink);line-height:1}
+.add:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+/* lista (entradas / bebidas) */
+.board{background:var(--ink);color:var(--sand);border:var(--b);border-radius:22px;padding:30px 34px;box-shadow:8px 8px 0 var(--yellow);position:relative;grid-column:1/-1}
+.board .ln{display:grid;grid-template-columns:1fr auto auto;gap:16px;align-items:center;padding:16px 0;border-bottom:2px dashed rgba(255,241,214,.25)}
+.board .ln:last-child{border:0}
+.board h3{font-family:"Anton";text-transform:uppercase;font-size:1.5rem;font-weight:400;line-height:1.05}
+.board p{font-size:.9rem;opacity:.75}
+.board .pr{font-family:"Anton";font-size:1.4rem;color:var(--yellow)}
+.note{position:relative;margin-top:30px;font-size:.85rem;opacity:.85}
+
+/* SURF BAND */
+.band{height:340px;border-bottom:var(--b);background:url("https://images.pexels.com/photos/3825873/pexels-photo-3825873.jpeg?auto=compress&cs=tinysrgb&w=1600") center/cover;display:grid;place-items:center;padding:0;overflow:hidden}
+.band h2{font-size:clamp(3rem,10vw,8rem);color:#fff;-webkit-text-stroke:3px var(--ink);text-shadow:6px 6px 0 var(--ink);text-align:center;transform:rotate(-3deg)}
 
 /* BUILDER */
-.builder{background:var(--sea-deep);color:#fff;position:relative;overflow:hidden}
-.builder .sec-head h2{color:#fff}
-.builder .sec-head p{color:rgba(255,255,255,.75)}
-.b-grid{display:grid;grid-template-columns:1.35fr .65fr;gap:32px;align-items:start}
-.step{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius);padding:24px;margin-bottom:16px}
-.step h3{font-family:"DM Sans";font-size:1rem;font-weight:700;display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.step h3 .n{width:28px;height:28px;border-radius:50%;background:var(--mango);color:var(--sea-deep);display:grid;place-items:center;font-size:.85rem}
-.step h3 .lim{margin-left:auto;font-weight:500;font-size:.82rem;opacity:.7}
+.builder{background:var(--pink)}
+.builder .kicker{background:var(--blue);color:#fff}
+.b-grid{display:grid;grid-template-columns:1.4fr .6fr;gap:30px;align-items:start}
+.step{background:#fff;border:var(--b);border-radius:20px;padding:22px;margin-bottom:18px;box-shadow:var(--hard-s)}
+.step h3{display:flex;align-items:center;gap:12px;font-family:"Anton";text-transform:uppercase;font-weight:400;font-size:1.4rem;margin-bottom:14px}
+.step h3 .n{width:34px;height:34px;border-radius:50%;background:var(--yellow);border:2px solid var(--ink);display:grid;place-items:center;font-size:1.05rem}
+.step h3 .lim{margin-left:auto;font-family:"Space Grotesk";font-size:.8rem;font-weight:700;letter-spacing:.05em;opacity:.6}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.28);padding:.55em 1em;border-radius:999px;font:inherit;font-size:.92rem;cursor:pointer;transition:all .15s}
-.chip:hover{border-color:var(--mango)}
-.chip[aria-pressed="true"]{background:var(--mango);border-color:var(--mango);color:var(--sea-deep);font-weight:700}
-.chip small{opacity:.75;margin-left:4px}
-.summary{position:sticky;top:96px;background:var(--sand);color:var(--ink);border-radius:var(--radius);padding:26px;box-shadow:0 30px 60px -20px rgba(0,0,0,.5)}
-.summary h3{color:var(--sea-deep);font-size:1.5rem;margin-bottom:12px}
-.summary ul{list-style:none;font-size:.92rem;color:var(--muted);margin-bottom:18px;min-height:80px}
-.summary li{padding:4px 0;border-bottom:1px dashed var(--line)}
-.summary li b{color:var(--ink)}
-.summary .total{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px}
-.summary .total span:last-child{font-family:"Fraunces";font-weight:800;font-size:2rem;color:var(--coral)}
+.chip{border:2px solid var(--ink);background:var(--sand);padding:.5em .95em;border-radius:999px;font:inherit;font-weight:500;font-size:.92rem;cursor:pointer;transition:transform .1s}
+.chip:hover{transform:translateY(-2px)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--yellow);font-weight:700}
+.chip small{opacity:.7;margin-left:4px}
+.summary{position:sticky;top:96px;background:var(--yellow);border:var(--b);border-radius:22px;padding:24px;box-shadow:8px 8px 0 var(--ink);transform:rotate(1deg)}
+.summary h3{font-family:"Anton";text-transform:uppercase;font-weight:400;font-size:2.2rem;line-height:1}
+.summary ul{list-style:none;margin:14px 0 18px;font-size:.92rem;min-height:70px}
+.summary li{padding:6px 0;border-bottom:2px dashed rgba(0,0,0,.2)}
+.summary .tot{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px;font-weight:700;text-transform:uppercase}
+.summary .tot span:last-child{font-family:"Anton";font-size:2.4rem}
 .summary .btn{width:100%;justify-content:center}
+.msg{font-size:.85rem;margin-top:10px;text-align:center;font-weight:700;min-height:1.2em}
+
+/* SWEET */
+.sweet .wrap{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
 
 /* HOW */
-.how .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
-.how .s{background:var(--card);border-radius:var(--radius);padding:30px;box-shadow:var(--shadow);position:relative}
-.how .s .big{font-family:"Fraunces";font-weight:800;font-size:3.4rem;color:var(--foam);-webkit-text-stroke:1.5px var(--lagoon);line-height:1}
-.how .s h3{font-size:1.3rem;margin:10px 0 6px;color:var(--sea-deep)}
-.how .s p{color:var(--muted)}
-.channels{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:40px}
+.how{background:var(--mint);border-block:var(--b)}
+.how .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:36px}
+.how .s{background:#fff;border:var(--b);border-radius:20px;padding:26px;box-shadow:var(--hard)}
+.how .s:nth-child(2){transform:rotate(1.5deg)}
+.how .s .big{font-family:"Anton";font-size:4rem;line-height:1;color:var(--orange);-webkit-text-stroke:2px var(--ink)}
+.how .s h3{font-family:"Anton";text-transform:uppercase;font-weight:400;font-size:1.6rem;margin:6px 0}
+.channels{display:flex;gap:14px;flex-wrap:wrap;margin-top:34px}
 
 /* VISIT */
-.visit{background:linear-gradient(180deg,var(--sand),#FFE9D2)}
-.visit .wrap{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:stretch}
-.info{background:var(--card);border-radius:var(--radius);padding:36px;box-shadow:var(--shadow)}
-.info h2{font-size:clamp(2rem,4vw,3rem);color:var(--sea-deep);margin:10px 0 22px}
-.info dl{display:grid;gap:18px}
-.info dt{font-weight:700;color:var(--sea);font-size:.85rem;letter-spacing:.1em;text-transform:uppercase}
-.info dd{font-size:1.05rem}
+.visit .wrap{display:grid;grid-template-columns:1fr 1fr;gap:34px}
+.info{background:#fff;border:var(--b);border-radius:22px;padding:32px;box-shadow:var(--hard)}
+.info h2{font-size:clamp(2.6rem,5vw,4rem)}
+.info dl{display:grid;gap:18px;margin-top:22px}
+.info dt{font-family:"Permanent Marker";color:var(--orange);font-size:1.1rem}
+.info dd{font-weight:500}
 .hours{display:grid;grid-template-columns:auto 1fr;gap:4px 18px}
-.map{border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);min-height:360px;background:var(--foam)}
-.map iframe{width:100%;height:100%;min-height:360px;border:0}
+.map{border:var(--b);border-radius:22px;overflow:hidden;box-shadow:var(--hard);min-height:380px;background:var(--blue)}
+.map iframe{width:100%;height:100%;min-height:380px;border:0;display:block}
 
 /* INSTA */
-.insta{background:var(--hibiscus);color:#fff;text-align:center;padding:80px 0}
-.insta h2{font-size:clamp(2rem,4.4vw,3.2rem);margin:10px 0 14px}
-.insta .eyebrow{color:var(--mango)}
-.insta p{opacity:.9;margin-bottom:26px}
-.insta .btn{background:#fff;color:var(--hibiscus)}
+.insta{background:var(--orange);color:#fff;text-align:center;border-top:var(--b)}
+.insta h2{font-size:clamp(2.4rem,7vw,6rem);-webkit-text-stroke:2px var(--ink);text-shadow:5px 5px 0 var(--ink);word-break:break-word}
+.insta p{font-size:1.15rem;margin:16px 0 28px;font-weight:500}
+.insta .kicker{background:var(--yellow);color:var(--ink)}
 
-footer{background:var(--sea-deep);color:rgba(255,255,255,.75);padding:40px 0;font-size:.9rem}
-footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}
-footer a{color:#fff}
+footer{background:var(--ink);color:var(--sand);padding:30px 0;font-size:.9rem}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+footer a{color:var(--yellow)}
 
 /* CART */
-.cart-fab{position:fixed;right:20px;bottom:20px;z-index:60;background:var(--coral);color:#fff;border:0;border-radius:999px;padding:14px 20px;font:inherit;font-weight:700;display:none;align-items:center;gap:10px;cursor:pointer;box-shadow:0 14px 30px -10px var(--coral)}
+.cart-fab{position:fixed;right:18px;bottom:18px;z-index:60;display:none;align-items:center;gap:10px;background:var(--yellow);border:var(--b);border-radius:999px;padding:12px 18px;font:inherit;font-weight:700;text-transform:uppercase;cursor:pointer;box-shadow:var(--hard-s)}
 .cart-fab.show{display:flex}
-.cart-fab .count{background:#fff;color:var(--coral);border-radius:999px;min-width:26px;height:26px;display:grid;place-items:center;font-size:.85rem}
+.cart-fab .count{background:var(--ink);color:var(--yellow);border-radius:999px;min-width:26px;height:26px;display:grid;place-items:center}
 .drawer{position:fixed;inset:0;z-index:70;display:none}
 .drawer.open{display:block}
-.drawer .scrim{position:absolute;inset:0;background:rgba(8,40,40,.5)}
-.drawer .panel{position:absolute;right:0;top:0;bottom:0;width:min(420px,100%);background:var(--sand);padding:28px;display:flex;flex-direction:column;animation:slide .25s ease}
+.drawer .scrim{position:absolute;inset:0;background:rgba(20,20,20,.55)}
+.drawer .panel{position:absolute;right:0;top:0;bottom:0;width:min(430px,100%);background:var(--sand);border-left:var(--b);padding:26px;display:flex;flex-direction:column;animation:slide .25s ease}
 @keyframes slide{from{transform:translateX(100%)}}
-.drawer h3{font-size:1.7rem;color:var(--sea-deep);display:flex;justify-content:space-between;align-items:center}
-.drawer .close{background:none;border:0;font-size:1.8rem;cursor:pointer;color:var(--sea-deep)}
-.drawer .lines{flex:1;overflow:auto;margin:18px 0}
-.line{display:flex;gap:12px;justify-content:space-between;padding:14px 0;border-bottom:1px dashed var(--line)}
+.drawer h3{font-family:"Anton";text-transform:uppercase;font-weight:400;font-size:2.2rem;display:flex;justify-content:space-between;align-items:center}
+.close{background:#fff;border:var(--b);border-radius:50%;width:42px;height:42px;font-size:1.4rem;cursor:pointer}
+.lines{flex:1;overflow:auto;margin:16px 0}
+.line{display:flex;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:2px dashed rgba(0,0,0,.2)}
 .line .t{font-weight:700}
-.line .d{font-size:.82rem;color:var(--muted)}
-.qty{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.qty button{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--line);background:#fff;cursor:pointer;font-weight:700}
-.drawer textarea,.drawer input{width:100%;border:1.5px solid var(--line);border-radius:14px;padding:12px;font:inherit;margin-bottom:10px;background:#fff}
-.drawer .total{display:flex;justify-content:space-between;font-family:"Fraunces";font-weight:800;font-size:1.5rem;margin-bottom:14px}
+.line .d{font-size:.82rem;opacity:.7}
+.qty{display:flex;align-items:center;gap:8px;font-weight:700;flex-shrink:0}
+.qty button{width:30px;height:30px;border-radius:50%;border:2px solid var(--ink);background:#fff;cursor:pointer;font-weight:700}
+.drawer input,.drawer textarea{width:100%;border:var(--b);border-radius:12px;padding:12px;font:inherit;margin-bottom:10px;background:#fff}
+.drawer .tot{display:flex;justify-content:space-between;font-family:"Anton";font-size:1.8rem;margin-bottom:12px}
 
-.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .6s,transform .6s}
 .reveal.in{opacity:1;transform:none}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
 
-@media (max-width:900px){
+@media (max-width:920px){
   section{padding:72px 0}
-  .nav ul,.nav .nav-cta{display:none}
+  .nav ul{display:none}
+  .nav .nav-cta{display:none}
   .menu-toggle{display:block}
-  .nav.open ul{display:flex;flex-direction:column;position:absolute;top:72px;left:0;right:0;background:var(--sea-deep);padding:20px 24px;gap:18px}
-  .hero .wrap,.about .wrap,.b-grid,.visit .wrap{grid-template-columns:1fr}
-  .bowl-hero{max-width:280px;order:-1}
-  .sticker{width:92px;height:92px;font-size:.66rem;top:-4%;right:-4%}
-  .sticker span{font-size:1.15rem}
-  .how .steps{grid-template-columns:1fr}
-  .pillar:nth-child(2),.pillar:nth-child(4){transform:none}
-  .summary{position:static}
+  .nav.open ul{display:flex;flex-direction:column;position:absolute;top:70px;left:0;right:0;background:var(--sand);border-bottom:var(--b);padding:16px}
+  .hero .wrap,.vibe .wrap,.b-grid,.visit .wrap{grid-template-columns:1fr}
+  .hero-pics{height:420px;max-width:440px;width:100%;margin:10px auto 0}
+  .sun{width:110px;height:110px;font-size:1rem}
+  .sweet .wrap,.how .steps{grid-template-columns:1fr}
+  .summary{position:static;transform:none}
+  .board{padding:22px}
+  .board .ln{grid-template-columns:1fr auto;}
+  .board .ln .add{grid-column:2;grid-row:1/3}
+  .board .ln .pr{grid-column:1}
 }
-@media (max-width:480px){.pillars{grid-template-columns:1fr}.hero{padding-top:100px}}
+@media (max-width:480px){
+  .hero h1{font-size:4rem}
+  .hero h1 .l2{-webkit-text-stroke:2px var(--ink)}
+  .hero-pics{height:360px}
+  .facts{grid-template-columns:1fr 1fr;gap:12px}
+  .fact b{font-size:2rem}
+}
 </style>
 </head>
 <body>
 
-<!-- ============================================================
-     DADOS DO RESTAURANTE — edite aqui (preços, endereço, contatos)
-     ============================================================ -->
+<!-- =============================================================
+     DADOS DA LOJA E CARDÁPIO — edite aqui
+     ============================================================= -->
 <script>
 const MAHALO = {
-  nome: "Mahalo Poke",
-  cidade: "Belém · PA",
   instagram: "https://www.instagram.com/mahalo_bowls1501",
   instagramHandle: "@mahalo_bowls1501",
-  whatsapp: "5591900000000",          // TODO: número real com DDI+DDD, só dígitos
-  ifood: "",                           // TODO: link do iFood (deixe "" para esconder)
-  endereco: "Endereço em Belém – PA",  // TODO: endereço completo
-  mapsQuery: "Mahalo Poke Belém PA",   // texto usado no mapa
-  horarios: [                          // TODO: confirmar horários
+  whatsapp: "5591900000000",          // TODO: número real (55 + DDD + número, só dígitos)
+  ifood: "",                           // TODO: link do iFood ("" esconde o botão)
+  endereco: "Endereço da loja",        // TODO: endereço completo
+  mapsQuery: "Mahalo Poke Belém",      // texto usado no mapa
+  horarios: [                          // TODO: confirmar
     ["Seg – Sex", "11h às 22h"],
     ["Sábado", "11h às 23h"],
     ["Domingo", "17h às 22h"],
   ],
 };
 
-/* Cardápio — preços de referência, ajuste conforme a loja */
+/* Fotos: Pexels (licença livre). Troque pelas fotos reais da loja quando tiver. */
+const px = id => `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=700`;
+
 const MENU = {
-  "Pokes da Casa": [
-    {nome:"Aloha Salmão", desc:"Salmão fresco, gohan, manga, pepino, edamame, cebola roxa, gergelim e molho shoyu da casa.", preco:49.9, tag:"Mais pedido", cor:"#FFD9CC", fish:"salmon"},
-    {nome:"Tuna Lava", desc:"Atum em cubos, gohan, abacate, alga wakame, cebolinha, crispy de alho e maionese de sriracha.", preco:54.9, tag:"Picante", cor:"#FBD1DA", fish:"tuna"},
-    {nome:"Pará Tropical", desc:"Salmão, gohan, manga, castanha-do-pará tostada, cream cheese, cebolinha e molho de maracujá.", preco:52.9, tag:"Sabor de Belém", cor:"#FFE7B8", fish:"salmon"},
-    {nome:"Camarão Crocante", desc:"Camarão empanado, gohan, cream cheese, pepino, cenoura, farofinha crocante e molho tarê.", preco:51.9, tag:"", cor:"#FFE2C2", fish:"shrimp"},
-    {nome:"Mahalo Vegano", desc:"Tofu grelhado, arroz integral, abacate, edamame, repolho roxo, manga, gergelim e molho ponzu.", preco:42.9, tag:"Vegano", cor:"#D4F0DF", fish:"tofu"},
-    {nome:"Frango Teriyaki", desc:"Frango grelhado ao teriyaki, gohan, milho, cenoura, pepino, cebolinha e gergelim.", preco:39.9, tag:"", cor:"#F6E2C6", fish:"chicken"},
-  ],
-  "Entradas": [
-    {nome:"Guioza (6 un.)", desc:"Pastelzinho japonês de porco ou legumes, selado na chapa, com molho de shoyu e gengibre.", preco:24.9, cor:"#F3E3CF", fish:"dumpling"},
-    {nome:"Edamame", desc:"Soja verde na casca com flor de sal e limão. Simples e viciante.", preco:16.9, tag:"Vegano", cor:"#D4F0DF", fish:"edamame"},
-    {nome:"Hot Roll Mahalo (8 un.)", desc:"Salmão e cream cheese empanados, com tarê e cebolinha.", preco:29.9, cor:"#FFD9CC", fish:"roll"},
-    {nome:"Ceviche de Salmão", desc:"Salmão marinado no limão com cebola roxa, coentro, pimenta-de-cheiro e chips de banana.", preco:34.9, cor:"#FFE7B8", fish:"salmon"},
-  ],
-  "Bowls Doces": [
-    {nome:"Açaí Mahalo 500ml", desc:"Açaí paraense de verdade, granola, banana, morango e mel. Nada de xarope.", preco:24.9, tag:"Do Pará", cor:"#E3D3F2", fish:"acai"},
-    {nome:"Tropical Bowl", desc:"Açaí, manga, paçoca, coco ralado e leite condensado.", preco:27.9, cor:"#E3D3F2", fish:"acai"},
-    {nome:"Mochi (2 un.)", desc:"Sorvete envolto em massa de arroz. Sabores do dia.", preco:18.9, cor:"#FBD1DA", fish:"mochi"},
-  ],
-  "Bebidas": [
-    {nome:"Suco de Cupuaçu", desc:"Natural, feito na hora. 400ml.", preco:12.9, tag:"Regional", cor:"#FFF0D2", fish:"juice"},
-    {nome:"Limonada Hibisco", desc:"Limão, hibisco e hortelã. 400ml.", preco:12.9, cor:"#FBD1DA", fish:"juice"},
-    {nome:"Chá Gelado da Casa", desc:"Chá verde com maracujá. 400ml.", preco:10.9, cor:"#D4F0DF", fish:"juice"},
-    {nome:"Refrigerante lata", desc:"Coca-Cola, Guaraná ou Zero.", preco:6.9, cor:"#E7F6F2", fish:"can"},
-    {nome:"Água (com/sem gás)", desc:"500ml.", preco:4.9, cor:"#E7F6F2", fish:"can"},
-  ],
+  "Pokes da casa": {tipo:"cards", itens:[
+    {nome:"Aloha Salmão", desc:"Salmão fresco, gohan, manga, pepino, gergelim preto e shoyu da casa.", preco:49.9, tag:"o mais pedido", foto:px(15913488)},
+    {nome:"Big Wave", desc:"Salmão, abacate, manga, repolho roxo, pepino e cebolinha sobre gohan.", preco:52.9, tag:"novo", foto:px(6546181)},
+    {nome:"Spicy Tuna", desc:"Atum em cubos, nori, pimenta dedo-de-moça, cenoura e maionese de sriracha.", preco:54.9, tag:"picante 🔥", foto:px(4828139)},
+    {nome:"Shrimp Session", desc:"Camarão, cream cheese, cenoura, folhas, amendoim e molho tarê.", preco:51.9, tag:"", foto:px(4828092)},
+    {nome:"Salmon Overload", desc:"Muito salmão, milho, edamame, cenoura e gergelim. Pra quem tá com fome.", preco:59.9, tag:"tamanho G", foto:px(15913464)},
+    {nome:"Island Veggie", desc:"Tofu grelhado, arroz integral, abacate, edamame, cenoura e ponzu.", preco:42.9, tag:"vegano 🌱", foto:px(4828218)},
+  ]},
+  "Entradas": {tipo:"lista", itens:[
+    {nome:"Guioza (6 un.)", desc:"Porco ou legumes, selado na chapa, com shoyu e gengibre.", preco:24.9},
+    {nome:"Edamame", desc:"Soja verde na casca com flor de sal e limão.", preco:16.9},
+    {nome:"Hot Roll (8 un.)", desc:"Salmão e cream cheese empanados, com tarê.", preco:29.9},
+    {nome:"Ceviche de Salmão", desc:"Limão, cebola roxa, coentro e chips de batata-doce.", preco:34.9},
+  ]},
+  "Bebidas": {tipo:"lista", itens:[
+    {nome:"Limonada Hibisco", desc:"Limão, hibisco e hortelã. 400ml.", preco:12.9},
+    {nome:"Chá gelado da casa", desc:"Chá verde com maracujá. 400ml.", preco:10.9},
+    {nome:"Suco natural", desc:"Laranja, abacaxi com hortelã ou manga. 400ml.", preco:11.9},
+    {nome:"Refrigerante lata", desc:"Coca-Cola, Guaraná ou Zero.", preco:6.9},
+    {nome:"Água", desc:"Com ou sem gás, 500ml.", preco:4.9},
+  ]},
 };
 
-/* Monte seu poke */
+const SWEET = [
+  {nome:"Açaí Bowl", desc:"Açaí, granola, morango, blueberry e banana.", preco:24.9, foto:px(6637835)},
+  {nome:"Tropical Bowl", desc:"Açaí na cuia de coco com manga, banana, amêndoas e frutas vermelhas.", preco:29.9, foto:px(8230020)},
+  {nome:"Pink Smoothie Bowl", desc:"Pitaya, banana em rodelas, cacau nibs e coco.", preco:27.9, foto:px(2173772)},
+];
+
 const BUILDER = {
   tamanhos: [{n:"P · 500ml", p:36.9},{n:"M · 700ml", p:44.9},{n:"G · 900ml", p:54.9}],
   steps: [
-    {id:"base",  titulo:"Escolha a base",        max:1, itens:["Gohan (arroz japonês)","Arroz integral","Mix de folhas","Metade gohan / metade folhas"]},
-    {id:"prot",  titulo:"Proteína",              max:1, itens:[["Salmão",0],["Atum",4],["Camarão",3],["Frango teriyaki",-4],["Tofu",-4]]},
-    {id:"acomp", titulo:"Acompanhamentos",       max:5, itens:["Manga","Pepino","Abacate","Edamame","Cenoura","Milho","Cebola roxa","Repolho roxo","Alga wakame","Tomate cereja"]},
-    {id:"molho", titulo:"Molho",                 max:2, itens:["Shoyu da casa","Tarê","Maracujá","Ponzu","Maionese de sriracha","Teriyaki"]},
-    {id:"top",   titulo:"Toppings crocantes",    max:3, itens:["Gergelim","Crispy de alho","Castanha-do-pará","Farofinha","Nori","Cebolinha"]},
-    {id:"extra", titulo:"Extras",                max:9, itens:[["Cream cheese",4],["Proteína extra",14],["Abacate extra",5],["Camarão empanado",9]]},
+    {id:"base",  titulo:"Base",            max:1, itens:["Gohan (arroz japonês)","Arroz integral","Mix de folhas","Meio a meio"]},
+    {id:"prot",  titulo:"Proteína",        max:1, itens:[["Salmão",0],["Atum",4],["Camarão",3],["Frango teriyaki",-4],["Tofu",-4]]},
+    {id:"acomp", titulo:"Acompanhamentos", max:5, itens:["Manga","Pepino","Abacate","Edamame","Cenoura","Milho","Cebola roxa","Repolho roxo","Alga wakame","Tomate cereja"]},
+    {id:"molho", titulo:"Molho",           max:2, itens:["Shoyu da casa","Tarê","Ponzu","Maracujá","Maionese de sriracha","Teriyaki"]},
+    {id:"top",   titulo:"Crocantes",       max:3, itens:["Gergelim","Crispy de alho","Amendoim","Couve crispy","Nori","Cebolinha"]},
+    {id:"extra", titulo:"Extras",          max:9, itens:[["Cream cheese",4],["Proteína extra",14],["Abacate extra",5],["Camarão empanado",9]]},
   ],
 };
 </script>
@@ -268,148 +299,109 @@ const BUILDER = {
 <nav class="nav" id="nav">
   <div class="wrap">
     <a href="#top" class="logo" aria-label="Mahalo Poke, início">
-      <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="#FFB547"/><path d="M8 22c3-3 6-3 9 0s6 3 9 0 6-3 6-3" stroke="#083F3D" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M8 28c3-3 6-3 9 0s6 3 9 0 6-3 6-3" stroke="#FF6B4A" stroke-width="2.6" fill="none" stroke-linecap="round"/><circle cx="25" cy="13" r="4" fill="#FF6B4A"/></svg>
-      <span>Mahalo<small>Poke · Belém</small></span>
+      <span class="mark"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><path d="M2 15c3-4 6-4 9 0s6 4 9 0 4-3 4-3" stroke="#141414" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="17" cy="7" r="3.5" fill="#FFE14D" stroke="#141414" stroke-width="2"/></svg></span>
+      <span class="word">Mahalo<span>.</span></span>
     </a>
     <ul id="navlinks">
-      <li><a href="#sobre">Sobre</a></li>
       <li><a href="#cardapio">Cardápio</a></li>
       <li><a href="#monte">Monte o seu</a></li>
+      <li><a href="#doces">Doces</a></li>
       <li><a href="#visite">Onde estamos</a></li>
     </ul>
-    <a href="#cardapio" class="btn btn-coral nav-cta">Peça agora</a>
-    <button class="menu-toggle" aria-label="Abrir menu" aria-expanded="false" id="menuToggle">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    <a href="#cardapio" class="btn btn-o nav-cta">Pedir agora</a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu" aria-expanded="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#141414" stroke-width="3" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
     </button>
   </div>
 </nav>
 
 <header class="hero" id="top">
-  <svg class="leaf" style="left:-60px;top:80px;width:260px" viewBox="0 0 200 200" aria-hidden="true"><path d="M100 190C40 150 10 90 30 20c50 10 110 60 70 170z" fill="#2BB3A3"/></svg>
-  <svg class="leaf" style="right:-40px;bottom:120px;width:220px;transform:rotate(140deg)" viewBox="0 0 200 200" aria-hidden="true"><path d="M100 190C40 150 10 90 30 20c50 10 110 60 70 170z" fill="#FFB547"/></svg>
   <div class="wrap">
     <div>
-      <span class="eyebrow" style="color:var(--mango)">Aloha, Belém 🌺</span>
-      <h1>Poke havaiano com <em>alma paraense.</em></h1>
-      <p class="lead">Peixe fresco, frutas tropicais e o crocante da castanha-do-pará, tudo num bowl colorido montado do seu jeito. Leve, rápido e gostoso de verdade.</p>
+      <h1 class="display">Mahalo<span class="l2">Poke</span><span class="l3">Bowls</span></h1>
+      <p class="lead">Peixe fresco, frutas tropicais e molho no ponto. Poke havaiano montado na hora, do jeito que você curtir. Leve, colorido e rápido.</p>
       <div class="cta">
-        <a href="#monte" class="btn btn-coral">Monte seu poke →</a>
-        <a href="#cardapio" class="btn btn-ghost">Ver cardápio</a>
-      </div>
-      <div class="badges">
-        <div><b>100%</b>peixe fresco</div>
-        <div><b>+30</b>ingredientes</div>
-        <div><b>~30min</b>delivery</div>
+        <a href="#monte" class="btn btn-o">Monte seu poke →</a>
+        <a href="#cardapio" class="btn btn-y">Ver cardápio</a>
       </div>
     </div>
-    <div class="bowl-hero">
-      <div class="sticker"><div><span>Mahalo</span>= obrigado<br>em havaiano</div></div>
-      <svg viewBox="0 0 400 400" role="img" aria-label="Ilustração de um poke bowl colorido">
-        <ellipse cx="200" cy="225" rx="170" ry="52" fill="#083F3D" opacity=".35"/>
-        <!-- conteúdo -->
-        <ellipse cx="200" cy="200" rx="160" ry="62" fill="#F7F1E4"/>
-        <g>
-          <!-- arroz -->
-          <ellipse cx="200" cy="196" rx="148" ry="54" fill="#FFFDF6"/>
-          <!-- salmão -->
-          <g fill="#FF8A65" stroke="#FFD2C2" stroke-width="3">
-            <rect x="96" y="160" width="34" height="28" rx="6" transform="rotate(-12 113 174)"/>
-            <rect x="128" y="150" width="34" height="28" rx="6" transform="rotate(8 145 164)"/>
-            <rect x="112" y="186" width="34" height="28" rx="6" transform="rotate(4 129 200)"/>
-          </g>
-          <!-- manga -->
-          <g fill="#FFB547"><rect x="212" y="150" width="24" height="24" rx="4" transform="rotate(10 224 162)"/><rect x="240" y="158" width="24" height="24" rx="4" transform="rotate(-8 252 170)"/><rect x="226" y="180" width="24" height="24" rx="4" transform="rotate(20 238 192)"/></g>
-          <!-- abacate -->
-          <g fill="#9BD06B" stroke="#4E8B3A" stroke-width="3"><path d="M170 214c10-22 50-22 60 0-12 12-48 12-60 0z"/><path d="M178 230c10-18 44-18 52 0-10 10-42 10-52 0z" opacity=".9"/></g>
-          <!-- edamame -->
-          <g fill="#6CC070"><circle cx="276" cy="196" r="9"/><circle cx="292" cy="186" r="9"/><circle cx="300" cy="204" r="9"/><circle cx="282" cy="214" r="9"/></g>
-          <!-- pepino -->
-          <g><circle cx="168" cy="166" r="14" fill="#CFEFA8" stroke="#3E8E4A" stroke-width="4"/><circle cx="190" cy="178" r="14" fill="#CFEFA8" stroke="#3E8E4A" stroke-width="4"/></g>
-          <!-- cebola roxa / repolho -->
-          <g stroke="#B04CA0" stroke-width="4" fill="none" stroke-linecap="round"><path d="M260 228c10-6 20-6 30 0"/><path d="M248 238c10-6 20-6 30 0"/></g>
-          <!-- gergelim -->
-          <g fill="#2B2B2B"><ellipse cx="140" cy="176" rx="2" ry="3.4"/><ellipse cx="200" cy="200" rx="2" ry="3.4"/><ellipse cx="236" cy="172" rx="2" ry="3.4"/><ellipse cx="160" cy="210" rx="2" ry="3.4"/><ellipse cx="264" cy="180" rx="2" ry="3.4"/></g>
-          <g fill="#fff"><ellipse cx="150" cy="200" rx="2" ry="3.4"/><ellipse cx="222" cy="206" rx="2" ry="3.4"/><ellipse cx="250" cy="200" rx="2" ry="3.4"/></g>
-          <!-- nori -->
-          <path d="M300 150l40-20 6 40-36 10z" fill="#1F3B2D"/>
-        </g>
-        <!-- tigela -->
-        <path d="M30 200c0 90 76 150 170 150s170-60 170-150z" fill="#FF6B4A"/>
-        <path d="M30 200c0 90 76 150 170 150s170-60 170-150" fill="none" stroke="#E2543A" stroke-width="4"/>
-        <path d="M60 250c40 20 80 20 120 0s80-20 120 0 50 10 50 10" stroke="#FFD2C2" stroke-width="7" fill="none" stroke-linecap="round" opacity=".7"/>
-        <path d="M80 290c40 20 80 20 120 0s80-20 120 0" stroke="#FFB547" stroke-width="7" fill="none" stroke-linecap="round" opacity=".8"/>
-        <!-- hashi -->
-        <g stroke-linecap="round"><path d="M260 60l90 150" stroke="#C99559" stroke-width="10"/><path d="M286 50l80 160" stroke="#B88246" stroke-width="10"/></g>
-        <!-- flor -->
-        <g transform="translate(70 120)"><g fill="#E8457A"><ellipse cx="0" cy="-18" rx="12" ry="18"/><ellipse cx="0" cy="-18" rx="12" ry="18" transform="rotate(72)"/><ellipse cx="0" cy="-18" rx="12" ry="18" transform="rotate(144)"/><ellipse cx="0" cy="-18" rx="12" ry="18" transform="rotate(216)"/><ellipse cx="0" cy="-18" rx="12" ry="18" transform="rotate(288)"/></g><circle r="6" fill="#FFB547"/></g>
-      </svg>
+    <div class="hero-pics">
+      <span class="sticker s1">aloha! 🤙</span>
+      <figure class="pic a"><img src="https://images.pexels.com/photos/6546181/pexels-photo-6546181.jpeg?auto=compress&cs=tinysrgb&w=900" alt="Poke bowl de salmão com abacate, manga e repolho roxo"><figcaption>big wave 🌊</figcaption></figure>
+      <figure class="pic b"><img src="https://images.pexels.com/photos/15913488/pexels-photo-15913488.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Poke de salmão com manga e gergelim"><figcaption>aloha salmão</figcaption></figure>
+      <div class="sun">peixe<br>fresco<br>todo dia</div>
+      <span class="sticker s2">feito na hora ✌️</span>
     </div>
   </div>
-  <div class="wave" aria-hidden="true"><svg viewBox="0 0 1440 90" preserveAspectRatio="none"><path d="M0 40c120 30 240 30 360 0s240-30 360 0 240 30 360 0 240-30 360 0v50H0z" fill="#FF6B4A"/></svg></div>
 </header>
 
-<div class="marquee" aria-hidden="true"><div class="track" id="marquee"></div></div>
+<div class="ticker" aria-hidden="true"><div class="track" id="t1"></div></div>
 
-<section class="about" id="sobre">
+<section class="vibe" id="sobre">
   <div class="wrap">
     <div class="reveal">
-      <span class="eyebrow">Nossa história</span>
-      <h2>Do Havaí pra beira do Guamá.</h2>
-      <p>Poke quer dizer “cortar em pedaços” e é a comida de rua mais querida do Havaí: peixe cru temperado servido sobre arroz. A gente trouxe essa ideia pra Belém e misturou com o que o Pará tem de melhor: frutas da estação, castanha-do-pará, pimenta-de-cheiro e açaí de verdade.</p>
-      <p>Cada bowl é montado na hora, com ingredientes frescos e porção generosa. <strong>Mahalo</strong> quer dizer <em>obrigado</em>. É assim que a gente quer que você se sinta depois de cada colherada.</p>
+      <span class="kicker">a vibe</span>
+      <h2 class="display">Comida de praia,<br><em>sem frescura.</em></h2>
+      <p>No Havaí, poke é comida de quem sai do mar com fome: peixe cru temperado, arroz e o que tiver de mais fresco. Aqui é igual. Bowl grande, cheio de cor, montado na sua frente.</p>
+      <p><strong>Mahalo</strong> é “obrigado” em havaiano. É assim que a gente fala com quem chega.</p>
     </div>
-    <div class="pillars reveal">
-      <div class="pillar"><div class="ico" style="background:#FFE2D9">🐟</div><h3>Peixe fresco</h3><p>Salmão e atum selecionados e cortados no dia.</p></div>
-      <div class="pillar"><div class="ico" style="background:#FFF0D2">🥭</div><h3>Toque tropical</h3><p>Manga, maracujá, cupuaçu e castanha da região.</p></div>
-      <div class="pillar"><div class="ico" style="background:#D4F0DF">🥗</div><h3>Leve e nutritivo</h3><p>Proteína, fibra e cor. Almoço que não pesa.</p></div>
-      <div class="pillar"><div class="ico" style="background:#FBD1DA">🌺</div><h3>Do seu jeito</h3><p>Mais de 30 ingredientes pra montar o seu bowl.</p></div>
+    <div class="facts reveal">
+      <div class="fact"><b>100%</b><span>peixe fresco</span></div>
+      <div class="fact"><b>+30</b><span>ingredientes</span></div>
+      <div class="fact"><b>3</b><span>tamanhos de bowl</span></div>
+      <div class="fact"><b>~30min</b><span>pra chegar aí</span></div>
     </div>
   </div>
 </section>
 
 <section class="menu" id="cardapio">
   <div class="wrap">
-    <div class="sec-head reveal">
-      <span class="eyebrow">Cardápio</span>
-      <h2>Escolha seu bowl favorito</h2>
-      <p>Toque no <b>+</b> pra adicionar ao pedido. No fim, é só enviar pelo WhatsApp.</p>
+    <div class="head">
+      <div><span class="kicker">cardápio</span><h2 class="display">Escolhe aí</h2></div>
+      <div class="tabs" role="tablist" id="tabs"></div>
     </div>
-    <div class="tabs" role="tablist" id="tabs"></div>
     <div class="grid" id="grid" role="tabpanel"></div>
-    <p class="note">Imagens ilustrativas. Preços e disponibilidade podem variar; confirme no pedido.</p>
+    <p class="note">Toque no <b>+</b> pra montar seu pedido. Fotos ilustrativas; preços podem variar.</p>
   </div>
 </section>
 
+<div class="band" aria-hidden="true"><h2 class="display">Catch the wave</h2></div>
+
 <section class="builder" id="monte">
   <div class="wrap">
-    <div class="sec-head reveal">
-      <span class="eyebrow" style="color:var(--mango)">Monte o seu</span>
-      <h2>Seu poke, suas regras</h2>
-      <p>Escolha o tamanho e vá montando. O preço atualiza na hora.</p>
+    <div class="head">
+      <div><span class="kicker">monte o seu</span><h2 class="display">Seu bowl,<br>suas regras</h2></div>
     </div>
     <div class="b-grid">
       <div id="steps"></div>
       <aside class="summary" aria-live="polite">
         <h3>Seu bowl</h3>
         <ul id="sumList"></ul>
-        <div class="total"><span>Total</span><span id="sumTotal">R$ 0</span></div>
-        <button class="btn btn-coral" id="addCustom">Adicionar ao pedido</button>
-        <p id="sumMsg" style="font-size:.82rem;color:var(--muted);margin-top:10px;text-align:center"></p>
+        <div class="tot"><span>Total</span><span id="sumTotal">R$ 0</span></div>
+        <button class="btn btn-o" id="addCustom">Adicionar ao pedido</button>
+        <p class="msg" id="sumMsg"></p>
       </aside>
     </div>
   </div>
 </section>
 
+<div class="ticker alt" aria-hidden="true"><div class="track" id="t2"></div></div>
+
+<section class="sweet" id="doces">
+  <div class="wrap" style="display:block">
+    <div class="head"><div><span class="kicker">pra fechar</span><h2 class="display">Bowls doces</h2></div></div>
+  </div>
+  <div class="wrap" id="sweetGrid"></div>
+</section>
+
 <section class="how">
   <div class="wrap">
-    <div class="sec-head reveal">
-      <span class="eyebrow">Como pedir</span>
-      <h2>Do clique ao bowl em 3 passos</h2>
-    </div>
+    <span class="kicker">como pedir</span>
+    <h2 class="display" style="font-size:clamp(2.8rem,6vw,5rem)">Fácil igual dropar</h2>
     <div class="steps">
-      <div class="s reveal"><div class="big">01</div><h3>Escolha</h3><p>Pegue um poke da casa ou monte o seu do zero.</p></div>
-      <div class="s reveal"><div class="big">02</div><h3>Envie</h3><p>Seu pedido vai prontinho pro nosso WhatsApp, com tudo descrito.</p></div>
-      <div class="s reveal"><div class="big">03</div><h3>Aproveite</h3><p>Retire na loja ou receba em casa, fresquinho.</p></div>
+      <div class="s"><div class="big">01</div><h3>Escolhe</h3><p>Pega um poke da casa ou monta o seu do zero.</p></div>
+      <div class="s"><div class="big">02</div><h3>Manda</h3><p>Seu pedido vai prontinho pro nosso WhatsApp, tudo descrito.</p></div>
+      <div class="s"><div class="big">03</div><h3>Curte</h3><p>Retira na loja ou recebe em casa, fresquinho.</p></div>
     </div>
     <div class="channels" id="channels"></div>
   </div>
@@ -417,36 +409,36 @@ const BUILDER = {
 
 <section class="visit" id="visite">
   <div class="wrap">
-    <div class="info reveal">
-      <span class="eyebrow">Onde estamos</span>
-      <h2>Passa aqui, vem dizer aloha.</h2>
+    <div class="info">
+      <span class="kicker">onde estamos</span>
+      <h2 class="display">Cola aqui</h2>
       <dl>
-        <div><dt>Endereço</dt><dd id="addr"></dd></div>
-        <div><dt>Horário</dt><dd class="hours" id="hours"></dd></div>
-        <div><dt>Contato</dt><dd><a id="waLink" href="#">WhatsApp</a> · <a id="igLink" href="#" target="_blank" rel="noopener"></a></dd></div>
+        <div><dt>endereço</dt><dd id="addr"></dd></div>
+        <div><dt>horário</dt><dd class="hours" id="hours"></dd></div>
+        <div><dt>contato</dt><dd><a id="waLink" href="#" target="_blank" rel="noopener">WhatsApp</a> · <a id="igLink" href="#" target="_blank" rel="noopener"></a></dd></div>
       </dl>
     </div>
-    <div class="map reveal"><iframe id="map" title="Mapa da loja" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+    <div class="map"><iframe id="map" title="Mapa da loja" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
   </div>
 </section>
 
 <section class="insta">
   <div class="wrap">
-    <span class="eyebrow">Segue a gente</span>
-    <h2 id="igHandle">@mahalo_bowls1501</h2>
-    <p>Novidades, bowls da semana e promoções primeiro no Instagram.</p>
-    <a class="btn" id="igBtn" href="#" target="_blank" rel="noopener">Abrir no Instagram ↗</a>
+    <span class="kicker">segue a gente</span>
+    <h2 class="display" id="igHandle">@mahalo_bowls1501</h2>
+    <p>Bowl da semana, promo e bastidores. Primeiro no Instagram.</p>
+    <a class="btn btn-y" id="igBtn" href="#" target="_blank" rel="noopener">Abrir Instagram ↗</a>
   </div>
 </section>
 
 <footer>
   <div class="wrap">
-    <span>© <span id="yr"></span> Mahalo Poke · Belém – PA</span>
-    <span>Feito com 🌺 e muito peixe fresco</span>
+    <span>© <span id="yr"></span> Mahalo Poke · mahalo = obrigado 🤙</span>
+    <span>Fotos ilustrativas: <a href="https://www.pexels.com" target="_blank" rel="noopener">Pexels</a></span>
   </div>
 </footer>
 
-<button class="cart-fab" id="cartFab" aria-label="Ver pedido"><span>🛍️ Meu pedido</span><span class="count" id="cartCount">0</span></button>
+<button class="cart-fab" id="cartFab" aria-label="Ver pedido">Meu pedido <span class="count" id="cartCount">0</span></button>
 <div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
   <div class="scrim" data-close></div>
   <div class="panel">
@@ -454,8 +446,8 @@ const BUILDER = {
     <div class="lines" id="lines"></div>
     <input id="cName" placeholder="Seu nome">
     <textarea id="cObs" rows="2" placeholder="Endereço de entrega ou “vou retirar” · observações"></textarea>
-    <div class="total"><span>Total</span><span id="cartTotal">R$ 0</span></div>
-    <button class="btn btn-coral" id="sendWa" style="justify-content:center">Enviar pelo WhatsApp</button>
+    <div class="tot"><span>Total</span><span id="cartTotal">R$ 0</span></div>
+    <button class="btn btn-o" id="sendWa" style="justify-content:center">Enviar pelo WhatsApp</button>
   </div>
 </div>
 
@@ -463,172 +455,126 @@ const BUILDER = {
 const $ = s => document.querySelector(s);
 const brl = v => v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 
-/* ---------- ilustrações dos itens ---------- */
-function art(kind){
-  const bowl = (inner) => `<svg viewBox="0 0 200 150" aria-hidden="true"><ellipse cx="100" cy="72" rx="80" ry="28" fill="#FFFDF6"/>${inner}<path d="M18 74c0 44 36 70 82 70s82-26 82-70z" fill="#0E5E5A"/><path d="M34 104c20 10 40 10 60 0s40-10 60 0" stroke="#2BB3A3" stroke-width="5" fill="none" stroke-linecap="round"/></svg>`;
-  const prot = {
-    salmon:`<g fill="#FF8A65" stroke="#FFD2C2" stroke-width="2"><rect x="50" y="54" width="20" height="16" rx="4"/><rect x="70" y="50" width="20" height="16" rx="4" transform="rotate(10 80 58)"/><rect x="58" y="66" width="20" height="14" rx="4"/></g>`,
-    tuna:`<g fill="#C9304A" stroke="#F08A9A" stroke-width="2"><rect x="50" y="54" width="20" height="16" rx="4"/><rect x="70" y="50" width="20" height="16" rx="4" transform="rotate(10 80 58)"/><rect x="58" y="66" width="20" height="14" rx="4"/></g>`,
-    shrimp:`<g fill="none" stroke="#FF8A50" stroke-width="7" stroke-linecap="round"><path d="M50 66a12 12 0 1 1 18 8"/><path d="M76 60a12 12 0 1 1 18 8"/></g>`,
-    tofu:`<g fill="#F5E6B8" stroke="#D8C48A" stroke-width="2"><rect x="50" y="54" width="18" height="18" rx="3"/><rect x="72" y="52" width="18" height="18" rx="3"/><rect x="60" y="68" width="18" height="12" rx="3"/></g>`,
-    chicken:`<g fill="#C7803A" stroke="#E7AE6C" stroke-width="2"><rect x="48" y="56" width="26" height="12" rx="6" transform="rotate(-10 61 62)"/><rect x="70" y="58" width="26" height="12" rx="6" transform="rotate(12 83 64)"/></g>`,
-  };
-  const veg = `<g fill="#FFB547"><rect x="108" y="52" width="14" height="14" rx="3"/><rect x="124" y="58" width="14" height="14" rx="3"/></g><g fill="#6CC070"><circle cx="118" cy="78" r="6"/><circle cx="132" cy="80" r="6"/><circle cx="144" cy="70" r="6"/></g><path d="M86 82c6-10 26-10 30 0-6 6-24 6-30 0z" fill="#9BD06B" stroke="#4E8B3A" stroke-width="2"/>`;
-  if (prot[kind]) return bowl(prot[kind] + veg);
-  const acai = bowl(`<ellipse cx="100" cy="72" rx="80" ry="28" fill="#5B2A6E"/><g fill="#FFE08A"><circle cx="64" cy="64" r="8"/><circle cx="80" cy="60" r="8"/></g><g fill="#E8457A"><path d="M112 58c6-6 14 0 10 8l-6 6-6-6c-4-4-2-8 2-8z"/><path d="M132 66c6-6 14 0 10 8l-6 6-6-6c-4-4-2-8 2-8z"/></g><g fill="#D9A55A"><circle cx="96" cy="78" r="3"/><circle cx="104" cy="82" r="3"/><circle cx="90" cy="84" r="3"/><circle cx="150" cy="78" r="3"/></g>`);
-  const map = {
-    acai,
-    dumpling:`<svg viewBox="0 0 200 150" aria-hidden="true"><ellipse cx="100" cy="110" rx="86" ry="22" fill="#fff"/><g fill="#F7E3BF" stroke="#D6B47A" stroke-width="3"><path d="M30 100c0-30 50-30 50 0z"/><path d="M76 96c0-30 50-30 50 0z"/><path d="M122 100c0-30 50-30 50 0z"/></g><g fill="#C68A3E"><ellipse cx="55" cy="101" rx="22" ry="4"/><ellipse cx="101" cy="97" rx="22" ry="4"/><ellipse cx="147" cy="101" rx="22" ry="4"/></g></svg>`,
-    edamame:`<svg viewBox="0 0 200 150" aria-hidden="true"><ellipse cx="100" cy="110" rx="86" ry="22" fill="#fff"/><g fill="#6CC070" stroke="#3E8E4A" stroke-width="3"><path d="M40 90c20-30 60-30 70-10-20 20-50 20-70 10z"/><path d="M90 100c20-30 60-30 70-10-20 20-50 20-70 10z"/><path d="M60 70c20-30 60-30 70-10-20 20-50 20-70 10z"/></g></svg>`,
-    roll:`<svg viewBox="0 0 200 150" aria-hidden="true"><ellipse cx="100" cy="112" rx="86" ry="22" fill="#fff"/>${[40,80,120,160].map(x=>`<g><circle cx="${x}" cy="90" r="20" fill="#C68A3E"/><circle cx="${x}" cy="90" r="14" fill="#FFFDF6"/><circle cx="${x}" cy="90" r="7" fill="#FF8A65"/></g>`).join("")}<path d="M30 74c30-8 110-8 140 0" stroke="#3A2414" stroke-width="4" fill="none"/></svg>`,
-    mochi:`<svg viewBox="0 0 200 150" aria-hidden="true"><ellipse cx="100" cy="112" rx="80" ry="20" fill="#fff"/><ellipse cx="72" cy="92" rx="30" ry="24" fill="#F9B8C8"/><ellipse cx="128" cy="92" rx="30" ry="24" fill="#C9E8B4"/><ellipse cx="66" cy="84" rx="10" ry="5" fill="#fff" opacity=".6"/><ellipse cx="122" cy="84" rx="10" ry="5" fill="#fff" opacity=".6"/></svg>`,
-    juice:`<svg viewBox="0 0 200 150" aria-hidden="true"><path d="M72 30h56l-8 110H80z" fill="#fff" opacity=".7" stroke="#0E5E5A" stroke-width="3"/><path d="M76 60h48l-5 78H81z" fill="#FFB547"/><path d="M110 14l-6 70" stroke="#E8457A" stroke-width="6" stroke-linecap="round"/><circle cx="128" cy="34" r="14" fill="#9BD06B"/></svg>`,
-    can:`<svg viewBox="0 0 200 150" aria-hidden="true"><rect x="76" y="26" width="48" height="110" rx="10" fill="#FF6B4A"/><rect x="76" y="64" width="48" height="30" fill="#fff" opacity=".85"/><rect x="82" y="22" width="36" height="8" rx="4" fill="#9AA"/></svg>`,
-  };
-  return map[kind] || bowl(prot.salmon + veg);
-}
+/* tickers */
+const tick = (el, words) => { const s = words.map((w,i)=> i%2 ? `<i>${w}</i>` : `<span>${w}</span>`).join(""); $(el).innerHTML = s+s+s+s; };
+tick("#t1", ["Aloha","✺","Peixe fresco","✺","Feito na hora","✺","Mahalo","✺","Poke bowls","✺"]);
+tick("#t2", ["Salmão","✺","Atum","✺","Camarão","✺","Tofu","✺","Abacate","✺","Manga","✺"]);
 
-/* ---------- marquee ---------- */
-{
-  const words = ["Aloha","🌺","Peixe fresco","🐟","Açaí paraense","🥭","Castanha-do-pará","🌴","Mahalo","🍣"];
-  const s = words.map(w=>`<span>${w}</span>`).join("");
-  $("#marquee").innerHTML = s + s + s + s;
-}
-
-/* ---------- cardápio ---------- */
-const tabs = $("#tabs"), grid = $("#grid");
-const cats = Object.keys(MENU);
+/* cardápio */
+const tabs=$("#tabs"), grid=$("#grid"), cats=Object.keys(MENU);
+const cardHTML = (it, ref) => `
+  <article class="card">
+    <div class="ph"><img src="${it.foto}" alt="${it.nome}" loading="lazy">${it.tag?`<span class="tag">${it.tag}</span>`:""}</div>
+    <div class="bd"><h3>${it.nome}</h3><p>${it.desc}</p>
+      <div class="row"><span class="price">${brl(it.preco)}</span><button class="add" aria-label="Adicionar ${it.nome}" data-ref="${ref}">+</button></div>
+    </div>
+  </article>`;
 function renderCat(cat){
   [...tabs.children].forEach(b=>b.setAttribute("aria-selected", b.dataset.cat===cat));
-  grid.innerHTML = MENU[cat].map((it,i)=>`
-    <article class="item">
-      <div class="art" style="background:${it.cor||"#FFE7D6"}">${it.tag?`<span class="tag">${it.tag}</span>`:""}${art(it.fish)}</div>
-      <div class="body">
-        <h3>${it.nome}</h3>
-        <p>${it.desc}</p>
-        <div class="row"><span class="price">${brl(it.preco)}</span>
-        <button class="add" aria-label="Adicionar ${it.nome}" data-cat="${cat}" data-i="${i}">+</button></div>
-      </div>
-    </article>`).join("");
+  const sec = MENU[cat];
+  grid.innerHTML = sec.tipo==="cards"
+    ? sec.itens.map((it,i)=>cardHTML(it, `m|${cat}|${i}`)).join("")
+    : `<div class="board">${sec.itens.map((it,i)=>`
+        <div class="ln"><div><h3>${it.nome}</h3><p>${it.desc}</p></div><span class="pr">${brl(it.preco)}</span>
+        <button class="add" aria-label="Adicionar ${it.nome}" data-ref="m|${cat}|${i}">+</button></div>`).join("")}</div>`;
 }
 tabs.innerHTML = cats.map(c=>`<button class="tab" role="tab" data-cat="${c}">${c}</button>`).join("");
 tabs.addEventListener("click", e=>{ const b=e.target.closest(".tab"); if(b) renderCat(b.dataset.cat); });
-grid.addEventListener("click", e=>{
-  const b = e.target.closest(".add"); if(!b) return;
-  const it = MENU[b.dataset.cat][+b.dataset.i];
+renderCat(cats[0]);
+$("#sweetGrid").innerHTML = SWEET.map((it,i)=>cardHTML(it, `s||${i}`)).join("");
+
+document.addEventListener("click", e=>{
+  const b = e.target.closest(".add[data-ref]"); if(!b) return;
+  const [k,cat,i] = b.dataset.ref.split("|");
+  const it = k==="m" ? MENU[cat].itens[+i] : SWEET[+i];
   addToCart({nome:it.nome, desc:"", preco:it.preco});
   b.textContent="✓"; setTimeout(()=>b.textContent="+",900);
 });
-renderCat(cats[0]);
 
-/* ---------- monte seu poke ---------- */
-const sel = {tam:1};
-BUILDER.steps.forEach(s=>sel[s.id]=[]);
-const norm = x => Array.isArray(x) ? {n:x[0], p:x[1]} : {n:x, p:0};
+/* monte seu poke */
+const sel={tam:1}; BUILDER.steps.forEach(s=>sel[s.id]=[]);
+const norm = x => Array.isArray(x) ? {n:x[0],p:x[1]} : {n:x,p:0};
 function renderSteps(){
-  const html = [`<div class="step"><h3><span class="n">1</span>Tamanho</h3><div class="chips">${
+  const out=[`<div class="step"><h3><span class="n">1</span>Tamanho</h3><div class="chips">${
     BUILDER.tamanhos.map((t,i)=>`<button class="chip" data-step="tam" data-i="${i}" aria-pressed="${sel.tam===i}">${t.n}<small>${brl(t.p)}</small></button>`).join("")}</div></div>`];
-  BUILDER.steps.forEach((s,k)=>{
-    html.push(`<div class="step"><h3><span class="n">${k+2}</span>${s.titulo}<span class="lim">${s.max>=9?"opcional":`até ${s.max}`}</span></h3><div class="chips">${
-      s.itens.map(norm).map((it,i)=>`<button class="chip" data-step="${s.id}" data-i="${i}" aria-pressed="${sel[s.id].includes(i)}">${it.n}${it.p?`<small>${it.p>0?"+":"−"}${brl(Math.abs(it.p))}</small>`:""}</button>`).join("")}</div></div>`);
-  });
-  $("#steps").innerHTML = html.join("");
+  BUILDER.steps.forEach((s,k)=>out.push(`<div class="step"><h3><span class="n">${k+2}</span>${s.titulo}<span class="lim">${s.max>=9?"OPCIONAL":`ATÉ ${s.max}`}</span></h3><div class="chips">${
+    s.itens.map(norm).map((it,i)=>`<button class="chip" data-step="${s.id}" data-i="${i}" aria-pressed="${sel[s.id].includes(i)}">${it.n}${it.p?`<small>${it.p>0?"+":"−"}${brl(Math.abs(it.p))}</small>`:""}</button>`).join("")}</div></div>`));
+  $("#steps").innerHTML=out.join("");
 }
-function customTotal(){
-  let t = BUILDER.tamanhos[sel.tam].p;
-  BUILDER.steps.forEach(s=>sel[s.id].forEach(i=>t+=norm(s.itens[i]).p));
-  return t;
-}
-function customLines(){
-  return BUILDER.steps.filter(s=>sel[s.id].length).map(s=>[s.titulo, sel[s.id].map(i=>norm(s.itens[i]).n).join(", ")]);
-}
+const customTotal=()=>{ let t=BUILDER.tamanhos[sel.tam].p; BUILDER.steps.forEach(s=>sel[s.id].forEach(i=>t+=norm(s.itens[i]).p)); return t; };
+const customLines=()=>BUILDER.steps.filter(s=>sel[s.id].length).map(s=>[s.titulo, sel[s.id].map(i=>norm(s.itens[i]).n).join(", ")]);
 function renderSummary(){
-  const lines = [["Tamanho", BUILDER.tamanhos[sel.tam].n], ...customLines()];
-  $("#sumList").innerHTML = lines.map(([a,b])=>`<li><b>${a}:</b> ${b}</li>`).join("");
-  $("#sumTotal").textContent = brl(customTotal());
+  $("#sumList").innerHTML=[["Tamanho",BUILDER.tamanhos[sel.tam].n],...customLines()].map(([a,b])=>`<li><b>${a}:</b> ${b}</li>`).join("");
+  $("#sumTotal").textContent=brl(customTotal());
 }
 $("#steps").addEventListener("click", e=>{
-  const c = e.target.closest(".chip"); if(!c) return;
-  const id=c.dataset.step, i=+c.dataset.i;
-  $("#sumMsg").textContent="";
-  if(id==="tam"){ sel.tam=i; }
+  const c=e.target.closest(".chip"); if(!c) return;
+  const id=c.dataset.step, i=+c.dataset.i; $("#sumMsg").textContent="";
+  if(id==="tam") sel.tam=i;
   else{
-    const s = BUILDER.steps.find(x=>x.id===id), arr = sel[id];
+    const s=BUILDER.steps.find(x=>x.id===id), arr=sel[id];
     if(arr.includes(i)) arr.splice(arr.indexOf(i),1);
     else if(s.max===1){ arr.length=0; arr.push(i); }
     else if(arr.length<s.max) arr.push(i);
-    else { $("#sumMsg").textContent=`Máximo de ${s.max} em “${s.titulo}”.`; return; }
+    else { $("#sumMsg").textContent=`Máximo de ${s.max} em ${s.titulo.toLowerCase()}.`; return; }
   }
   renderSteps(); renderSummary();
 });
 $("#addCustom").addEventListener("click", ()=>{
-  if(!sel.base.length || !sel.prot.length){ $("#sumMsg").textContent="Escolha pelo menos a base e a proteína 🙂"; return; }
+  if(!sel.base.length||!sel.prot.length){ $("#sumMsg").textContent="Escolhe pelo menos a base e a proteína 🤙"; return; }
   addToCart({nome:`Poke montado (${BUILDER.tamanhos[sel.tam].n})`, desc:customLines().map(([a,b])=>`${a}: ${b}`).join(" | "), preco:customTotal()});
   BUILDER.steps.forEach(s=>sel[s.id]=[]); renderSteps(); renderSummary();
-  $("#sumMsg").textContent="Adicionado! Pode montar outro 🌺";
+  $("#sumMsg").textContent="Adicionado! Bora montar outro?";
 });
 renderSteps(); renderSummary();
 
-/* ---------- carrinho ---------- */
-let cart = [];
-try{ cart = JSON.parse(localStorage.getItem("mahalo-cart")||"[]"); }catch(e){}
-function save(){ try{ localStorage.setItem("mahalo-cart", JSON.stringify(cart)); }catch(e){} }
-function addToCart(item){
-  const ex = cart.find(c=>c.nome===item.nome && c.desc===item.desc);
-  ex ? ex.q++ : cart.push({...item,q:1});
-  save(); renderCart();
-}
+/* carrinho */
+let cart=[]; try{ cart=JSON.parse(localStorage.getItem("mahalo-cart")||"[]"); }catch(e){}
+const save=()=>{ try{ localStorage.setItem("mahalo-cart",JSON.stringify(cart)); }catch(e){} };
+function addToCart(item){ const ex=cart.find(c=>c.nome===item.nome&&c.desc===item.desc); ex?ex.q++:cart.push({...item,q:1}); save(); renderCart(); }
 function renderCart(){
-  const n = cart.reduce((a,c)=>a+c.q,0), tot = cart.reduce((a,c)=>a+c.q*c.preco,0);
-  $("#cartCount").textContent = n;
-  $("#cartFab").classList.toggle("show", n>0);
-  $("#cartTotal").textContent = brl(tot);
+  const n=cart.reduce((a,c)=>a+c.q,0), tot=cart.reduce((a,c)=>a+c.q*c.preco,0);
+  $("#cartCount").textContent=n; $("#cartFab").classList.toggle("show",n>0); $("#cartTotal").textContent=brl(tot);
   $("#lines").innerHTML = cart.length ? cart.map((c,i)=>`
     <div class="line"><div><div class="t">${c.nome}</div>${c.desc?`<div class="d">${c.desc}</div>`:""}<div class="d">${brl(c.preco)}</div></div>
     <div class="qty"><button data-i="${i}" data-d="-1" aria-label="Menos">−</button>${c.q}<button data-i="${i}" data-d="1" aria-label="Mais">+</button></div></div>`).join("")
-    : `<p style="color:var(--muted)">Seu pedido está vazio.</p>`;
+    : `<p>Seu pedido está vazio.</p>`;
 }
-$("#lines").addEventListener("click", e=>{
-  const b=e.target.closest("button[data-d]"); if(!b) return;
-  const c=cart[+b.dataset.i]; c.q += +b.dataset.d;
-  if(c.q<=0) cart.splice(+b.dataset.i,1);
-  save(); renderCart();
-});
+$("#lines").addEventListener("click", e=>{ const b=e.target.closest("button[data-d]"); if(!b) return; const c=cart[+b.dataset.i]; c.q+=+b.dataset.d; if(c.q<=0) cart.splice(+b.dataset.i,1); save(); renderCart(); });
 const drawer=$("#drawer");
 $("#cartFab").onclick=()=>drawer.classList.add("open");
 drawer.addEventListener("click", e=>{ if(e.target.closest("[data-close]")) drawer.classList.remove("open"); });
 document.addEventListener("keydown", e=>{ if(e.key==="Escape") drawer.classList.remove("open"); });
 $("#sendWa").onclick=()=>{
   if(!cart.length) return;
-  const tot = cart.reduce((a,c)=>a+c.q*c.preco,0);
-  const msg = [`Aloha, Mahalo! 🌺 Quero fazer um pedido:`, "",
+  const tot=cart.reduce((a,c)=>a+c.q*c.preco,0);
+  const msg=["Aloha, Mahalo! 🤙 Quero fazer um pedido:","",
     ...cart.map(c=>`• ${c.q}x ${c.nome} — ${brl(c.q*c.preco)}${c.desc?`\n   ${c.desc}`:""}`),
-    "", `*Total: ${brl(tot)}*`,
-    $("#cName").value ? `Nome: ${$("#cName").value}` : "",
-    $("#cObs").value ? `Obs/entrega: ${$("#cObs").value}` : ""].filter((l,i,a)=>l!==""||a[i-1]!=="").join("\n");
+    "",`*Total: ${brl(tot)}*`,
+    $("#cName").value?`Nome: ${$("#cName").value}`:null,
+    $("#cObs").value?`Obs/entrega: ${$("#cObs").value}`:null].filter(l=>l!==null).join("\n");
   window.open(`https://wa.me/${MAHALO.whatsapp}?text=${encodeURIComponent(msg)}`,"_blank","noopener");
 };
 renderCart();
 
-/* ---------- dados da loja ---------- */
-const wa = `https://wa.me/${MAHALO.whatsapp}?text=${encodeURIComponent("Aloha! Vim pelo site 🌺")}`;
-$("#addr").textContent = `${MAHALO.endereco}`;
-$("#hours").innerHTML = MAHALO.horarios.map(([d,h])=>`<span>${d}</span><span>${h}</span>`).join("");
-$("#waLink").href = wa; $("#waLink").target="_blank";
-$("#igLink").href = MAHALO.instagram; $("#igLink").textContent = MAHALO.instagramHandle;
-$("#igBtn").href = MAHALO.instagram; $("#igHandle").textContent = MAHALO.instagramHandle;
-$("#map").src = `https://www.google.com/maps?q=${encodeURIComponent(MAHALO.mapsQuery)}&output=embed`;
-$("#channels").innerHTML = `<a class="btn btn-dark" href="${wa}" target="_blank" rel="noopener">💬 WhatsApp</a>`
-  + (MAHALO.ifood ? `<a class="btn btn-coral" href="${MAHALO.ifood}" target="_blank" rel="noopener">🛵 iFood</a>` : "")
-  + `<a class="btn btn-dark" href="${MAHALO.instagram}" target="_blank" rel="noopener">📸 Instagram</a>`;
-$("#yr").textContent = new Date().getFullYear();
+/* dados da loja */
+const wa=`https://wa.me/${MAHALO.whatsapp}?text=${encodeURIComponent("Aloha! Vim pelo site 🤙")}`;
+$("#addr").textContent=MAHALO.endereco;
+$("#hours").innerHTML=MAHALO.horarios.map(([d,h])=>`<span>${d}</span><span>${h}</span>`).join("");
+$("#waLink").href=wa;
+$("#igLink").href=MAHALO.instagram; $("#igLink").textContent=MAHALO.instagramHandle;
+$("#igBtn").href=MAHALO.instagram; $("#igHandle").textContent=MAHALO.instagramHandle;
+$("#map").src=`https://www.google.com/maps?q=${encodeURIComponent(MAHALO.mapsQuery)}&output=embed`;
+$("#channels").innerHTML=`<a class="btn btn-o" href="${wa}" target="_blank" rel="noopener">WhatsApp</a>`
+  +(MAHALO.ifood?`<a class="btn btn-y" href="${MAHALO.ifood}" target="_blank" rel="noopener">iFood</a>`:"")
+  +`<a class="btn" href="${MAHALO.instagram}" target="_blank" rel="noopener">Instagram</a>`;
+$("#yr").textContent=new Date().getFullYear();
 
-/* ---------- nav + animações ---------- */
+/* nav + reveal */
 const nav=$("#nav");
-addEventListener("scroll", ()=>nav.classList.toggle("solid", scrollY>40), {passive:true});
-$("#menuToggle").onclick=()=>{ const o=nav.classList.toggle("open"); nav.classList.add("solid"); $("#menuToggle").setAttribute("aria-expanded",o); };
+$("#menuToggle").onclick=()=>{ const o=nav.classList.toggle("open"); $("#menuToggle").setAttribute("aria-expanded",o); };
 $("#navlinks").addEventListener("click", ()=>nav.classList.remove("open"));
-const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target);} }),{threshold:.15});
+const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target);} }),{threshold:.15});
 document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
 </script>
 </body>
